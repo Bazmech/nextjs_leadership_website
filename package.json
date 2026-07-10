@@ -1,0 +1,40 @@
+{
+  "name": "nextjs_leadership_website",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/migrate.mjs && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:studio": "drizzle-kit studio",
+    "db:branch": "node scripts/neon-branch.mjs",
+    "slicemachine": "start-slicemachine --open"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.5.16",
+    "@neondatabase/serverless": "^1.1.0",
+    "@prismicio/client": "^7.21.8",
+    "@prismicio/next": "^2.3.0",
+    "@prismicio/react": "^3.4.1",
+    "drizzle-orm": "^0.45.2",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@slicemachine/adapter-next": "^0.3.96",
+    "@tailwindcss/postcss": "^4",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "slice-machine-ui": "^2.21.3",
+    "tailwindcss": "^4"
+  }
+}

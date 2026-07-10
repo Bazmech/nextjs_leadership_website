@@ -1,0 +1,36 @@
+---
+description: Approved packages and when to use each — do not introduce overlapping libraries
+alwaysApply: true
+---
+
+# Package Usage
+
+Use **Yarn** (`yarn add`, `yarn.lock`). Do not add `package-lock.json` or switch package managers.
+
+## Stack map
+
+| Concern | Package | Rule / location |
+|---------|---------|-----------------|
+| Framework | `next`, `react` | App Router in `src/app/` |
+| Styling | `tailwindcss` v4 | `dark-mode-ui.mdc`, semantic tokens in `globals.css` |
+| UI structure | Atomic components | `atomic-components.mdc` — compose atoms/molecules |
+| Accessible primitives | `@radix-ui/react-*` | `radix-ui.mdc` |
+| Form validation | `zod` | `zod-forms.mdc` |
+| Form submission | Server Actions | `server-actions.mdc` — **do not** add a second form-submission rule |
+| Auth | `@clerk/nextjs` | `src/proxy.js`, Clerk provider in layout |
+| CMS | `@prismicio/*` | `src/prismicio.js`, slices in `src/slices/` |
+| Database | `drizzle-orm`, `@neondatabase/serverless` | `src/lib/db.js`, `src/db/schema` |
+
+## Before adding a dependency
+
+1. Check this map and linked rules — prefer extending the approved stack
+2. Do not add a second library for the same job (e.g. `react-hook-form` + Zod actions, MUI + Radix, axios for mutations)
+3. Install only the Radix primitives you need (`@radix-ui/react-label`, etc.) — not alternate UI kits
+4. Update `.env.example` when a package needs new env vars (`env-example.mdc`)
+
+## Avoid without explicit approval
+
+- Client-side mutation libraries (`axios` POST, `fetch("/api/...")`) — use Server Actions
+- Form libraries that bypass Server Actions (`react-hook-form` submit handlers posting to APIs)
+- Duplicate validation (manual regex in actions when a Zod schema exists)
+- CSS-in-JS or component libraries that replace Tailwind + atomic components

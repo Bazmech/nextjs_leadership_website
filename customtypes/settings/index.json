@@ -1,0 +1,178 @@
+{
+  "id": "settings",
+  "label": "Settings",
+  "format": "custom",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Site identity": {
+      "site_name": {
+        "type": "Text",
+        "config": {
+          "label": "Site name",
+          "placeholder": "ElevateLeadership"
+        }
+      },
+      "title_postfix": {
+        "type": "Text",
+        "config": {
+          "label": "Title postfix",
+          "placeholder": " | ElevateLeadership"
+        }
+      },
+      "tagline": {
+        "type": "Text",
+        "config": {
+          "label": "Tagline",
+          "placeholder": "Executive Coaching & Leadership Development"
+        }
+      },
+      "logo_label": {
+        "type": "Text",
+        "config": {
+          "label": "Logo text",
+          "placeholder": "ElevateLeadership"
+        }
+      },
+      "logo_accent": {
+        "type": "Text",
+        "config": {
+          "label": "Logo accent text",
+          "placeholder": "Leadership"
+        }
+      }
+    },
+    "SEO fallbacks": {
+      "default_meta_title": {
+        "type": "Text",
+        "config": {
+          "label": "Default SEO title",
+          "placeholder": "ElevateLeadership | Executive Coaching & Leadership Development"
+        }
+      },
+      "default_meta_description": {
+        "type": "Text",
+        "config": {
+          "label": "Default SEO description",
+          "placeholder": "Partner with experienced coaches to build high-performing teams..."
+        }
+      },
+      "default_meta_image": {
+        "type": "Image",
+        "config": {
+          "label": "Default social sharing image",
+          "constraint": {
+            "width": 1200,
+            "height": 630
+          },
+          "thumbnails": []
+        }
+      },
+      "default_og_title": {
+        "type": "Text",
+        "config": {
+          "label": "Default Open Graph title",
+          "placeholder": "Defaults to default SEO title when empty"
+        }
+      },
+      "default_og_description": {
+        "type": "Text",
+        "config": {
+          "label": "Default Open Graph description",
+          "placeholder": "Defaults to default SEO description when empty"
+        }
+      },
+      "site_url": {
+        "type": "Text",
+        "config": {
+          "label": "Site URL",
+          "placeholder": "https://www.example.com"
+        }
+      },
+      "twitter_handle": {
+        "type": "Text",
+        "config": {
+          "label": "Twitter / X handle",
+          "placeholder": "@elevateleadership"
+        }
+      },
+      "google_site_verification": {
+        "type": "Text",
+        "config": {
+          "label": "Google site verification",
+          "placeholder": "verification token from Google Search Console"
+        }
+      }
+    },
+    "Contact & header": {
+      "contact_email": {
+        "type": "Text",
+        "config": {
+          "label": "Contact email",
+          "placeholder": "hello@example.com"
+        }
+      },
+      "contact_phone": {
+        "type": "Text",
+        "config": {
+          "label": "Contact phone",
+          "placeholder": "+1 (555) 123-4567"
+        }
+      },
+      "header_cta_label": {
+        "type": "Text",
+        "config": {
+          "label": "Header CTA label",
+          "placeholder": "Book a Call"
+        }
+      },
+      "header_cta_link": {
+        "type": "Link",
+        "config": {
+          "label": "Header CTA link",
+          "allowText": false,
+          "select": null
+        }
+      },
+      "footer_copyright": {
+        "type": "Text",
+        "config": {
+          "label": "Footer copyright name",
+          "placeholder": "Defaults to site name when empty"
+        }
+      }
+    },
+    "Social": {
+      "social_links": {
+        "type": "Group",
+        "config": {
+          "label": "Social links",
+          "fields": {
+            "platform": {
+              "type": "Select",
+              "config": {
+                "label": "Platform",
+                "options": [
+                  "LinkedIn",
+                  "Twitter",
+                  "Facebook",
+                  "Instagram",
+                  "YouTube",
+                  "Other"
+                ]
+              }
+            },
+            "url": {
+              "type": "Link",
+              "config": {
+                "label": "URL",
+                "allowText": false,
+                "select": null
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

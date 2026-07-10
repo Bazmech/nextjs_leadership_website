@@ -1,0 +1,54 @@
+---
+description: Prefer Server Actions for mutations and server-side data changes
+alwaysApply: true
+---
+
+# Server Actions
+
+This project uses **Next.js 16 App Router** with **JavaScript**. Read `node_modules/next/dist/docs/` before implementing unfamiliar APIs (see `AGENTS.md`).
+
+## Default to Server Actions
+
+For mutations, form submissions, and server-side data changes, use Server Actions — not client `fetch`, axios, or Route Handlers.
+
+- Place actions in `src/actions/` (e.g. `src/actions/inquiry.js`) with `"use server"` at the top of the file
+- Validate input with Zod in the action — see `zod-forms.mdc` (do not add a separate submission rule)
+- Use Radix-wrapped fields from `src/components/` — see `radix-ui.mdc`
+- Call from Server Components directly, or pass to Client Components as props
+
+## Form wiring
+
+**All form submissions** go through a Server Action on the `<form action={...}>` — never `onSubmit` + `fetch`.
+
+```js
+// src/actions/inquiry.js — validate with Zod (zod-forms.mdc), then persist
+"use server";
+
+export async function submitInquiry(prevState, formData) {
+  // schema.safeParse(...), insert, revalidatePath, return { success, error, message }
+}
+```
+
+```js
+// Client form — useActionState for pending + feedback (ContactForm pattern)
+"use client";
+
+import { useActionState } from "react";
+import { submitInquiry } from "@/actions/inquiry";
+
+const [state, formAction, isPending] = useActionState(submitInquiry, initialState);
+
+<form action={formAction}>...</form>
+```
+
+Server-only forms without pending UI may use `<form action={submitInquiry}>` directly.
+
+## Avoid
+
+- `fetch("/api/...")` from Client Components for mutations this app owns
+- New `src/app/api/` routes when a Server Action suffices
+- `"use client"` solely to POST data — keep the form server-rendered and action-driven when possible
+
+## Reads
+
+Prefer async Server Components for data fetching. Use Client Components only for interactivity that cannot live on the server.

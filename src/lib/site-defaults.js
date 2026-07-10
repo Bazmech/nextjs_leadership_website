@@ -1,0 +1,22 @@
+export const siteDefaults = {
+  siteName: "ElevateLeadership",
+  titlePostfix: " | ElevateLeadership",
+  tagline: "Executive Coaching & Leadership Development",
+  logoLabel: "ElevateLeadership",
+  logoAccent: "Leadership",
+  defaultMetaTitle: "ElevateLeadership | Executive Coaching & Leadership Development",
+  defaultMetaDescription:
+    "Partner with experienced coaches to build high-performing teams, sharpen your leadership skills, and drive lasting organizational impact.",
+  defaultMetaImageUrl: null,
+  defaultOgTitle: null,
+  defaultOgDescription: null,
+  siteUrl: null,
+  twitterHandle: null,
+  googleSiteVerification: null,
+  contactEmail: null,
+  contactPhone: null,
+  headerCtaLabel: "Book a Call",
+  headerCtaHref: "#contact",
+  footerCopyright: "ElevateLeadership",
+  socialLinks: [],
+};

@@ -1,0 +1,64 @@
+---
+description: Prefer CSS Grid for layout; use Flexbox only when necessary
+globs: src/**/*.{js,css}
+alwaysApply: false
+---
+
+# Grid-First Layout
+
+Use **CSS Grid** for page and section structure. Use **Flexbox** only when Grid is a poor fit.
+
+This project uses **Tailwind v4** — prefer `grid`, `grid-cols-*`, `gap-*`, and `place-*` utilities.
+
+## Default to Grid
+
+Use Grid for:
+
+- Page sections and multi-column layouts
+- Card grids, stat rows, and feature lists
+- Header/footer structure with distinct columns
+- Any 2D layout (rows **and** columns)
+
+```js
+// ❌ BAD — flex for a structural multi-column section
+<div className="flex flex-wrap gap-8 sm:flex-row">...</div>
+
+// ✅ GOOD — grid for structural layout
+<div className="grid gap-8 sm:grid-cols-2">...</div>
+```
+
+```js
+// ✅ GOOD — page-level structure
+<div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">...</div>
+```
+
+## Flex only when required
+
+Use Flex sparingly for:
+
+- Single-axis alignment inside one grid cell (e.g. center an icon in a box)
+- Inline groups that must not wrap into a grid (button groups, nav item clusters)
+- `flex-1` / `grow` behavior inside a parent that is already Grid-based
+- Third-party components that require flex (e.g. Clerk `UserButton` wrappers)
+
+```js
+// ✅ OK — flex inside a grid cell for inline controls
+<div className="flex items-center gap-3">
+  <Button>Sign in</Button>
+  <Button>Sign up</Button>
+</div>
+```
+
+## Avoid
+
+- `flex` on outer section wrappers that define columns or rows
+- `flex-wrap` as a substitute for responsive grids
+- Nested flex containers where one `grid` parent would suffice
+- Mixing competing layout models at the same structural level without reason
+
+## Checklist for new layout work
+
+- [ ] Section/column structure uses `grid` first
+- [ ] Responsive breakpoints use `grid-cols-*`, not flex direction swaps
+- [ ] Flex is limited to inner alignment or unavoidable one-dimensional cases
+- [ ] Gaps use `gap-*` on the grid parent, not margin hacks between flex children

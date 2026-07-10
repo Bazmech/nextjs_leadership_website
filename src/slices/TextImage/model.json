@@ -1,0 +1,43 @@
+{
+  "id": "text_image",
+  "type": "SharedSlice",
+  "name": "TextImage",
+  "description": "50/50 text and image with optional reverse",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "image": {
+          "type": "Image",
+          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+        },
+        "video_url": {
+          "type": "Text",
+          "config": { "label": "Video URL (optional, overrides image)" }
+        },
+        "text": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Text",
+            "placeholder": "Rich text content",
+            "allowTargetBlank": true,
+            "multi": "paragraph,heading2,heading3,heading4,strong,em,hyperlink,list-item,o-list-item"
+          }
+        },
+        "reversed": {
+          "type": "Boolean",
+          "config": {
+            "label": "Reverse layout on desktop",
+            "default_value": false
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

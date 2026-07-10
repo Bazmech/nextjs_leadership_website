@@ -1,0 +1,44 @@
+{
+  "id": "section_intro",
+  "type": "SharedSlice",
+  "name": "SectionIntro",
+  "description": "Centered title, subtitle, text, and link",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "title": {
+          "type": "Text",
+          "config": { "label": "Title" }
+        },
+        "subtitle": {
+          "type": "Text",
+          "config": { "label": "Subtitle" }
+        },
+        "text": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Text",
+            "placeholder": "Optional rich text",
+            "allowTargetBlank": true,
+            "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+          }
+        },
+        "link": {
+          "type": "Link",
+          "config": {
+            "label": "Link",
+            "allowText": true,
+            "select": null
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

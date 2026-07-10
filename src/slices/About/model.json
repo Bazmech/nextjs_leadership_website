@@ -1,0 +1,47 @@
+{
+  "id": "about",
+  "type": "SharedSlice",
+  "name": "About",
+  "description": "About section with highlights",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default about layout",
+      "imageUrl": "",
+      "primary": {
+        "eyebrow": {
+          "type": "Text",
+          "config": { "label": "Eyebrow", "placeholder": "About Us" }
+        },
+        "heading": {
+          "type": "Text",
+          "config": {
+            "label": "Heading",
+            "placeholder": "Trusted partners in leadership growth"
+          }
+        },
+        "body_paragraph_1": {
+          "type": "Text",
+          "config": { "label": "Body Paragraph 1" }
+        },
+        "body_paragraph_2": {
+          "type": "Text",
+          "config": { "label": "Body Paragraph 2" }
+        },
+        "monogram": {
+          "type": "Text",
+          "config": { "label": "Monogram", "placeholder": "EL" }
+        }
+      },
+      "items": {
+        "highlight": {
+          "type": "Text",
+          "config": { "label": "Highlight" }
+        }
+      }
+    }
+  ]
+}

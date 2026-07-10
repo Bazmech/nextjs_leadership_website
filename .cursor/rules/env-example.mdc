@@ -1,0 +1,48 @@
+---
+description: Keep .env.example in sync when adding environment variables
+alwaysApply: true
+---
+
+# Environment Variables
+
+When you add, rename, or remove any environment variable used by this project, update `.env.example` in the same change.
+
+## When this applies
+
+- New `process.env.*` reads
+- New integration setup (auth, database, CMS, webhooks, etc.)
+- Renamed or removed env vars
+- New optional env vars documented in README or scripts
+
+## What to update
+
+1. **`.env.example`** — add the variable with a safe placeholder and a short comment
+2. **README** env table — if the variable is user-facing or required for setup
+3. **Never commit** real secrets; `.env.local` is for local values only
+
+## Format
+
+Group variables by service and match existing sections in `.env.example`:
+
+```bash
+# -----------------------------------------------------------------------------
+# Service name
+# -----------------------------------------------------------------------------
+
+MY_NEW_VAR=placeholder_value
+# OPTIONAL_VAR=only_if_needed
+```
+
+## Checklist
+
+- [ ] Variable added to `.env.example` with placeholder (not a real secret)
+- [ ] Comment explains purpose and where to get the value
+- [ ] Required vs optional is clear
+- [ ] README env table updated if setup docs mention it
+- [ ] `.env.local` is not committed
+
+## Avoid
+
+- Adding env vars only to `.env.local` or code without updating `.env.example`
+- Committing secrets or production keys to `.env.example`
+- Leaving removed variables in `.env.example` after deleting their usage

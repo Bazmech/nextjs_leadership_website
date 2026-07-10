@@ -1,0 +1,30 @@
+{
+  "id": "call_to_action",
+  "type": "SharedSlice",
+  "name": "CallToAction",
+  "description": "Contact / consultation CTA",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default CTA layout",
+      "imageUrl": "",
+      "primary": {
+        "heading": {
+          "type": "Text",
+          "config": {
+            "label": "Heading",
+            "placeholder": "Ready to elevate your leadership?"
+          }
+        },
+        "description": {
+          "type": "Text",
+          "config": { "label": "Description" }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

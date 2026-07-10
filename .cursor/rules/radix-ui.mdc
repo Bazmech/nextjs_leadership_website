@@ -1,0 +1,52 @@
+---
+description: Use Radix UI primitives for accessible forms and interactive UI
+globs: src/components/**/*
+alwaysApply: false
+---
+
+# Radix UI
+
+Use **Radix primitives** (`@radix-ui/react-*`) for accessible, keyboard-friendly behavior. Style with Tailwind and project semantic tokens (`dark-mode-ui.mdc`). Wrap primitives in atoms/molecules (`atomic-components.mdc`) — do not import Radix directly in page files or organisms.
+
+## Install per primitive
+
+```bash
+yarn add @radix-ui/react-label @radix-ui/react-checkbox
+```
+
+Add only the packages a feature needs.
+
+## Use Radix for
+
+| Primitive | Package | Typical wrapper |
+|-----------|---------|-----------------|
+| Labels | `@radix-ui/react-label` | `FormField`, `atoms/Label` |
+| Checkbox / Switch | `@radix-ui/react-checkbox`, `@radix-ui/react-switch` | `atoms/Checkbox`, `atoms/Switch` |
+| Select | `@radix-ui/react-select` | `atoms/Select` or `molecules/SelectField` |
+| Radio group | `@radix-ui/react-radio-group` | `molecules/RadioGroupField` |
+| Dialog / Alert dialog | `@radix-ui/react-dialog`, `@radix-ui/react-alert-dialog` | `molecules/Modal`, `molecules/ConfirmDialog` |
+| Dropdown menu | `@radix-ui/react-dropdown-menu` | `molecules/DropdownMenu` |
+| Tabs | `@radix-ui/react-tabs` | `molecules/Tabs` |
+| Tooltip | `@radix-ui/react-tooltip` | `atoms/Tooltip` |
+| Popover | `@radix-ui/react-popover` | `molecules/Popover` |
+| Accordion | `@radix-ui/react-accordion` | `molecules/Accordion` |
+
+## Forms
+
+- Pair Radix **Label** (or **FormField**) with native `input` / `textarea` or Radix **Select** / **Checkbox**
+- Every control needs a stable `id`, matching `htmlFor`, and `name` for `FormData`
+- Keep submission on Server Actions (`server-actions.mdc`) — Radix handles a11y, not transport
+
+```js
+// ✅ GOOD — Radix label + native input, submitted via action
+import * as Label from "@radix-ui/react-label";
+
+<Label.Root htmlFor="email">Email</Label.Root>
+<input id="email" name="email" type="email" required />
+```
+
+## Avoid
+
+- Raw `<button>` / `<div>` for modals, menus, or tabs when a Radix primitive exists
+- Third-party UI kits (MUI, Chakra) for patterns Radix already covers
+- Inline Radix imports in `src/app/` routes — always wrap in `src/components/`

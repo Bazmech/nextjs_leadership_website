@@ -1,0 +1,35 @@
+{
+  "id": "listing",
+  "type": "SharedSlice",
+  "name": "Listing",
+  "description": "Responsive 3-column card listing",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {},
+      "items": {
+        "image": {
+          "type": "Image",
+          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+        },
+        "title": {
+          "type": "Text",
+          "config": { "label": "Title" }
+        },
+        "link": {
+          "type": "Link",
+          "config": {
+            "label": "Link",
+            "allowText": true,
+            "select": null
+          }
+        }
+      }
+    }
+  ]
+}

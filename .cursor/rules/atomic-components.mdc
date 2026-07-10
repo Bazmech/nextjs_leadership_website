@@ -1,0 +1,40 @@
+---
+description: Atomic component folders and reuse-before-create mandate
+globs: src/components/**
+alwaysApply: false
+---
+
+# Atomic Components
+
+Organize UI under `src/components/` using atomic design:
+
+```
+src/components/
+  atoms/       # Single-purpose primitives (Button, Input, Badge)
+  molecules/   # Small compositions (NavLink, FormField, StatCard)
+  organisms/   # Page sections (Header, Hero, ContactForm)
+```
+
+## Folder convention
+
+- One component per folder: `atoms/Button/Button.js`
+- Default export the component; colocate component-only styles/helpers in the same folder
+- Import with the `@/` alias: `@/components/atoms/Button/Button`
+
+## Reuse before create (required)
+
+Before adding any component:
+
+1. Search `src/components/` for atoms/molecules that already solve part of the need
+2. Compose existing pieces instead of duplicating markup or styles
+3. Only extract a new atom/molecule when the pattern is reused or clearly will be
+4. After creating a component, scan siblings at the same atomic level for consolidation opportunities
+
+```js
+// ❌ BAD — new Header nav link markup when NavLink exists
+<a className="text-sm font-medium text-muted ...">About</a>
+
+// ✅ GOOD — compose existing molecule
+import NavLink from "@/components/molecules/NavLink/NavLink";
+<NavLink href="#about">About</NavLink>
+```

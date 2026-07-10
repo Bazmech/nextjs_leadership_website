@@ -1,0 +1,54 @@
+---
+description: Create or update Cursor rules when the user asks for lasting conventions
+alwaysApply: true
+---
+
+# Auto-Create Project Rules
+
+When the user asks for something that should persist across future sessions, add or update a rule in `.cursor/rules/` in the **same task** — do not wait to be asked again.
+
+## Create a rule when the user asks for
+
+- Coding standards, conventions, or patterns ("always use…", "never…", "prefer…")
+- Project-wide workflows (env vars, layout, auth, CMS, database, testing)
+- File/folder structure mandates (atomic design, naming, colocation)
+- Tooling or stack-specific guidance (Prismic, Clerk, Neon, Tailwind, Yarn)
+- Explicit requests: "add a rule", "remember this", "create a cursor rule"
+
+## Do not create a rule for
+
+- One-off implementation tasks with no ongoing convention
+- Bug fixes or single-feature work unless the user also wants it codified
+- Duplicating an existing rule — update the existing `.mdc` file instead
+
+## Before writing
+
+1. List existing rules in `.cursor/rules/` and avoid overlap
+2. Prefer **one concern per rule**; split if the request spans unrelated topics
+3. Choose scope:
+   - `alwaysApply: true` — project-wide workflow (env files, server actions, rule creation)
+   - `globs: ...` + `alwaysApply: false` — file-type or area-specific (components, CSS)
+
+## Rule file requirements
+
+- Path: `.cursor/rules/<kebab-case-name>.mdc`
+- YAML frontmatter: `description`, and either `alwaysApply: true` or `globs`
+- Body: concise, actionable, under ~50 lines when possible
+- Include brief ✅/❌ examples when it clarifies behavior
+
+## After creating or updating a rule
+
+- Mention the new/updated rule path in the task summary
+- If the rule introduces new env vars or setup steps, also update `.env.example` per `env-example.mdc`
+- If the rule changes how developers run the project, add a short note to `README.md` only when relevant
+
+## Examples
+
+| User request | Action |
+|--------------|--------|
+| "Use grid unless flex is required" | Create `grid-first-layout.mdc` with `globs: src/**/*.{js,css}` |
+| "Update .env.example when adding env vars" | Create `env-example.mdc` with `alwaysApply: true` |
+| "Use server actions for mutations" | Already covered — update `server-actions.mdc` instead of duplicating |
+| "Use Zod for forms" | Already covered — update `zod-forms.mdc` instead of duplicating |
+| "Use Radix for UI primitives" | Already covered — update `radix-ui.mdc` instead of duplicating |
+| "Which packages to use" | Already covered — update `package-usage.mdc` instead of duplicating |

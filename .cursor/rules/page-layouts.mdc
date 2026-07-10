@@ -1,0 +1,47 @@
+---
+description: Page layout components, container width, and rich text patterns
+globs: src/components/**/*
+alwaysApply: false
+---
+
+# Page Layouts
+
+Use the shared layout system for all page sections. Max content width is **lg** (`Container` → `max-w-[var(--width-container-lg)]` / 64rem).
+
+## Structure rules
+
+- **Header and Footer** are full-width; inner content uses `Container`
+- **All other sections** use `Section` (wraps `Container`) or `Container` directly
+- Prefer **Grid** for layout; see `grid-first-layout.mdc`
+- Use `Link` for all links (supports `href`, Prismic `field`, and `target`)
+
+## Layout components
+
+| Layer | Component | Purpose |
+|-------|-----------|---------|
+| Atom | `Container` | lg max-width + horizontal padding |
+| Atom | `AspectMedia` | 16:9 image or video |
+| Atom | `Link` | Unified link with target support |
+| Molecule | `RichText` | Formatted Prismic rich text output |
+| Molecule | `SectionIntro` | Centered title → subtitle → text → link |
+| Molecule | `TextImage` | 50/50 grid; image always above text on mobile |
+| Molecule | `ListingCard` | Card with image, title, Prismic/URL link |
+| Organism | `Section` | Full-width section + `Container` |
+| Organism | `MediaBlock`, `TextImageBlock`, `ListingBlock`, `SectionIntroBlock`, `RichTextBlock` | Composed page sections |
+
+## Rich text
+
+- Always render Prismic structured text through `RichText` (never raw `PrismicRichText` in pages/slices)
+- Inline links inside rich text use the shared `Link` atom via `richTextComponents`
+
+## Listing links
+
+- Prismic **Link** fields support internal document selection or external URLs
+- Pass `linkField` to `ListingCard` / `Link`; optional `linkLabel` overrides button text
+
+## Checklist for new sections
+
+- [ ] Wrapped in `Section` or uses `Container` (not raw `max-w-*` on sections)
+- [ ] Links use `Link` with `target` when opening externally
+- [ ] Rich text uses `RichText` molecule
+- [ ] Responsive layout uses grid (`lg:grid-cols-3` for listings, `md:grid-cols-2` for text/image)

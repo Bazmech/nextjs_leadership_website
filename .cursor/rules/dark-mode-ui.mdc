@@ -1,0 +1,42 @@
+---
+description: Light/dark mode via Tailwind v4 semantic tokens
+globs: src/**/*.{js,css}
+alwaysApply: false
+---
+
+# Light & Dark Mode
+
+All new UI must work in light and dark mode. This project uses **Tailwind v4** with CSS variables in `src/app/globals.css` and `prefers-color-scheme: dark` — not a `class="dark"` toggle.
+
+## Use semantic tokens
+
+Prefer theme tokens defined in `globals.css` / `@theme inline`:
+
+| Token | Example classes |
+|-------|-----------------|
+| Surfaces | `bg-background`, `bg-surface` |
+| Text | `text-foreground`, `text-muted`, `text-primary`, `text-accent` |
+| Borders | `border-border` |
+| Actions | `bg-primary`, `hover:bg-primary-light`, `bg-accent` |
+
+```js
+// ❌ BAD — hardcoded light-only colors
+<p className="text-black bg-white">...</p>
+
+// ✅ GOOD — tokens adapt via CSS variables
+<p className="text-foreground bg-surface">...</p>
+```
+
+## Adding new colors
+
+1. Add light value under `:root` and dark value under `@media (prefers-color-scheme: dark)` in `globals.css`
+2. Expose via `@theme inline` (e.g. `--color-brand: var(--brand)`)
+3. Use the Tailwind utility (`text-brand`, `bg-brand`) in components
+
+Do not ship new UI with colors that only look correct in one mode. If `dark:` variants are needed, pair them with a light default (see existing `page.js` patterns).
+
+## Checklist for every new component
+
+- [ ] Backgrounds and text use semantic tokens or paired `dark:` classes
+- [ ] Borders, hovers, and focus rings are visible in both modes
+- [ ] Images/icons account for dark backgrounds when needed (e.g. `dark:invert`)

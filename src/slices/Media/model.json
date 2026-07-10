@@ -1,0 +1,27 @@
+{
+  "id": "media",
+  "type": "SharedSlice",
+  "name": "Media",
+  "description": "16:9 image or video",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "image": {
+          "type": "Image",
+          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+        },
+        "video_url": {
+          "type": "Text",
+          "config": { "label": "Video URL (optional)" }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

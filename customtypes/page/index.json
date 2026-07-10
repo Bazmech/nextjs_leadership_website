@@ -1,0 +1,98 @@
+{
+  "id": "page",
+  "label": "Page",
+  "format": "page",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "title": {
+        "type": "Text",
+        "config": {
+          "label": "Title",
+          "placeholder": "Page title"
+        }
+      },
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "Slug",
+          "placeholder": "about-us"
+        }
+      },
+      "slices": {
+        "type": "Slices",
+        "fieldset": "Page content",
+        "config": {
+          "choices": {
+            "hero": { "type": "SharedSlice" },
+            "services": { "type": "SharedSlice" },
+            "about": { "type": "SharedSlice" },
+            "call_to_action": { "type": "SharedSlice" },
+            "media": { "type": "SharedSlice" },
+            "text_image": { "type": "SharedSlice" },
+            "listing": { "type": "SharedSlice" },
+            "section_intro": { "type": "SharedSlice" },
+            "rich_text": { "type": "SharedSlice" }
+          }
+        }
+      }
+    },
+    "SEO & Metadata": {
+      "meta_title": {
+        "type": "Text",
+        "config": {
+          "label": "SEO title",
+          "placeholder": "Defaults to page title when empty"
+        }
+      },
+      "meta_description": {
+        "type": "Text",
+        "config": {
+          "label": "SEO description"
+        }
+      },
+      "meta_image": {
+        "type": "Image",
+        "config": {
+          "label": "Social sharing image (Open Graph)",
+          "constraint": {
+            "width": 1200,
+            "height": 630
+          },
+          "thumbnails": []
+        }
+      },
+      "og_title": {
+        "type": "Text",
+        "config": {
+          "label": "Open Graph title",
+          "placeholder": "Defaults to SEO title when empty"
+        }
+      },
+      "og_description": {
+        "type": "Text",
+        "config": {
+          "label": "Open Graph description",
+          "placeholder": "Defaults to SEO description when empty"
+        }
+      },
+      "canonical_url": {
+        "type": "Text",
+        "config": {
+          "label": "Canonical URL",
+          "placeholder": "https://www.example.com/page-slug (optional)"
+        }
+      },
+      "no_index": {
+        "type": "Boolean",
+        "config": {
+          "label": "No index",
+          "default_value": false,
+          "placeholder_false": "Allow search indexing",
+          "placeholder_true": "Hide from search engines (noindex)"
+        }
+      }
+    }
+  }
+}

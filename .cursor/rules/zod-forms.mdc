@@ -1,0 +1,72 @@
+---
+description: Validate form input with Zod schemas in Server Actions
+globs: src/actions/**/*
+alwaysApply: false
+---
+
+# Zod Form Validation
+
+Use **Zod** for all form validation. Validate on the **server** inside Server Actions — not with ad-hoc checks or client-only validation.
+
+Submission flow is defined in `server-actions.mdc` (do not duplicate). This rule covers schemas and parsing only.
+
+## Schema location
+
+- Shared schemas: `src/lib/schemas/<name>.js`
+- Export the schema and inferred shape if needed elsewhere
+
+```js
+// src/lib/schemas/inquiry.js
+import { z } from "zod";
+
+export const inquirySchema = z.object({
+  name: z.string().trim().min(1, "Name is required."),
+  email: z.string().trim().email("Enter a valid email address."),
+  message: z.string().trim().min(1, "Message is required."),
+});
+```
+
+## Parse FormData in actions
+
+```js
+"use server";
+
+import { inquirySchema } from "@/lib/schemas/inquiry";
+
+export async function submitInquiry(prevState, formData) {
+  const parsed = inquirySchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    message: formData.get("message"),
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.flatten().fieldErrors,
+      message: null,
+    };
+  }
+
+  const { name, email, message } = parsed.data;
+  // persist, revalidatePath, return success state
+}
+```
+
+## Action return shape
+
+Use a consistent state object for `useActionState`:
+
+```js
+{ success: boolean, error: string | Record<string, string[]> | null, message: string | null }
+```
+
+- Single global error: `error: "Please fix the highlighted fields."`
+- Field errors: `error: { email: ["Enter a valid email address."] }`
+- Display errors in the form with `role="alert"` / `aria-invalid`
+
+## Avoid
+
+- Manual regex or `if (!field)` chains when a Zod schema can express the rule
+- Client-only validation as the sole gate — always re-validate in the action
+- Duplicating the same schema on client and server unless UX needs instant feedback (server schema is source of truth)
