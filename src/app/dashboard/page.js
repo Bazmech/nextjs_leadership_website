@@ -1,8 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
-import Link from "next/link";
 import { getRecentInquiries } from "@/actions/inquiry";
+import Link from "@/components/atoms/Link/Link";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { getCurrentAppUser, isStaffRole } from "@/lib/users";
 
 export async function generateMetadata() {
   return buildSimplePageMetadata("Dashboard", "Your leadership coaching dashboard.");
@@ -13,22 +14,18 @@ function formatDate(value) {
 }
 
 export default async function DashboardPage() {
-  const user = await currentUser();
-  const [dbContext, inquiries] = await Promise.all([
-    getDatabaseContext(),
+  const [user, appUser, inquiries] = await Promise.all([
+    currentUser(),
+    getCurrentAppUser(),
     getRecentInquiries(),
   ]);
+  const showDbBranch = isStaffRole(appUser?.roleName);
+  const dbContext = showDbBranch ? await getDatabaseContext() : null;
 
   return (
-    <main className="min-h-screen bg-background px-6 py-16">
+    <div className="bg-background px-6 py-16">
       <div className="mx-auto max-w-3xl">
-        <Link
-          href="/"
-          className="text-sm font-medium text-muted transition-colors hover:text-foreground"
-        >
-          &larr; Back to home
-        </Link>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Welcome back
           {user?.firstName ? `, ${user.firstName}` : ""}
         </h1>
@@ -37,42 +34,66 @@ export default async function DashboardPage() {
           coaching resources, session notes, and program progress.
         </p>
 
-        <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            Database branch
-          </h2>
-          <p className="mt-2 text-sm text-muted">
-            Each Vercel preview deployment uses its own isolated Neon branch.
+        {showDbBranch ? (
+          <p className="mt-6">
+            <Link
+              href="/dashboard/users"
+              className="text-sm font-medium text-primary transition-colors hover:text-primary-light"
+            >
+              Manage users
+            </Link>
           </p>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Connection</dt>
-              <dd className="font-medium text-foreground">
-                {dbContext.connected ? "Connected" : "Not configured"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Neon branch</dt>
-              <dd className="font-medium text-foreground">
-                {dbContext.neonBranch ?? "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Git branch</dt>
-              <dd className="font-medium text-foreground">
-                {dbContext.gitBranch ?? "local"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Environment</dt>
-              <dd className="font-medium text-foreground">
-                {dbContext.vercelEnv}
-              </dd>
-            </div>
-          </dl>
-        </div>
+        ) : null}
 
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
+        {showDbBranch && dbContext ? (
+          <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+            <h2 className="text-lg font-semibold text-foreground">
+              Database branch
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Each Vercel preview deployment uses its own isolated Neon branch.
+            </p>
+            <dl className="mt-4 space-y-3 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted">Connection</dt>
+                <dd className="font-medium text-foreground">
+                  {dbContext.connected ? "Connected" : "Not configured"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted">Neon branch</dt>
+                <dd className="font-medium text-foreground">
+                  {dbContext.neonBranch ?? "—"}
+                </dd>
+              </div>
+              {dbContext.neonBranchId &&
+              dbContext.neonBranch !== dbContext.neonBranchId ? (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted">Neon branch ID</dt>
+                  <dd className="font-medium text-foreground">
+                    {dbContext.neonBranchId}
+                  </dd>
+                </div>
+              ) : null}
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted">Git branch</dt>
+                <dd className="font-medium text-foreground">
+                  {dbContext.gitBranch ?? "local"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted">Environment</dt>
+                <dd className="font-medium text-foreground">
+                  {dbContext.vercelEnv}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        ) : null}
+
+        <div
+          className={`${showDbBranch ? "mt-6" : "mt-10"} rounded-2xl border border-border bg-surface p-6`}
+        >
           <h2 className="text-lg font-semibold text-foreground">Account</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between gap-4">
@@ -115,6 +136,6 @@ export default async function DashboardPage() {
           </div>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

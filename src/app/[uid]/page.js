@@ -41,7 +41,7 @@ export default async function Page({ params }) {
     return (
       <>
         <Header />
-        <main>
+        <main className="flex-1">
           <SliceZone slices={page.data.slices} components={components} />
         </main>
         <Footer />

@@ -23,10 +23,14 @@
     "@prismicio/client": "^7.21.8",
     "@prismicio/next": "^2.3.0",
     "@prismicio/react": "^3.4.1",
+    "@radix-ui/react-label": "^2.1.11",
+    "@radix-ui/react-select": "^2.3.3",
+    "@radix-ui/react-switch": "^1.3.3",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@slicemachine/adapter-next": "^0.3.96",

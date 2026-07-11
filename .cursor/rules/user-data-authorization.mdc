@@ -1,0 +1,58 @@
+---
+description: Authorize user-data DB access via Clerk ID and role
+alwaysApply: true
+---
+
+# User Data Authorization
+
+Any database read or write that involves **user-owned data** must verify the caller with the Clerk session and/or the app `users.role_id` so one user cannot access another user’s records.
+
+## Roles
+
+| Role | Access to other users’ data |
+|------|-----------------------------|
+| `default` | Own data only (`clerk_user_id` must match session) |
+| `admin` | Staff admin surfaces only; **cannot** edit or assign `super_admin` |
+| `super_admin` | Staff admin surfaces; may manage all roles including other staff |
+
+Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`).
+
+## Required pattern
+
+1. Resolve the session with Clerk `auth()` / `currentUser()` — never trust a client-supplied user id alone.
+2. Load the app user + role when authorization depends on role.
+3. Scope queries with `eq(table.clerkUserId, sessionUserId)` unless the actor is `admin` or `super_admin` **and** the code path is an admin surface.
+4. Prefer returning empty / `null` / a safe error over leaking rows.
+
+```js
+// ✅ Own data only
+const { userId } = await auth();
+if (!userId) return [];
+return db.select().from(rows).where(eq(rows.clerkUserId, userId));
+
+// ✅ Admin list — only inside an admin page/action after role check
+const appUser = await getCurrentAppUser();
+if (!isStaffRole(appUser?.roleName)) return [];
+return db.select().from(rows); // cross-user OK on this admin path only
+
+// ❌ Never
+return db.select().from(rows); // unscoped user data
+return db.select().from(rows).where(eq(rows.clerkUserId, formData.get("userId")));
+```
+
+## Admin exception
+
+Cross-user queries are allowed **only** when:
+
+- The caller’s role is `admin` or `super_admin`, **and**
+- The Server Action / Server Component is part of an admin or staff page (document that in the action)
+
+Do not grant cross-user access from shared helpers used by regular user pages.
+
+## Avoid
+
+- Filtering solely on row `id` without also checking ownership or staff role
+- Passing another user’s Clerk id from the client to bypass scope
+- Putting admin-wide queries in default-user dashboards
+- Skipping auth because a route is “already protected” by middleware — still scope the query
+- Letting `admin` edit or assign `super_admin` — use `canManageUser` / `canAssignRole`

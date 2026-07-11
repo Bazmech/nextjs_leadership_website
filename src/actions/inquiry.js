@@ -56,7 +56,8 @@ export async function getRecentInquiries() {
   try {
     const db = getDb();
 
-    return db
+    // Own inquiries only — see user-data-authorization.mdc
+    return await db
       .select()
       .from(coachingInquiries)
       .where(eq(coachingInquiries.clerkUserId, userId))

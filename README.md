@@ -10,6 +10,7 @@ Executive coaching and leadership development website built with Next.js 16 (App
 | Language | JavaScript |
 | Styling | Tailwind CSS v4 + CSS variables in `src/app/globals.css` |
 | Auth | [Clerk](https://clerk.com) (`@clerk/nextjs` v7) |
+| CMS | [Prismic](https://prismic.io) (`@prismicio/client`, Slice Machine) |
 | Database | [Neon](https://neon.tech) Postgres via `@neondatabase/serverless` |
 | ORM / migrations | [Drizzle ORM](https://orm.drizzle.team) + `drizzle-kit` |
 | Deployment | [Vercel](https://vercel.com) with Neon Storage integration |
@@ -105,6 +106,7 @@ Project conventions for Cursor and contributors live in `.cursor/rules/`:
 | `radix-ui.mdc` | Radix primitives for forms, dialogs, menus, tabs, and other interactive UI |
 | `zod-forms.mdc` | Zod schemas in `src/lib/schemas/`; validate `FormData` in Server Actions |
 | `server-actions.mdc` | All form submissions and mutations via `src/actions/` + `useActionState` |
+| `user-data-authorization.mdc` | Scope user-owned DB queries by Clerk ID / role; staff cross-user only on admin pages |
 | `dark-mode-ui.mdc` | All new UI must support light and dark mode via semantic tokens in `globals.css` |
 
 **Additional actions:**
@@ -128,6 +130,7 @@ Clerk handles sign-in, sign-up, and session management.
 | Sign-in / sign-up pages | `src/app/sign-in/`, `src/app/sign-up/` |
 | Header auth controls | `src/components/molecules/AuthNav/AuthNav.js` |
 | Protected route example | `src/app/dashboard/page.js` |
+| Sync Clerk user → Neon | `src/lib/users.js` + `src/app/dashboard/layout.js` |
 | Branded Clerk UI | `src/lib/clerk-appearance.js` |
 
 **Route access**
@@ -136,6 +139,8 @@ Clerk handles sign-in, sign-up, and session management.
 |-------|--------|
 | `/`, `/sign-in`, `/sign-up`, `/[uid]`, `/slice-simulator` | Public |
 | `/dashboard` | Protected (redirects to sign-in if unauthenticated) |
+
+After sign-in / sign-up, Clerk redirects to `/dashboard`. The dashboard layout calls `ensureAppUser`, which inserts the Clerk user into `users` (with the `default` role) if they are not already present.
 
 **Additional actions (required before auth works)**
 
@@ -164,7 +169,7 @@ Postgres is provided by Neon. The app uses **one isolated Neon database branch p
 
 | Item | Location |
 |------|----------|
-| Schema | `src/db/schema.js` — `coaching_inquiries` table |
+| Schema | `src/db/schema.js` — `coaching_inquiries`, `user_roles`, `users` tables |
 | Migrations | `src/db/migrations/` |
 | DB client | `src/lib/db.js` |
 | Branch context | `src/lib/db-context.js` — reads active Neon branch name at runtime |

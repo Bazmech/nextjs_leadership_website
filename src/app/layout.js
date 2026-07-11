@@ -26,8 +26,10 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <ClerkProvider appearance={clerkAppearance}>{children}</ClerkProvider>
+      <body className="flex min-h-full flex-col">
+        <ClerkProvider appearance={clerkAppearance}>
+          <div className="flex min-h-full flex-1 flex-col">{children}</div>
+        </ClerkProvider>
         <PrismicPreview repositoryName={repositoryName} />
       </body>
     </html>
