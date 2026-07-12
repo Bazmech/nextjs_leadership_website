@@ -16,13 +16,17 @@ Submission flow is defined in `server-actions.mdc` (do not duplicate). This rule
 - Export the schema and inferred shape if needed elsewhere
 
 ```js
-// src/lib/schemas/inquiry.js
+// src/lib/schemas/user.js
 import { z } from "zod";
 
-export const inquirySchema = z.object({
-  name: z.string().trim().min(1, "Name is required."),
-  email: z.string().trim().email("Enter a valid email address."),
-  message: z.string().trim().min(1, "Message is required."),
+export const updateUserSchema = z.object({
+  userId: z.string().uuid("Invalid user."),
+  roleName: z.enum(["default", "admin", "super_admin"], {
+    error: "Select a valid role.",
+  }),
+  enabled: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true"),
 });
 ```
 
@@ -31,13 +35,13 @@ export const inquirySchema = z.object({
 ```js
 "use server";
 
-import { inquirySchema } from "@/lib/schemas/inquiry";
+import { updateUserSchema } from "@/lib/schemas/user";
 
-export async function submitInquiry(prevState, formData) {
-  const parsed = inquirySchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    message: formData.get("message"),
+export async function updateUser(prevState, formData) {
+  const parsed = updateUserSchema.safeParse({
+    userId: formData.get("userId"),
+    roleName: formData.get("roleName"),
+    enabled: formData.get("enabled"),
   });
 
   if (!parsed.success) {
@@ -48,7 +52,7 @@ export async function submitInquiry(prevState, formData) {
     };
   }
 
-  const { name, email, message } = parsed.data;
+  const { userId, roleName, enabled } = parsed.data;
   // persist, revalidatePath, return success state
 }
 ```

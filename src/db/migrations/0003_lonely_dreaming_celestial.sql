@@ -1,0 +1,1 @@
+DROP TABLE "coaching_inquiries" CASCADE;

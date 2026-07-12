@@ -11,7 +11,7 @@ This project uses **Next.js 16 App Router** with **JavaScript**. Read `node_modu
 
 For mutations, form submissions, and server-side data changes, use Server Actions — not client `fetch`, axios, or Route Handlers.
 
-- Place actions in `src/actions/` (e.g. `src/actions/inquiry.js`) with `"use server"` at the top of the file
+- Place actions in `src/actions/` (e.g. `src/actions/users.js`) with `"use server"` at the top of the file
 - Validate input with Zod in the action — see `zod-forms.mdc` (do not add a separate submission rule)
 - Use Radix-wrapped fields from `src/components/` — see `radix-ui.mdc`
 - Call from Server Components directly, or pass to Client Components as props
@@ -21,27 +21,27 @@ For mutations, form submissions, and server-side data changes, use Server Action
 **All form submissions** go through a Server Action on the `<form action={...}>` — never `onSubmit` + `fetch`.
 
 ```js
-// src/actions/inquiry.js — validate with Zod (zod-forms.mdc), then persist
+// src/actions/users.js — validate with Zod (zod-forms.mdc), then persist
 "use server";
 
-export async function submitInquiry(prevState, formData) {
-  // schema.safeParse(...), insert, revalidatePath, return { success, error, message }
+export async function updateUser(prevState, formData) {
+  // schema.safeParse(...), update, revalidatePath, return { success, error, message }
 }
 ```
 
 ```js
-// Client form — useActionState for pending + feedback (ContactForm pattern)
+// Client form — useActionState for pending + feedback
 "use client";
 
 import { useActionState } from "react";
-import { submitInquiry } from "@/actions/inquiry";
+import { updateUser } from "@/actions/users";
 
-const [state, formAction, isPending] = useActionState(submitInquiry, initialState);
+const [state, formAction, isPending] = useActionState(updateUser, initialState);
 
 <form action={formAction}>...</form>
 ```
 
-Server-only forms without pending UI may use `<form action={submitInquiry}>` directly.
+Server-only forms without pending UI may use `<form action={updateUser}>` directly.
 
 ## Avoid
 

@@ -123,7 +123,7 @@
         "type": "Text",
         "config": {
           "label": "Header CTA label",
-          "placeholder": "Book a Call"
+          "placeholder": "Explore Services"
         }
       },
       "header_cta_link": {

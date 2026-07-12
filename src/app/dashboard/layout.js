@@ -8,7 +8,11 @@ export default async function DashboardLayout({ children }) {
   let appUser = null;
 
   if (userId) {
-    appUser = await ensureAppUser(userId);
+    try {
+      appUser = await ensureAppUser(userId);
+    } catch (error) {
+      console.error("ensureAppUser failed:", error);
+    }
   }
 
   if (appUser && !appUser.enabled) {

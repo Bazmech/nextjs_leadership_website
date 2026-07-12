@@ -1,5 +1,4 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { getRecentInquiries } from "@/actions/inquiry";
 import Link from "@/components/atoms/Link/Link";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
@@ -9,15 +8,10 @@ export async function generateMetadata() {
   return buildSimplePageMetadata("Dashboard", "Your leadership coaching dashboard.");
 }
 
-function formatDate(value) {
-  return new Date(value).toLocaleString();
-}
-
 export default async function DashboardPage() {
-  const [user, appUser, inquiries] = await Promise.all([
+  const [user, appUser] = await Promise.all([
     currentUser(),
     getCurrentAppUser(),
-    getRecentInquiries(),
   ]);
   const showDbBranch = isStaffRole(appUser?.roleName);
   const dbContext = showDbBranch ? await getDatabaseContext() : null;
@@ -112,29 +106,6 @@ export default async function DashboardPage() {
             </div>
           </dl>
         </div>
-
-        {inquiries.length > 0 ? (
-          <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
-            <h2 className="text-lg font-semibold text-foreground">
-              Your recent inquiries
-            </h2>
-            <ul className="mt-4 space-y-4">
-              {inquiries.map((inquiry) => (
-                <li
-                  key={inquiry.id}
-                  className="rounded-xl border border-border bg-background p-4"
-                >
-                  <p className="text-sm font-medium text-foreground">
-                    {inquiry.message}
-                  </p>
-                  <p className="mt-2 text-xs text-muted">
-                    Submitted {formatDate(inquiry.createdAt)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
       </div>
     </div>
   );

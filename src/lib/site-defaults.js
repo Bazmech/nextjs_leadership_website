@@ -15,8 +15,8 @@ export const siteDefaults = {
   googleSiteVerification: null,
   contactEmail: null,
   contactPhone: null,
-  headerCtaLabel: "Book a Call",
-  headerCtaHref: "#contact",
+  headerCtaLabel: "Explore Services",
+  headerCtaHref: "#services",
   footerCopyright: "ElevateLeadership",
   socialLinks: [],
 };

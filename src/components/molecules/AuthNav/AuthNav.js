@@ -38,10 +38,10 @@ export default function AuthNav() {
 
   return (
     <div className="flex items-center gap-3">
-      <SignInButton mode="modal">
+      <SignInButton mode="modal" forceRedirectUrl="/dashboard">
         <Button variant="ghost">Sign in</Button>
       </SignInButton>
-      <SignUpButton mode="modal">
+      <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
         <Button variant="primary">Sign up</Button>
       </SignUpButton>
     </div>

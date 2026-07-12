@@ -12,7 +12,7 @@ Organize UI under `src/components/` using atomic design:
 src/components/
   atoms/       # Single-purpose primitives (Button, Input, Badge)
   molecules/   # Small compositions (NavLink, FormField, StatCard)
-  organisms/   # Page sections (Header, Hero, ContactForm)
+  organisms/   # Page sections (Header, Hero, Services)
 ```
 
 ## Folder convention

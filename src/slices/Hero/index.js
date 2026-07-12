@@ -38,18 +38,18 @@ export default function Hero({ slice }) {
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:w-fit">
           <PrismicNextLink
             field={primary.primary_cta_link}
-            href={linkHref(primary.primary_cta_link, "#contact")}
+            href={linkHref(primary.primary_cta_link, "#services")}
           >
             <Button as="span" variant="accent">
-              {asText(primary.primary_cta_label) || "Start Your Journey"}
+              {asText(primary.primary_cta_label) || "Explore Services"}
             </Button>
           </PrismicNextLink>
           <PrismicNextLink
             field={primary.secondary_cta_link}
-            href={linkHref(primary.secondary_cta_link, "#services")}
+            href={linkHref(primary.secondary_cta_link, "#about")}
           >
             <Button as="span" variant="secondary">
-              {asText(primary.secondary_cta_label) || "Explore Services"}
+              {asText(primary.secondary_cta_label) || "About Us"}
             </Button>
           </PrismicNextLink>
         </div>

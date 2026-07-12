@@ -68,7 +68,7 @@ src/
   components/
     atoms/                # Primitives (Button, Input, Textarea, Eyebrow)
     molecules/            # Compositions (NavLink, Logo, StatCard, AuthNav, ...)
-    organisms/            # Page sections (Header, Hero, Services, ContactForm, ...)
+    organisms/            # Page sections (Header, Hero, Services, About, ...)
   db/
     schema.js             # Drizzle table definitions
     migrations/           # SQL migrations (committed to git)
@@ -169,11 +169,10 @@ Postgres is provided by Neon. The app uses **one isolated Neon database branch p
 
 | Item | Location |
 |------|----------|
-| Schema | `src/db/schema.js` — `coaching_inquiries`, `user_roles`, `users` tables |
+| Schema | `src/db/schema.js` — `user_roles`, `users` tables |
 | Migrations | `src/db/migrations/` |
 | DB client | `src/lib/db.js` |
 | Branch context | `src/lib/db-context.js` — reads active Neon branch name at runtime |
-| Contact form → DB | `src/actions/inquiry.js` + `src/components/organisms/ContactForm/ContactForm.js` |
 | Dashboard DB info | `src/app/dashboard/page.js` shows Neon branch, git branch, and environment |
 | Auto-migrate on build | `yarn build` runs `scripts/migrate.mjs` first |
 
@@ -298,7 +297,6 @@ Content is managed in [Prismic](https://prismic.io) using Slice Machine. The hom
 | `hero` | Headline, CTAs, stats |
 | `services` | Services grid |
 | `about` | About section with highlights |
-| `call_to_action` | Consultation CTA + contact form |
 | `media` | 16:9 image or video |
 | `text_image` | 50/50 text and image |
 | `listing` | 3-column responsive card listing |
@@ -404,7 +402,7 @@ Before going live, confirm:
 - [ ] Preview branching enabled for isolated preview databases
 - [ ] `DATABASE_URL` available in Production (via Neon integration)
 - [ ] First deploy completes successfully (`yarn build` runs migrations)
-- [ ] Sign-in, sign-up, dashboard, and contact form tested on preview and production
+- [ ] Sign-in, sign-up, and dashboard tested on preview and production
 - [ ] Prismic repository created and `PRISMIC_REPOSITORY` set in Vercel
 - [ ] Custom types and slices pushed via Slice Machine
 - [ ] Homepage published in Prismic

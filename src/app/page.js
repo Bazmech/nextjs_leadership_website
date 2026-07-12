@@ -2,7 +2,6 @@ import Header from "@/components/organisms/Header/Header";
 import Hero from "@/components/organisms/Hero/Hero";
 import Services from "@/components/organisms/Services/Services";
 import About from "@/components/organisms/About/About";
-import Cta from "@/components/organisms/Cta/Cta";
 import Footer from "@/components/organisms/Footer/Footer";
 import { SliceZone } from "@prismicio/react";
 import { createClient } from "@/prismicio";
@@ -18,7 +17,6 @@ function StaticHome() {
         <Hero />
         <Services />
         <About />
-        <Cta />
       </main>
       <Footer />
     </>

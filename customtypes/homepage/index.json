@@ -21,7 +21,6 @@
             "hero": { "type": "SharedSlice" },
             "services": { "type": "SharedSlice" },
             "about": { "type": "SharedSlice" },
-            "call_to_action": { "type": "SharedSlice" },
             "media": { "type": "SharedSlice" },
             "text_image": { "type": "SharedSlice" },
             "listing": { "type": "SharedSlice" },

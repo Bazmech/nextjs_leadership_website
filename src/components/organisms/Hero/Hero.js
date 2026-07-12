@@ -26,11 +26,11 @@ export default function Hero() {
           teams, navigate change, and unlock their full potential.
         </p>
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:w-fit">
-          <Button as="a" href="#contact" variant="accent">
-            Start Your Journey
-          </Button>
-          <Button as="a" href="#services" variant="secondary">
+          <Button as="a" href="#services" variant="accent">
             Explore Services
+          </Button>
+          <Button as="a" href="#about" variant="secondary">
+            About Us
           </Button>
         </div>
         <dl className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10 md:grid-cols-4">
