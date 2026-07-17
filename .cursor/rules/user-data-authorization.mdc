@@ -11,11 +11,32 @@ Any database read or write that involves **user-owned data** must verify the cal
 
 | Role | Access to other users’ data |
 |------|-----------------------------|
+| `Public` | Not a DB role — signed-out / anonymous visitors only |
 | `default` | Own data only (`clerk_user_id` must match session) |
 | `admin` | Staff admin surfaces only; **cannot** edit or assign `super_admin` |
 | `super_admin` | Staff admin surfaces; may manage all roles including other staff |
 
-Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`).
+Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`) and visibility helpers in `src/lib/roles.js` (`canAccessByRole`, `getViewerVisibilityRole`).
+
+## Cascading visibility (CMS / nav)
+
+For Prismic Header Menu and similar role-gated UI, access is **cascading** (higher roles see everything below them):
+
+| Viewer | Can see items requiring |
+|--------|-------------------------|
+| `Public` (signed out) | `Public` |
+| `default` | `Public`, `default` |
+| `admin` | `Public`, `default`, `admin` |
+| `super_admin` | `Public`, `default`, `admin`, `super_admin` |
+
+`Public` is a CMS visibility tier only — it is **not** stored in `user_roles`. Signed-out visitors map to `Public`; signed-in users use their app `roleName`.
+
+```js
+import { canAccessByRole, getViewerVisibilityRole } from "@/lib/roles";
+
+const viewerRole = getViewerVisibilityRole(appUser?.roleName); // Public when null
+if (!canAccessByRole(viewerRole, item.requiredRole)) return null;
+```
 
 ## Required pattern
 
@@ -56,3 +77,4 @@ Do not grant cross-user access from shared helpers used by regular user pages.
 - Putting admin-wide queries in default-user dashboards
 - Skipping auth because a route is “already protected” by middleware — still scope the query
 - Letting `admin` edit or assign `super_admin` — use `canManageUser` / `canAssignRole`
+- Treating `Public` as a database role or inserting it into `user_roles`

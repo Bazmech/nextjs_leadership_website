@@ -2,43 +2,47 @@
   "id": "section_intro",
   "type": "SharedSlice",
   "name": "SectionIntro",
-  "description": "Centered title, subtitle, text, and link",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default",
-      "imageUrl": "",
       "primary": {
         "title": {
           "type": "Text",
-          "config": { "label": "Title" }
+          "config": {
+            "label": "Title"
+          }
         },
         "subtitle": {
           "type": "Text",
-          "config": { "label": "Subtitle" }
+          "config": {
+            "label": "Subtitle"
+          }
         },
         "text": {
           "type": "StructuredText",
           "config": {
             "label": "Text",
             "placeholder": "Optional rich text",
-            "allowTargetBlank": true,
-            "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+            "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item",
+            "allowTargetBlank": true
           }
         },
         "link": {
           "type": "Link",
           "config": {
             "label": "Link",
-            "allowText": true,
-            "select": null
+            "select": null,
+            "allowText": true
           }
         }
       },
       "items": {}
     }
-  ]
+  ],
+  "description": "Centered title, subtitle, text, and link"
 }

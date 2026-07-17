@@ -2,34 +2,40 @@
   "id": "listing",
   "type": "SharedSlice",
   "name": "Listing",
-  "description": "Responsive 3-column card listing",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default",
-      "imageUrl": "",
       "primary": {},
       "items": {
         "image": {
           "type": "Image",
-          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+          "config": {
+            "label": "Image",
+            "constraint": {},
+            "thumbnails": []
+          }
         },
         "title": {
           "type": "Text",
-          "config": { "label": "Title" }
+          "config": {
+            "label": "Title"
+          }
         },
         "link": {
           "type": "Link",
           "config": {
             "label": "Link",
-            "allowText": true,
-            "select": null
+            "select": null,
+            "allowText": true
           }
         }
       }
     }
-  ]
+  ],
+  "description": "Responsive 3-column card listing"
 }

@@ -2,26 +2,32 @@
   "id": "media",
   "type": "SharedSlice",
   "name": "Media",
-  "description": "16:9 image or video",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default",
-      "imageUrl": "",
       "primary": {
         "image": {
           "type": "Image",
-          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+          "config": {
+            "label": "Image",
+            "constraint": {},
+            "thumbnails": []
+          }
         },
         "video_url": {
           "type": "Text",
-          "config": { "label": "Video URL (optional)" }
+          "config": {
+            "label": "Video URL (optional)"
+          }
         }
       },
       "items": {}
     }
-  ]
+  ],
+  "description": "16:9 image or video"
 }

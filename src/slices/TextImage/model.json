@@ -2,31 +2,36 @@
   "id": "text_image",
   "type": "SharedSlice",
   "name": "TextImage",
-  "description": "50/50 text and image with optional reverse",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default",
-      "imageUrl": "",
       "primary": {
         "image": {
           "type": "Image",
-          "config": { "label": "Image", "constraint": {}, "thumbnails": [] }
+          "config": {
+            "label": "Image",
+            "constraint": {},
+            "thumbnails": []
+          }
         },
         "video_url": {
           "type": "Text",
-          "config": { "label": "Video URL (optional, overrides image)" }
+          "config": {
+            "label": "Video URL (optional, overrides image)"
+          }
         },
         "text": {
           "type": "StructuredText",
           "config": {
             "label": "Text",
             "placeholder": "Rich text content",
-            "allowTargetBlank": true,
-            "multi": "paragraph,heading2,heading3,heading4,strong,em,hyperlink,list-item,o-list-item"
+            "multi": "paragraph,heading2,heading3,heading4,strong,em,hyperlink,list-item,o-list-item",
+            "allowTargetBlank": true
           }
         },
         "reversed": {
@@ -39,5 +44,6 @@
       },
       "items": {}
     }
-  ]
+  ],
+  "description": "50/50 text and image with optional reverse"
 }

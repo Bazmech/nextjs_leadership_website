@@ -14,8 +14,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
-    "db:branch": "node scripts/neon-branch.mjs",
-    "slicemachine": "start-slicemachine --open"
+    "db:branch": "node scripts/neon-branch.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.16",
@@ -33,12 +32,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@slicemachine/adapter-next": "^0.3.96",
     "@tailwindcss/postcss": "^4",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
-    "slice-machine-ui": "^2.21.3",
     "tailwindcss": "^4"
   }
 }

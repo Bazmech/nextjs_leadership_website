@@ -2,19 +2,21 @@
   "id": "about",
   "type": "SharedSlice",
   "name": "About",
-  "description": "About section with highlights",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default about layout",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default about layout",
-      "imageUrl": "",
       "primary": {
         "eyebrow": {
           "type": "Text",
-          "config": { "label": "Eyebrow", "placeholder": "About Us" }
+          "config": {
+            "label": "Eyebrow",
+            "placeholder": "About Us"
+          }
         },
         "heading": {
           "type": "Text",
@@ -25,23 +27,33 @@
         },
         "body_paragraph_1": {
           "type": "Text",
-          "config": { "label": "Body Paragraph 1" }
+          "config": {
+            "label": "Body Paragraph 1"
+          }
         },
         "body_paragraph_2": {
           "type": "Text",
-          "config": { "label": "Body Paragraph 2" }
+          "config": {
+            "label": "Body Paragraph 2"
+          }
         },
         "monogram": {
           "type": "Text",
-          "config": { "label": "Monogram", "placeholder": "EL" }
+          "config": {
+            "label": "Monogram",
+            "placeholder": "EL"
+          }
         }
       },
       "items": {
         "highlight": {
           "type": "Text",
-          "config": { "label": "Highlight" }
+          "config": {
+            "label": "Highlight"
+          }
         }
       }
     }
-  ]
+  ],
+  "description": "About section with highlights"
 }

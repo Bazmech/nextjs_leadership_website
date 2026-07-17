@@ -1,9 +1,7 @@
 {
   "id": "settings",
   "label": "Settings",
-  "format": "custom",
   "repeatable": false,
-  "status": true,
   "json": {
     "Site identity": {
       "site_name": {
@@ -130,8 +128,8 @@
         "type": "Link",
         "config": {
           "label": "Header CTA link",
-          "allowText": false,
-          "select": null
+          "select": null,
+          "allowText": false
         }
       },
       "footer_copyright": {
@@ -166,13 +164,15 @@
               "type": "Link",
               "config": {
                 "label": "URL",
-                "allowText": false,
-                "select": null
+                "select": null,
+                "allowText": false
               }
             }
           }
         }
       }
     }
-  }
+  },
+  "status": true,
+  "format": "custom"
 }

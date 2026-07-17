@@ -1,9 +1,7 @@
 {
   "id": "homepage",
   "label": "Homepage",
-  "format": "page",
   "repeatable": false,
-  "status": true,
   "json": {
     "Main": {
       "title": {
@@ -18,14 +16,30 @@
         "fieldset": "Page content",
         "config": {
           "choices": {
-            "hero": { "type": "SharedSlice" },
-            "services": { "type": "SharedSlice" },
-            "about": { "type": "SharedSlice" },
-            "media": { "type": "SharedSlice" },
-            "text_image": { "type": "SharedSlice" },
-            "listing": { "type": "SharedSlice" },
-            "section_intro": { "type": "SharedSlice" },
-            "rich_text": { "type": "SharedSlice" }
+            "hero": {
+              "type": "SharedSlice"
+            },
+            "services": {
+              "type": "SharedSlice"
+            },
+            "about": {
+              "type": "SharedSlice"
+            },
+            "media": {
+              "type": "SharedSlice"
+            },
+            "text_image": {
+              "type": "SharedSlice"
+            },
+            "listing": {
+              "type": "SharedSlice"
+            },
+            "section_intro": {
+              "type": "SharedSlice"
+            },
+            "rich_text": {
+              "type": "SharedSlice"
+            }
           }
         }
       }
@@ -82,10 +96,12 @@
         "config": {
           "label": "No index",
           "default_value": false,
-          "placeholder_false": "Allow search indexing",
-          "placeholder_true": "Hide from search engines (noindex)"
+          "placeholder_true": "Hide from search engines (noindex)",
+          "placeholder_false": "Allow search indexing"
         }
       }
     }
-  }
+  },
+  "status": true,
+  "format": "page"
 }

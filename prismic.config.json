@@ -1,0 +1,16 @@
+{
+  "repositoryName": "productive-leadership",
+  "libraries": [
+    "./src/slices"
+  ],
+  "routes": [
+    {
+      "type": "homepage",
+      "path": "/"
+    },
+    {
+      "type": "page",
+      "path": "/:uid"
+    }
+  ]
+}

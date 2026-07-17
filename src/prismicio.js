@@ -1,24 +1,19 @@
 import { createClient as baseCreateClient } from "@prismicio/client";
 import { enableAutoPreviews } from "@prismicio/next";
-import sm from "../slicemachine.config.json";
+import config from "../prismic.config.json";
 
 export const repositoryName =
-  process.env.PRISMIC_REPOSITORY || sm.repositoryName;
+  process.env.PRISMIC_REPOSITORY || config.repositoryName;
 
-const routes = [
-  { type: "homepage", path: "/" },
-  { type: "page", path: "/:uid" },
-];
-
-export function createClient(config = {}) {
+export function createClient(clientConfig = {}) {
   const client = baseCreateClient(repositoryName, {
     accessToken: process.env.PRISMIC_ACCESS_TOKEN,
-    routes,
+    routes: config.routes,
     fetchOptions:
       process.env.NODE_ENV === "production"
         ? { next: { tags: ["prismic"] }, cache: "force-cache" }
         : { next: { revalidate: 5 } },
-    ...config,
+    ...clientConfig,
   });
 
   enableAutoPreviews({ client });

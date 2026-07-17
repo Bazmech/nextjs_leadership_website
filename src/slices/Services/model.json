@@ -2,19 +2,21 @@
   "id": "services",
   "type": "SharedSlice",
   "name": "Services",
-  "description": "Services grid section",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default services layout",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default services layout",
-      "imageUrl": "",
       "primary": {
         "eyebrow": {
           "type": "Text",
-          "config": { "label": "Eyebrow", "placeholder": "What We Offer" }
+          "config": {
+            "label": "Eyebrow",
+            "placeholder": "What We Offer"
+          }
         },
         "heading": {
           "type": "Text",
@@ -25,23 +27,34 @@
         },
         "description": {
           "type": "Text",
-          "config": { "label": "Description" }
+          "config": {
+            "label": "Description"
+          }
         }
       },
       "items": {
         "icon": {
           "type": "Text",
-          "config": { "label": "Icon", "placeholder": "◆" }
+          "config": {
+            "label": "Icon",
+            "placeholder": "◆"
+          }
         },
         "title": {
           "type": "Text",
-          "config": { "label": "Title", "placeholder": "Executive Coaching" }
+          "config": {
+            "label": "Title",
+            "placeholder": "Executive Coaching"
+          }
         },
         "description": {
           "type": "Text",
-          "config": { "label": "Description" }
+          "config": {
+            "label": "Description"
+          }
         }
       }
     }
-  ]
+  ],
+  "description": "Services grid section"
 }

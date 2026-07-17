@@ -1,11 +1,23 @@
 import Container from "@/components/atoms/Container/Container";
-import NavLink from "@/components/molecules/NavLink/NavLink";
+import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
+import { getHeaderMenuLinks } from "@/lib/prismic-header-menu";
 import { getSiteSettings } from "@/lib/prismic-settings";
-import { mainNavLinks } from "@/lib/site-nav";
+
+function flattenMenuItems(items = []) {
+  return items.flatMap((item) => [
+    { ...item, children: [] },
+    ...flattenMenuItems(item.children),
+  ]);
+}
 
 export default async function Footer() {
-  const settings = await getSiteSettings();
+  const [settings, menuItems] = await Promise.all([
+    getSiteSettings(),
+    getHeaderMenuLinks(),
+  ]);
+  const footerLinks = flattenMenuItems(menuItems);
   const year = new Date().getFullYear();
+
 
   return (
     <footer className="border-t border-border bg-surface py-12">
@@ -49,13 +61,13 @@ export default async function Footer() {
               ))}
             </ul>
           ) : null}
-          <ul className="grid grid-flow-col gap-6">
-            {mainNavLinks.map((link) => (
-              <li key={link.href}>
-                <NavLink href={link.href}>{link.label}</NavLink>
-              </li>
-            ))}
-          </ul>
+          <nav aria-label="Footer">
+            <NavMenuList
+              items={footerLinks}
+              className="grid grid-flow-col gap-6"
+              variant="inline"
+            />
+          </nav>
         </div>
       </Container>
     </footer>

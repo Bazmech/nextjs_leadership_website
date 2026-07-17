@@ -1,0 +1,55 @@
+{
+  "id": "header_menu",
+  "label": "Header Menu",
+  "repeatable": false,
+  "json": {
+    "Main": {
+      "menu_items": {
+        "type": "Group",
+        "config": {
+          "label": "Menu items",
+          "fields": {
+            "label": {
+              "type": "Text",
+              "config": {
+                "label": "Label",
+                "placeholder": "Services"
+              }
+            },
+            "link": {
+              "type": "Link",
+              "config": {
+                "label": "Link",
+                "select": null,
+                "allowText": false
+              }
+            },
+            "required_role": {
+              "type": "Select",
+              "config": {
+                "label": "Minimum role",
+                "placeholder": "Who can see this item",
+                "default_value": "Public",
+                "options": [
+                  "Public",
+                  "default",
+                  "admin",
+                  "super_admin"
+                ]
+              }
+            },
+            "parent_label": {
+              "type": "Text",
+              "config": {
+                "label": "Parent label (optional)",
+                "placeholder": "Leave blank for top-level; enter a parent item's Label to nest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "status": true,
+  "format": "custom"
+}

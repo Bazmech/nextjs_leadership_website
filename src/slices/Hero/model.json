@@ -2,15 +2,14 @@
   "id": "hero",
   "type": "SharedSlice",
   "name": "Hero",
-  "description": "Homepage hero with headline, CTAs, and stats",
   "variations": [
     {
       "id": "default",
       "name": "Default",
+      "description": "Default hero layout",
+      "imageUrl": "https://images.prismic.io/slice-machine/621a5ec4-0387-4bc5-9860-2dd46cbc07cd_default_ss.png?auto=compress,format",
       "docURL": "...",
       "version": "initial",
-      "description": "Default hero layout",
-      "imageUrl": "",
       "primary": {
         "eyebrow": {
           "type": "Text",
@@ -35,31 +34,52 @@
         },
         "primary_cta_label": {
           "type": "Text",
-          "config": { "label": "Primary CTA Label", "placeholder": "Start Your Journey" }
+          "config": {
+            "label": "Primary CTA Label",
+            "placeholder": "Start Your Journey"
+          }
         },
         "primary_cta_link": {
           "type": "Link",
-          "config": { "label": "Primary CTA Link", "allowText": false, "select": null }
+          "config": {
+            "label": "Primary CTA Link",
+            "select": null,
+            "allowText": false
+          }
         },
         "secondary_cta_label": {
           "type": "Text",
-          "config": { "label": "Secondary CTA Label", "placeholder": "Explore Services" }
+          "config": {
+            "label": "Secondary CTA Label",
+            "placeholder": "Explore Services"
+          }
         },
         "secondary_cta_link": {
           "type": "Link",
-          "config": { "label": "Secondary CTA Link", "allowText": false, "select": null }
+          "config": {
+            "label": "Secondary CTA Link",
+            "select": null,
+            "allowText": false
+          }
         }
       },
       "items": {
         "value": {
           "type": "Text",
-          "config": { "label": "Stat Value", "placeholder": "15+" }
+          "config": {
+            "label": "Stat Value",
+            "placeholder": "15+"
+          }
         },
         "label": {
           "type": "Text",
-          "config": { "label": "Stat Label", "placeholder": "Years Experience" }
+          "config": {
+            "label": "Stat Label",
+            "placeholder": "Years Experience"
+          }
         }
       }
     }
-  ]
+  ],
+  "description": "Homepage hero with headline, CTAs, and stats"
 }
