@@ -1,11 +1,20 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { migrate } from "drizzle-orm/neon-http/migrator";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const migrationsFolder = path.join(__dirname, "../src/db/migrations");
+const root = path.join(__dirname, "..");
+const migrationsFolder = path.join(root, "src/db/migrations");
+
+for (const file of [".env.local", ".env"]) {
+  const filePath = path.join(root, file);
+  if (existsSync(filePath)) {
+    process.loadEnvFile(filePath);
+  }
+}
 
 async function runMigrations() {
   const databaseUrl =
