@@ -8,14 +8,14 @@
         "type": "Text",
         "config": {
           "label": "Site name",
-          "placeholder": "ElevateLeadership"
+          "placeholder": "ProductiveLeadership"
         }
       },
       "title_postfix": {
         "type": "Text",
         "config": {
           "label": "Title postfix",
-          "placeholder": " | ElevateLeadership"
+          "placeholder": " | ProductiveLeadership"
         }
       },
       "tagline": {
@@ -29,7 +29,7 @@
         "type": "Text",
         "config": {
           "label": "Logo text",
-          "placeholder": "ElevateLeadership"
+          "placeholder": "ProductiveLeadership"
         }
       },
       "logo_accent": {
@@ -45,7 +45,7 @@
         "type": "Text",
         "config": {
           "label": "Default SEO title",
-          "placeholder": "ElevateLeadership | Executive Coaching & Leadership Development"
+          "placeholder": "ProductiveLeadership | Executive Coaching & Leadership Development"
         }
       },
       "default_meta_description": {
@@ -91,7 +91,7 @@
         "type": "Text",
         "config": {
           "label": "Twitter / X handle",
-          "placeholder": "@elevateleadership"
+          "placeholder": "@productiveleadership"
         }
       },
       "google_site_verification": {

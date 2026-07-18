@@ -15,7 +15,7 @@ export default function About() {
         <div className="relative aspect-square max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-light">
           <div className="grid h-full place-items-center">
             <span className="text-8xl font-bold text-white/20" aria-hidden="true">
-              EL
+              PL
             </span>
           </div>
         </div>
@@ -25,7 +25,7 @@ export default function About() {
             title="Trusted partners in leadership growth"
           />
           <p className="mt-6 leading-relaxed text-muted">
-            ElevateLeadership was founded on a simple belief: great leaders are
+            ProductiveLeadership was founded on a simple belief: great leaders are
             made, not born. Our coaches bring decades of experience in Fortune 500
             boardrooms, startups, and nonprofit organizations.
           </p>

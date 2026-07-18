@@ -21,7 +21,7 @@ export default function About({ slice }) {
         <div className="relative aspect-square max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-light">
           <div className="grid h-full place-items-center">
             <span className="text-8xl font-bold text-white/20" aria-hidden="true">
-              {getPrismicText(primary.monogram, "EL")}
+              {getPrismicText(primary.monogram, "PL")}
             </span>
           </div>
         </div>

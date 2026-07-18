@@ -149,7 +149,7 @@ interface HomepageDocumentData {
 	 * SEO title field in *Homepage*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**: ElevateLeadership | Executive Coaching
+	 * - **Placeholder**: ProductiveLeadership | Executive Coaching
 	 * - **API ID Path**: homepage.meta_title
 	 * - **Tab**: SEO & Metadata
 	 * - **Documentation**: https://prismic.io/docs/fields/text
@@ -384,7 +384,7 @@ interface SettingsDocumentData {
 	 * Site name field in *Settings*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**: ElevateLeadership
+	 * - **Placeholder**: ProductiveLeadership
 	 * - **API ID Path**: settings.site_name
 	 * - **Tab**: Site identity
 	 * - **Documentation**: https://prismic.io/docs/fields/text
@@ -395,7 +395,7 @@ interface SettingsDocumentData {
 	 * Title postfix field in *Settings*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**:  | ElevateLeadership
+	 * - **Placeholder**:  | ProductiveLeadership
 	 * - **API ID Path**: settings.title_postfix
 	 * - **Tab**: Site identity
 	 * - **Documentation**: https://prismic.io/docs/fields/text
@@ -417,7 +417,7 @@ interface SettingsDocumentData {
 	 * Logo text field in *Settings*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**: ElevateLeadership
+	 * - **Placeholder**: ProductiveLeadership
 	 * - **API ID Path**: settings.logo_label
 	 * - **Tab**: Site identity
 	 * - **Documentation**: https://prismic.io/docs/fields/text
@@ -437,7 +437,7 @@ interface SettingsDocumentData {
 	 * Default SEO title field in *Settings*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**: ElevateLeadership | Executive Coaching & Leadership Development
+	 * - **Placeholder**: ProductiveLeadership | Executive Coaching & Leadership Development
 	 * - **API ID Path**: settings.default_meta_title
 	 * - **Tab**: SEO fallbacks
 	 * - **Documentation**: https://prismic.io/docs/fields/text
@@ -503,7 +503,7 @@ interface SettingsDocumentData {
 	 * Twitter / X handle field in *Settings*
 	 *
 	 * - **Field Type**: Text
-	 * - **Placeholder**: @elevateleadership
+	 * - **Placeholder**: @productiveleadership
 	 * - **API ID Path**: settings.twitter_handle
 	 * - **Tab**: SEO fallbacks
 	 * - **Documentation**: https://prismic.io/docs/fields/text

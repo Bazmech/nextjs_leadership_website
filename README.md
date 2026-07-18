@@ -1,4 +1,4 @@
-# ElevateLeadership
+# ProductiveLeadership
 
 Executive coaching and leadership development website built with Next.js 16 (App Router), JavaScript, and Tailwind CSS v4.
 

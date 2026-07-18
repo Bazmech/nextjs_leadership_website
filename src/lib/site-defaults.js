@@ -1,10 +1,10 @@
 export const siteDefaults = {
-  siteName: "ElevateLeadership",
-  titlePostfix: " | ElevateLeadership",
+  siteName: "ProductiveLeadership",
+  titlePostfix: " | ProductiveLeadership",
   tagline: "Executive Coaching & Leadership Development",
-  logoLabel: "ElevateLeadership",
+  logoLabel: "ProductiveLeadership",
   logoAccent: "Leadership",
-  defaultMetaTitle: "ElevateLeadership | Executive Coaching & Leadership Development",
+  defaultMetaTitle: "ProductiveLeadership | Executive Coaching & Leadership Development",
   defaultMetaDescription:
     "Partner with experienced coaches to build high-performing teams, sharpen your leadership skills, and drive lasting organizational impact.",
   defaultMetaImageUrl: null,
@@ -17,6 +17,6 @@ export const siteDefaults = {
   contactPhone: null,
   headerCtaLabel: "Explore Services",
   headerCtaHref: "#services",
-  footerCopyright: "ElevateLeadership",
+  footerCopyright: "ProductiveLeadership",
   socialLinks: [],
 };
