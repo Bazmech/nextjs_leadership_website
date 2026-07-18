@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "@/components/atoms/Link/Link";
+import DangerZone from "@/components/molecules/DangerZone/DangerZone";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
 import { getCurrentAppUser, isStaffRole } from "@/lib/users";
@@ -13,8 +14,8 @@ export default async function DashboardPage() {
     currentUser(),
     getCurrentAppUser(),
   ]);
-  const showDbBranch = isStaffRole(appUser?.roleName);
-  const dbContext = showDbBranch ? await getDatabaseContext() : null;
+  const showStaffTools = isStaffRole(appUser?.roleName);
+  const dbContext = showStaffTools ? await getDatabaseContext() : null;
 
   return (
     <div className="bg-background px-6 py-16">
@@ -28,18 +29,7 @@ export default async function DashboardPage() {
           coaching resources, session notes, and program progress.
         </p>
 
-        {showDbBranch ? (
-          <p className="mt-6">
-            <Link
-              href="/dashboard/users"
-              className="text-sm font-medium text-primary transition-colors hover:text-primary-light"
-            >
-              Manage users
-            </Link>
-          </p>
-        ) : null}
-
-        {showDbBranch && dbContext ? (
+        {showStaffTools && dbContext ? (
           <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
             <h2 className="text-lg font-semibold text-foreground">
               Database branch
@@ -86,7 +76,7 @@ export default async function DashboardPage() {
         ) : null}
 
         <div
-          className={`${showDbBranch ? "mt-6" : "mt-10"} rounded-2xl border border-border bg-surface p-6`}
+          className={`${showStaffTools ? "mt-6" : "mt-10"} rounded-2xl border border-border bg-surface p-6`}
         >
           <h2 className="text-lg font-semibold text-foreground">Account</h2>
           <dl className="mt-4 space-y-3 text-sm">
@@ -106,6 +96,27 @@ export default async function DashboardPage() {
             </div>
           </dl>
         </div>
+
+        {showStaffTools ? (
+          <DangerZone className="mt-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Manage users
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  Change roles and enable or disable accounts.
+                </p>
+              </div>
+              <Link
+                href="/dashboard/users"
+                className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
+              >
+                Manage users
+              </Link>
+            </div>
+          </DangerZone>
+        ) : null}
       </div>
     </div>
   );

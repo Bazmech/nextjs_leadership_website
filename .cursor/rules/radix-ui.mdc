@@ -30,6 +30,7 @@ Add only the packages a feature needs.
 | Tooltip | `@radix-ui/react-tooltip` | `atoms/Tooltip` |
 | Popover | `@radix-ui/react-popover` | `molecules/Popover` |
 | Accordion | `@radix-ui/react-accordion` | `molecules/Accordion` |
+| Collapsible | `@radix-ui/react-collapsible` | `atoms/Collapsible` |
 
 ## Forms
 
