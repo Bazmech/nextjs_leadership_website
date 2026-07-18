@@ -14,7 +14,12 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
-    "db:branch": "node scripts/neon-branch.mjs"
+    "db:branch": "node scripts/neon-branch.mjs",
+    "prismic:login": "npx prismic login",
+    "prismic:status": "npx prismic status",
+    "prismic:pull": "npx prismic pull",
+    "prismic:push": "npx prismic push",
+    "prismic:sync": "npx prismic sync --watch"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.16",
