@@ -9,11 +9,17 @@ import {
 import Link from "next/link";
 import Button from "@/components/atoms/Button/Button";
 
-export default function AuthNav() {
+export default function AuthNav({ inverse = false }) {
   const { isLoaded, isSignedIn } = useAuth();
 
   if (!isLoaded) {
-    return <div className="h-9 w-28 animate-pulse rounded-full bg-border" />;
+    return (
+      <div
+        className={`h-9 w-28 animate-pulse rounded-full ${
+          inverse ? "bg-white/20" : "bg-border"
+        }`}
+      />
+    );
   }
 
   if (isSignedIn) {
@@ -21,7 +27,11 @@ export default function AuthNav() {
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard"
-          className="hidden text-sm font-medium text-muted transition-colors hover:text-foreground sm:inline"
+          className={`hidden text-sm font-medium transition-colors sm:inline ${
+            inverse
+              ? "text-white/90 hover:text-white"
+              : "text-muted hover:text-foreground"
+          }`}
         >
           Dashboard
         </Link>
@@ -39,10 +49,10 @@ export default function AuthNav() {
   return (
     <div className="flex items-center gap-3">
       <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-        <Button variant="ghost">Sign in</Button>
+        <Button variant={inverse ? "ghost-inverse" : "ghost"}>Sign in</Button>
       </SignInButton>
       <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
-        <Button variant="primary">Sign up</Button>
+        <Button variant={inverse ? "on-primary" : "primary"}>Sign up</Button>
       </SignUpButton>
     </div>
   );

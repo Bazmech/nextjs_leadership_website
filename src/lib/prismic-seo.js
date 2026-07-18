@@ -1,4 +1,4 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import { siteDefaults } from "@/lib/site-defaults";
 import {
   buildTitleTemplate,
@@ -7,9 +7,7 @@ import {
 } from "@/lib/prismic-settings";
 
 function getText(field, fallback = "") {
-  if (!field) return fallback;
-  if (typeof field === "string") return field.trim() || fallback;
-  return asText(field)?.trim() || fallback;
+  return getPrismicText(field, fallback);
 }
 
 function getImageUrl(imageField) {

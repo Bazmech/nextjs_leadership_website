@@ -20,16 +20,16 @@ export default async function Footer() {
 
 
   return (
-    <footer className="border-t border-border bg-surface py-12">
+    <footer className="bg-primary py-12 text-white">
       <Container className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
         <div className="grid gap-3">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-white/90">
             &copy; {year} {settings.footerCopyright}. All rights reserved.
           </p>
           {settings.contactEmail || settings.contactPhone ? (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-white/90">
               {settings.contactEmail ? (
-                <a href={`mailto:${settings.contactEmail}`} className="hover:text-foreground">
+                <a href={`mailto:${settings.contactEmail}`} className="hover:text-white">
                   {settings.contactEmail}
                 </a>
               ) : null}
@@ -37,7 +37,7 @@ export default async function Footer() {
                 <span className="mx-2">·</span>
               ) : null}
               {settings.contactPhone ? (
-                <a href={`tel:${settings.contactPhone.replace(/\s/g, "")}`} className="hover:text-foreground">
+                <a href={`tel:${settings.contactPhone.replace(/\s/g, "")}`} className="hover:text-white">
                   {settings.contactPhone}
                 </a>
               ) : null}
@@ -53,7 +53,7 @@ export default async function Footer() {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm text-muted transition-colors hover:text-foreground"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     {link.platform}
                   </a>
@@ -66,6 +66,7 @@ export default async function Footer() {
               items={footerLinks}
               className="grid grid-flow-col gap-6"
               variant="inline"
+              tone="inverse"
             />
           </nav>
         </div>

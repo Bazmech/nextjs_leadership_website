@@ -1,10 +1,15 @@
 import Link from "@/components/atoms/Link/Link";
 
-export default function NavLink({ href, children, className = "" }) {
+const tones = {
+  default: "text-muted transition-colors hover:text-foreground",
+  inverse: "text-white/90 transition-colors hover:text-white",
+};
+
+export default function NavLink({ href, children, className = "", tone = "default" }) {
   return (
     <Link
       href={href}
-      className={`text-sm font-medium text-muted transition-colors hover:text-foreground ${className}`.trim()}
+      className={`text-sm font-medium ${tones[tone] ?? tones.default} ${className}`.trim()}
     >
       {children}
     </Link>

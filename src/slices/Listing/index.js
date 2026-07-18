@@ -1,9 +1,9 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import ListingBlock from "@/components/organisms/ListingBlock/ListingBlock";
 
 export default function Listing({ slice }) {
   const items = slice.items.map((item) => ({
-    title: asText(item.title),
+    title: getPrismicText(item.title),
     image: item.image,
     linkField: item.link,
     linkLabel: item.link?.text,

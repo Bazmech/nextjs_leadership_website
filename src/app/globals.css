@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --primary: #1e3a5f;
-  --primary-light: #2d5a8e;
-  --accent: #b45309;
-  --accent-light: #d97706;
-  --muted: #78716c;
+  /* nhs.uk brand: #005eb8, #fff, #f0f4f5, #d2e2f1 */
+  --background: #f0f4f5;
+  --foreground: #005eb8;
+  --primary: #005eb8;
+  --primary-light: #005eb8;
+  --accent: #005eb8;
+  --accent-light: #d2e2f1;
+  --muted: #005eb8;
   --surface: #ffffff;
-  --border: #e7e5e4;
+  --border: #d2e2f1;
   --container-lg: 64rem;
 }
 
@@ -30,15 +31,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c0a09;
-    --foreground: #fafaf9;
-    --primary: #3b6ea5;
-    --primary-light: #5a8fc7;
-    --accent: #f59e0b;
-    --accent-light: #fbbf24;
-    --muted: #a8a29e;
-    --surface: #1c1917;
-    --border: #292524;
+    /* Same NHS surfaces: page #f0f4f5, header/footer #fff */
+    --background: #f0f4f5;
+    --foreground: #005eb8;
+    --primary: #005eb8;
+    --primary-light: #005eb8;
+    --accent: #005eb8;
+    --accent-light: #d2e2f1;
+    --muted: #005eb8;
+    --surface: #ffffff;
+    --border: #d2e2f1;
   }
 }
 

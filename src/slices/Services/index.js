@@ -1,10 +1,13 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import SectionHeader from "@/components/molecules/SectionHeader/SectionHeader";
 import ServiceCard from "@/components/molecules/ServiceCard/ServiceCard";
 import Section from "@/components/organisms/Section/Section";
 
 export default function Services({ slice }) {
   const { primary, items } = slice;
+  const eyebrow = getPrismicText(primary.eyebrow);
+  const heading = getPrismicText(primary.heading);
+  const description = getPrismicText(primary.description);
 
   return (
     <Section
@@ -13,26 +16,27 @@ export default function Services({ slice }) {
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
     >
-        <SectionHeader
-          className="max-w-2xl"
-          eyebrow={primary.eyebrow ? asText(primary.eyebrow) : undefined}
-          title={primary.heading ? asText(primary.heading) : undefined}
-          description={
-            primary.description ? asText(primary.description) : undefined
-          }
-        />
-        {items?.length > 0 ? (
-          <div className="mt-14 grid gap-8 sm:grid-cols-2">
-            {items.map((item, index) => (
+      <SectionHeader
+        className="max-w-2xl"
+        eyebrow={eyebrow || undefined}
+        title={heading || undefined}
+        description={description || undefined}
+      />
+      {items?.length > 0 ? (
+        <div className="mt-14 grid gap-8 sm:grid-cols-2">
+          {items.map((item, index) => {
+            const title = getPrismicText(item.title);
+            return (
               <ServiceCard
-                key={`${asText(item.title)}-${index}`}
-                icon={asText(item.icon) || "◆"}
-                title={asText(item.title)}
-                description={asText(item.description)}
+                key={`${title}-${index}`}
+                icon={getPrismicText(item.icon, "◆")}
+                title={title}
+                description={getPrismicText(item.description)}
               />
-            ))}
-          </div>
-        ) : null}
+            );
+          })}
+        </div>
+      ) : null}
     </Section>
   );
 }

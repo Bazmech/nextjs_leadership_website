@@ -1,10 +1,14 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import CheckListItem from "@/components/molecules/CheckListItem/CheckListItem";
 import SectionHeader from "@/components/molecules/SectionHeader/SectionHeader";
 import Section from "@/components/organisms/Section/Section";
 
 export default function About({ slice }) {
   const { primary, items } = slice;
+  const eyebrow = getPrismicText(primary.eyebrow);
+  const heading = getPrismicText(primary.heading);
+  const body1 = getPrismicText(primary.body_paragraph_1);
+  const body2 = getPrismicText(primary.body_paragraph_2);
 
   return (
     <Section
@@ -17,32 +21,31 @@ export default function About({ slice }) {
         <div className="relative aspect-square max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-light">
           <div className="grid h-full place-items-center">
             <span className="text-8xl font-bold text-white/20" aria-hidden="true">
-              {asText(primary.monogram) || "EL"}
+              {getPrismicText(primary.monogram, "EL")}
             </span>
           </div>
         </div>
         <div>
           <SectionHeader
-            eyebrow={primary.eyebrow ? asText(primary.eyebrow) : undefined}
-            title={primary.heading ? asText(primary.heading) : undefined}
+            eyebrow={eyebrow || undefined}
+            title={heading || undefined}
           />
-          {primary.body_paragraph_1 ? (
-            <p className="mt-6 leading-relaxed text-muted">
-              {asText(primary.body_paragraph_1)}
-            </p>
+          {body1 ? (
+            <p className="mt-6 leading-relaxed text-muted">{body1}</p>
           ) : null}
-          {primary.body_paragraph_2 ? (
-            <p className="mt-4 leading-relaxed text-muted">
-              {asText(primary.body_paragraph_2)}
-            </p>
+          {body2 ? (
+            <p className="mt-4 leading-relaxed text-muted">{body2}</p>
           ) : null}
           {items?.length > 0 ? (
             <ul className="mt-8 grid gap-3">
-              {items.map((item, index) => (
-                <CheckListItem key={`${asText(item.highlight)}-${index}`}>
-                  {asText(item.highlight)}
-                </CheckListItem>
-              ))}
+              {items.map((item, index) => {
+                const highlight = getPrismicText(item.highlight);
+                return (
+                  <CheckListItem key={`${highlight}-${index}`}>
+                    {highlight}
+                  </CheckListItem>
+                );
+              })}
             </ul>
           ) : null}
         </div>

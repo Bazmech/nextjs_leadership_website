@@ -1,13 +1,11 @@
 import { cache } from "react";
-import { asText } from "@prismicio/client";
 import { createClient } from "@/prismicio";
+import { getPrismicText } from "@/lib/prismic-field";
 import { resolveLinkHref } from "@/lib/link-utils";
 import { siteDefaults } from "@/lib/site-defaults";
 
 function getText(field, fallback = "") {
-  if (!field) return fallback;
-  if (typeof field === "string") return field.trim() || fallback;
-  return asText(field)?.trim() || fallback;
+  return getPrismicText(field, fallback);
 }
 
 function getImageUrl(imageField) {

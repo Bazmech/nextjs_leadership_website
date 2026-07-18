@@ -1,4 +1,4 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import { PrismicNextLink } from "@prismicio/next";
 import Button from "@/components/atoms/Button/Button";
 import Container from "@/components/atoms/Container/Container";
@@ -13,6 +13,9 @@ function linkHref(field, fallback) {
 
 export default function Hero({ slice }) {
   const { primary, items } = slice;
+  const eyebrow = getPrismicText(primary.eyebrow);
+  const title = getPrismicText(primary.title);
+  const description = getPrismicText(primary.description);
 
   return (
     <section
@@ -22,17 +25,15 @@ export default function Hero({ slice }) {
     >
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
       <Container>
-        {primary.eyebrow ? (
-          <Eyebrow className="mb-4">{asText(primary.eyebrow)}</Eyebrow>
-        ) : null}
-        {primary.title ? (
+        {eyebrow ? <Eyebrow className="mb-4">{eyebrow}</Eyebrow> : null}
+        {title ? (
           <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-foreground md:text-6xl">
-            {asText(primary.title)}
+            {title}
           </h1>
         ) : null}
-        {primary.description ? (
+        {description ? (
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted md:text-xl">
-            {asText(primary.description)}
+            {description}
           </p>
         ) : null}
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:w-fit">
@@ -41,7 +42,7 @@ export default function Hero({ slice }) {
             href={linkHref(primary.primary_cta_link, "#services")}
           >
             <Button as="span" variant="accent">
-              {asText(primary.primary_cta_label) || "Explore Services"}
+              {getPrismicText(primary.primary_cta_label, "Explore Services")}
             </Button>
           </PrismicNextLink>
           <PrismicNextLink
@@ -49,19 +50,22 @@ export default function Hero({ slice }) {
             href={linkHref(primary.secondary_cta_link, "#about")}
           >
             <Button as="span" variant="secondary">
-              {asText(primary.secondary_cta_label) || "About Us"}
+              {getPrismicText(primary.secondary_cta_label, "About Us")}
             </Button>
           </PrismicNextLink>
         </div>
         {items?.length > 0 ? (
           <dl className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10 md:grid-cols-4">
-            {items.map((item, index) => (
-              <StatCard
-                key={`${asText(item.label)}-${index}`}
-                value={asText(item.value)}
-                label={asText(item.label)}
-              />
-            ))}
+            {items.map((item, index) => {
+              const label = getPrismicText(item.label);
+              return (
+                <StatCard
+                  key={`${label}-${index}`}
+                  value={getPrismicText(item.value)}
+                  label={label}
+                />
+              );
+            })}
           </dl>
         ) : null}
       </Container>

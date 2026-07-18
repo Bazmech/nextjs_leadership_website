@@ -1,4 +1,4 @@
-import { asText } from "@prismicio/client";
+import { getPrismicText } from "@/lib/prismic-field";
 import MediaBlock from "@/components/organisms/MediaBlock/MediaBlock";
 
 export default function Media({ slice }) {
@@ -6,7 +6,10 @@ export default function Media({ slice }) {
 
   return (
     <div data-slice-type={slice.slice_type} data-slice-variation={slice.variation}>
-      <MediaBlock image={primary.image} videoUrl={asText(primary.video_url)} />
+      <MediaBlock
+        image={primary.image}
+        videoUrl={getPrismicText(primary.video_url) || undefined}
+      />
     </div>
   );
 }
