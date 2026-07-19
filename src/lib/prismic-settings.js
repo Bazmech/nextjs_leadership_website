@@ -32,6 +32,27 @@ function mapSocialLinks(links = []) {
     .filter(Boolean);
 }
 
+/** Normalize a link/document field to an app pathname (e.g. `/account-disabled`). */
+function resolveDocumentPathname(field, fallback = null) {
+  const href = resolveLinkHref(field);
+  if (href) {
+    try {
+      if (href.startsWith("http://") || href.startsWith("https://")) {
+        return new URL(href).pathname || fallback;
+      }
+    } catch {
+      // fall through
+    }
+    return href.startsWith("/") ? href : `/${href}`;
+  }
+
+  if (field?.uid) {
+    return `/${field.uid}`;
+  }
+
+  return fallback;
+}
+
 function mapSettingsData(data = {}) {
   const siteName = getText(data.site_name, siteDefaults.siteName);
   const titlePostfix = getText(data.title_postfix, siteDefaults.titlePostfix);
@@ -61,6 +82,9 @@ function mapSettingsData(data = {}) {
     headerCtaHref: resolveLinkHref(data.header_cta_link) || siteDefaults.headerCtaHref,
     footerCopyright: getText(data.footer_copyright, siteName),
     socialLinks: mapSocialLinks(data.social_links),
+    accountDisabledPath:
+      resolveDocumentPathname(data.account_disabled_page) ||
+      siteDefaults.accountDisabledPath,
   };
 }
 

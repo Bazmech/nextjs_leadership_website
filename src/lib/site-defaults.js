@@ -19,4 +19,5 @@ export const siteDefaults = {
   headerCtaHref: "#services",
   footerCopyright: "ProductiveLeadership",
   socialLinks: [],
+  accountDisabledPath: "/account-disabled",
 };

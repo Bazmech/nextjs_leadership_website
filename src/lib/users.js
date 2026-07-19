@@ -1,11 +1,56 @@
 import { count, eq, inArray } from "drizzle-orm";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { userRoles, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
+import { getSiteSettings } from "@/lib/prismic-settings";
 
 export const DEFAULT_ROLE_NAME = "default";
+export const ACCOUNT_DISABLED_PATH_FALLBACK = "/account-disabled";
 const STAFF_ROLE_NAMES = new Set(["admin", "super_admin"]);
+
+/** Path of the CMS page selected in Settings → Account disabled page. */
+export async function getAccountDisabledPath() {
+  try {
+    const settings = await getSiteSettings();
+    return settings.accountDisabledPath || ACCOUNT_DISABLED_PATH_FALLBACK;
+  } catch {
+    return ACCOUNT_DISABLED_PATH_FALLBACK;
+  }
+}
+
+async function getAccountDisabledPathOrFallback() {
+  try {
+    return await Promise.race([
+      getAccountDisabledPath(),
+      new Promise((resolve) => {
+        setTimeout(() => resolve(ACCOUNT_DISABLED_PATH_FALLBACK), 2000);
+      }),
+    ]);
+  } catch {
+    return ACCOUNT_DISABLED_PATH_FALLBACK;
+  }
+}
+
+/** Redirect disabled session users to the CMS account-disabled page. */
+export async function redirectIfAppUserDisabled(appUser) {
+  if (!appUser || appUser.enabled !== false) {
+    return;
+  }
+
+  let path = await getAccountDisabledPathOrFallback();
+  if (!path.startsWith("/")) {
+    path = `/${path}`;
+  }
+
+  // Never bounce disabled users back onto the dashboard (redirect loop).
+  if (path === "/dashboard" || path.startsWith("/dashboard/")) {
+    path = ACCOUNT_DISABLED_PATH_FALLBACK;
+  }
+
+  redirect(path);
+}
 
 function formatClerkDisplayName(clerkUser) {
   const fullName = [clerkUser.firstName, clerkUser.lastName]
@@ -111,14 +156,34 @@ export async function getAppUserByClerkId(clerkUserId) {
   return row ?? null;
 }
 
-/** App user for the current Clerk session (includes `roleName`). */
-export async function getCurrentAppUser() {
+/**
+ * Load the current session’s app user (cached per request).
+ * Does not redirect — call `redirectIfAppUserDisabled` on protected surfaces.
+ */
+const loadCurrentAppUser = cache(async () => {
   const { userId } = await auth();
   if (!userId) {
     return null;
   }
 
-  return getAppUserByClerkId(userId);
+  return ensureAppUser(userId);
+});
+
+/**
+ * App user for the current Clerk session (includes `roleName`).
+ * Ensures a local row exists. Does not redirect when disabled.
+ */
+export async function getCurrentAppUser() {
+  return loadCurrentAppUser();
+}
+
+/**
+ * Session user that must be enabled — redirects to the CMS disabled page otherwise.
+ */
+export async function requireEnabledAppUser() {
+  const appUser = await getCurrentAppUser();
+  await redirectIfAppUserDisabled(appUser);
+  return appUser;
 }
 
 export function isStaffRole(roleName) {
@@ -178,7 +243,7 @@ export function assertCanAccessUserData(
 
 /** Redirect non-staff callers away from admin user-management surfaces. */
 export async function requireStaffAppUser() {
-  const appUser = await getCurrentAppUser();
+  const appUser = await requireEnabledAppUser();
 
   if (!isStaffRole(appUser?.roleName)) {
     redirect("/dashboard");
@@ -189,7 +254,7 @@ export async function requireStaffAppUser() {
 
 /** Redirect non-super-admin callers away from exclusive super_admin surfaces. */
 export async function requireSuperAdminAppUser() {
-  const appUser = await getCurrentAppUser();
+  const appUser = await requireEnabledAppUser();
 
   if (!isSuperAdminRole(appUser?.roleName)) {
     redirect("/dashboard");

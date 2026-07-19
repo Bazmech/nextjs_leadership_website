@@ -171,6 +171,23 @@
           }
         }
       }
+    },
+    "Account access": {
+      "account_disabled_page": {
+        "type": "Link",
+        "config": {
+          "label": "Account disabled page",
+          "select": "document",
+          "customtypes": [
+            {
+              "id": "page",
+              "fields": [
+                "title"
+              ]
+            }
+          ]
+        }
+      }
     }
   },
   "status": true,

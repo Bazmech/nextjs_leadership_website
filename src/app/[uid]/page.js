@@ -1,10 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SliceZone } from "@prismicio/react";
 import Header from "@/components/organisms/Header/Header";
 import Footer from "@/components/organisms/Footer/Footer";
 import { createClient } from "@/prismicio";
 import { buildPrismicMetadata } from "@/lib/prismic-seo";
 import { getSiteSettings } from "@/lib/prismic-settings";
+import { getCurrentAppUser } from "@/lib/users";
 import { components } from "@/slices";
 
 export async function generateMetadata({ params }) {
@@ -33,21 +34,38 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }) {
   const { uid } = await params;
+  const path = `/${uid}`;
+  const [client, settings] = await Promise.all([
+    createClient(),
+    getSiteSettings(),
+  ]);
 
+  let page;
   try {
-    const client = createClient();
-    const page = await client.getByUID("page", uid);
-
-    return (
-      <>
-        <Header />
-        <main className="flex-1">
-          <SliceZone slices={page.data.slices} components={components} />
-        </main>
-        <Footer />
-      </>
-    );
+    page = await client.getByUID("page", uid);
   } catch {
     notFound();
   }
+
+  if (settings.accountDisabledPath === path) {
+    const appUser = await getCurrentAppUser();
+
+    if (!appUser) {
+      redirect("/sign-in");
+    }
+
+    if (appUser.enabled) {
+      redirect("/dashboard");
+    }
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="flex-1">
+        <SliceZone slices={page.data.slices} components={components} />
+      </main>
+      <Footer />
+    </>
+  );
 }

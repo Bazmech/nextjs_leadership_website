@@ -581,7 +581,16 @@ interface SettingsDocumentData {
 	 * - **Tab**: Social
 	 * - **Documentation**: https://prismic.io/docs/fields/repeatable-group
 	 */
-	social_links: prismic.GroupField<Simplify<SettingsDocumentDataSocialLinksItem>>;
+	social_links: prismic.GroupField<Simplify<SettingsDocumentDataSocialLinksItem>>;/**
+	 * Account disabled page field in *Settings*
+	 *
+	 * - **Field Type**: Content Relationship
+	 * - **Placeholder**: *None*
+	 * - **API ID Path**: settings.account_disabled_page
+	 * - **Tab**: Account access
+	 * - **Documentation**: https://prismic.io/docs/fields/content-relationship
+	 */
+	account_disabled_page: ContentRelationshipFieldWithData<[{"id":"page","fields":["title"]}]>;
 }
 
 /**

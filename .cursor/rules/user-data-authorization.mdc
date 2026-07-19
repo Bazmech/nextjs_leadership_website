@@ -16,7 +16,9 @@ Any database read or write that involves **user-owned data** must verify the cal
 | `admin` | Staff admin surfaces only; **cannot** edit or assign `super_admin` |
 | `super_admin` | Staff admin surfaces; may manage all roles including other staff; exclusive surfaces (e.g. `/dashboard/questions`) |
 
-Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`, `requireStaffAppUser`, `requireSuperAdminAppUser`) and visibility helpers in `src/lib/roles.js` (`canAccessByRole`, `getViewerVisibilityRole`).
+Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `requireEnabledAppUser`, `redirectIfAppUserDisabled`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`, `requireStaffAppUser`, `requireSuperAdminAppUser`) and visibility helpers in `src/lib/roles.js` (`canAccessByRole`, `getViewerVisibilityRole`).
+
+`getCurrentAppUser()` loads (and ensures) the session’s `users` row. On protected surfaces call `requireEnabledAppUser()` (or `redirectIfAppUserDisabled`) so disabled accounts are sent to the CMS Account disabled page. Do not redirect from shared chrome (Header/nav) — that caused redirect loops.
 
 Gate staff-only routes with `requireStaffAppUser()`. Gate `super_admin`-only routes with `requireSuperAdminAppUser()` — do not rely on UI hiding alone.
 
@@ -27,6 +29,7 @@ For Prismic Header Menu and similar role-gated UI, access is **cascading** (high
 | Viewer | Can see items requiring |
 |--------|-------------------------|
 | `Public` (signed out) | `Public` |
+| Disabled (`users.enabled = false`) | `Public` only — no user-page nav links |
 | `default` | `Public`, `default` |
 | `admin` | `Public`, `default`, `admin` |
 | `super_admin` | `Public`, `default`, `admin`, `super_admin` |

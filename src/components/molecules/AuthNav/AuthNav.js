@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import Button from "@/components/atoms/Button/Button";
 
-export default function AuthNav({ inverse = false }) {
+export default function AuthNav({ inverse = false, showUserLinks = true }) {
   const { isLoaded, isSignedIn } = useAuth();
 
   if (!isLoaded) {
@@ -25,16 +25,18 @@ export default function AuthNav({ inverse = false }) {
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-3">
-        <Link
-          href="/dashboard"
-          className={`hidden text-sm font-medium transition-colors sm:inline ${
-            inverse
-              ? "text-white/90 hover:text-white"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          Dashboard
-        </Link>
+        {showUserLinks ? (
+          <Link
+            href="/dashboard"
+            className={`hidden text-sm font-medium transition-colors sm:inline ${
+              inverse
+                ? "text-white/90 hover:text-white"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            Dashboard
+          </Link>
+        ) : null}
         <UserButton
           appearance={{
             elements: {

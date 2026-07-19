@@ -5,12 +5,15 @@ import Container from "@/components/atoms/Container/Container";
 import Logo from "@/components/molecules/Logo/Logo";
 import { getHeaderMenuLinks } from "@/lib/prismic-header-menu";
 import { getSiteSettings } from "@/lib/prismic-settings";
+import { getCurrentAppUser } from "@/lib/users";
 
 export default async function Header() {
-  const [settings, menuItems] = await Promise.all([
+  const [settings, menuItems, appUser] = await Promise.all([
     getSiteSettings(),
     getHeaderMenuLinks(),
+    getCurrentAppUser(),
   ]);
+  const accountDisabled = Boolean(appUser && !appUser.enabled);
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-white">
@@ -25,15 +28,17 @@ export default async function Header() {
           />
         </nav>
         <div className="grid grid-flow-col items-center justify-end gap-4">
-          <Button
-            as="a"
-            href={settings.headerCtaHref}
-            variant="on-primary-sm"
-            className="hidden sm:inline-flex"
-          >
-            {settings.headerCtaLabel}
-          </Button>
-          <AuthNav inverse />
+          {!accountDisabled ? (
+            <Button
+              as="a"
+              href={settings.headerCtaHref}
+              variant="on-primary-sm"
+              className="hidden sm:inline-flex"
+            >
+              {settings.headerCtaLabel}
+            </Button>
+          ) : null}
+          <AuthNav inverse showUserLinks={!accountDisabled} />
         </div>
       </Container>
     </header>

@@ -71,6 +71,19 @@ function filterMenuTree(items, viewerRole) {
     }));
 }
 
+/** Drop authenticated app routes (dashboard, etc.) from nav. */
+function stripUserPageLinks(items) {
+  return items
+    .filter((item) => {
+      const href = item.href?.trim() ?? "";
+      return !href.startsWith("/dashboard");
+    })
+    .map((item) => ({
+      ...item,
+      children: stripUserPageLinks(item.children),
+    }));
+}
+
 function mapFallbackLinks() {
   return mainNavLinks.map((link, index) => ({
     id: `fallback-${index}`,
@@ -93,10 +106,14 @@ export const getHeaderMenuDocument = cache(async () => {
 
 /**
  * Header/footer nav tree for the current session, filtered by cascading role visibility.
+ * Disabled accounts only see Public links (no user-page nav).
  */
 export const getHeaderMenuLinks = cache(async () => {
   const appUser = await getCurrentAppUser();
-  const viewerRole = getViewerVisibilityRole(appUser?.roleName);
+  const accountDisabled = Boolean(appUser && !appUser.enabled);
+  const viewerRole = accountDisabled
+    ? PUBLIC_ROLE_NAME
+    : getViewerVisibilityRole(appUser?.roleName);
 
   const document = await getHeaderMenuDocument();
   const rows = document?.data?.menu_items;
@@ -105,5 +122,6 @@ export const getHeaderMenuLinks = cache(async () => {
       ? buildMenuTree(rows)
       : mapFallbackLinks();
 
-  return filterMenuTree(tree, viewerRole);
+  const filtered = filterMenuTree(tree, viewerRole);
+  return accountDisabled ? stripUserPageLinks(filtered) : filtered;
 });
