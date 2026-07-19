@@ -368,7 +368,7 @@ Copy `.env.example` to `.env.local` and configure:
 | `PRISMIC_REPOSITORY` | Yes (for CMS) | Prismic repository name |
 | `PRISMIC_ACCESS_TOKEN` | Optional | Required if Prismic API is private |
 | `PRISMIC_WEBHOOK_SECRET` | Optional | Validates `/api/revalidate` webhook calls |
-| `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_GIT_COMMIT_REF` | Auto | Injected by Vercel at deploy time (do not set locally) |
+| `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_GIT_COMMIT_REF` | Auto | Injected by Vercel at deploy time (do not set locally). Cookiebot CMP loads only when `VERCEL_ENV=production` and the production host is `www.productiveleadership.org` (or apex). |
 
 On Vercel, Clerk keys must be added manually in **Project Settings → Environment Variables**. Neon `DATABASE_URL` values are injected by the Storage integration.
 

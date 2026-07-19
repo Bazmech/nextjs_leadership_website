@@ -2,7 +2,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { PrismicPreview } from "@prismicio/next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { clerkAppearance } from "@/lib/clerk-appearance";
+import { COOKIEBOT_CBID, shouldLoadCookiebot } from "@/lib/cookiebot";
 import { buildRootMetadata } from "@/lib/prismic-seo";
 import { repositoryName } from "@/prismicio";
 import "./globals.css";
@@ -22,12 +24,23 @@ export async function generateMetadata() {
 }
 
 export default function RootLayout({ children }) {
+  const loadCookiebot = shouldLoadCookiebot();
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {loadCookiebot ? (
+          <Script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            strategy="beforeInteractive"
+            data-cbid={COOKIEBOT_CBID}
+            data-blockingmode="auto"
+          />
+        ) : null}
         <ClerkProvider
           appearance={clerkAppearance}
           signInUrl="/sign-in"
