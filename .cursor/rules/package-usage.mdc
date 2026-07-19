@@ -14,12 +14,13 @@ Use **Yarn** (`yarn add`, `yarn.lock`). Do not add `package-lock.json` or switch
 | Framework | `next`, `react` | App Router in `src/app/` |
 | Styling | `tailwindcss` v4 | `dark-mode-ui.mdc`, semantic tokens in `globals.css` |
 | UI structure | Atomic components | `atomic-components.mdc` — compose atoms/molecules |
-| Accessible primitives | `@radix-ui/react-*` | `radix-ui.mdc` |
+| Accessible primitives | `@radix-ui/react-*` | `radix-ui.mdc` — use a Radix primitive whenever one fits |
 | Form validation | `zod` | `zod-forms.mdc` |
 | Form submission | Server Actions | `server-actions.mdc` — **do not** add a second form-submission rule |
 | Auth | `@clerk/nextjs` | `src/proxy.js`, Clerk provider in layout |
 | CMS | `@prismicio/*` | `src/prismicio.js`, slices in `src/slices/` |
 | Database | `drizzle-orm`, `@neondatabase/serverless` | `src/lib/db.js`, `src/db/schema` |
+| Web Analytics | `@vercel/analytics` | `<Analytics />` in `src/app/layout.js` |
 
 ## Before adding a dependency
 

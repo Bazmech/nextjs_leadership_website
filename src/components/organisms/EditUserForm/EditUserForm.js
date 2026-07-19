@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateUser } from "@/actions/users";
 import Button from "@/components/atoms/Button/Button";
+import Link from "@/components/atoms/Link/Link";
 import SelectField from "@/components/molecules/SelectField/SelectField";
 import SwitchField from "@/components/molecules/SwitchField/SwitchField";
 
@@ -74,14 +75,22 @@ export default function EditUserForm({ user }) {
         </p>
       ) : null}
 
-      <Button
-        type="submit"
-        variant="accent-sm"
-        disabled={isPending}
-        className="disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {isPending ? "Saving…" : "Save changes"}
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="submit"
+          variant="accent-sm"
+          disabled={isPending}
+          className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isPending ? "Saving…" : "Save changes"}
+        </Button>
+        <Link
+          href="/dashboard/users"
+          className="inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
+        >
+          Cancel
+        </Link>
+      </div>
     </form>
   );
 }

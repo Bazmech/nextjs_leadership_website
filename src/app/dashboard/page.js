@@ -1,9 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "@/components/atoms/Link/Link";
 import DangerZone from "@/components/molecules/DangerZone/DangerZone";
+import ManageAccountButton from "@/components/molecules/ManageAccountButton/ManageAccountButton";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
-import { getCurrentAppUser, isStaffRole } from "@/lib/users";
+import {
+  getCurrentAppUser,
+  isStaffRole,
+  isSuperAdminRole,
+} from "@/lib/users";
 
 export async function generateMetadata() {
   return buildSimplePageMetadata("Dashboard", "Your leadership coaching dashboard.");
@@ -15,7 +20,8 @@ export default async function DashboardPage() {
     getCurrentAppUser(),
   ]);
   const showStaffTools = isStaffRole(appUser?.roleName);
-  const dbContext = showStaffTools ? await getDatabaseContext() : null;
+  const showSuperAdminTools = isSuperAdminRole(appUser?.roleName);
+  const dbContext = showSuperAdminTools ? await getDatabaseContext() : null;
 
   return (
     <div className="bg-background px-6 py-16">
@@ -29,56 +35,11 @@ export default async function DashboardPage() {
           coaching resources, session notes, and program progress.
         </p>
 
-        {showStaffTools && dbContext ? (
-          <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
-            <h2 className="text-lg font-semibold text-foreground">
-              Database branch
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Each Vercel preview deployment uses its own isolated Neon branch.
-            </p>
-            <dl className="mt-4 space-y-3 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">Connection</dt>
-                <dd className="font-medium text-foreground">
-                  {dbContext.connected ? "Connected" : "Not configured"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">Neon branch</dt>
-                <dd className="font-medium text-foreground">
-                  {dbContext.neonBranch ?? "—"}
-                </dd>
-              </div>
-              {dbContext.neonBranchId &&
-              dbContext.neonBranch !== dbContext.neonBranchId ? (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted">Neon branch ID</dt>
-                  <dd className="font-medium text-foreground">
-                    {dbContext.neonBranchId}
-                  </dd>
-                </div>
-              ) : null}
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">Git branch</dt>
-                <dd className="font-medium text-foreground">
-                  {dbContext.gitBranch ?? "local"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">Environment</dt>
-                <dd className="font-medium text-foreground">
-                  {dbContext.vercelEnv}
-                </dd>
-              </div>
-            </dl>
+        <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <h2 className="text-lg font-semibold text-foreground">Account</h2>
+            <ManageAccountButton />
           </div>
-        ) : null}
-
-        <div
-          className={`${showStaffTools ? "mt-6" : "mt-10"} rounded-2xl border border-border bg-surface p-6`}
-        >
-          <h2 className="text-lg font-semibold text-foreground">Account</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Email</dt>
@@ -99,21 +60,89 @@ export default async function DashboardPage() {
 
         {showStaffTools ? (
           <DangerZone className="mt-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    Manage users
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Change roles and enable or disable accounts.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/users"
+                  className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
+                >
                   Manage users
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  Change roles and enable or disable accounts.
-                </p>
+                </Link>
               </div>
-              <Link
-                href="/dashboard/users"
-                className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
-              >
-                Manage users
-              </Link>
+
+              {showSuperAdminTools ? (
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-red-200 pt-5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      Manage questions
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      Create and edit coaching and assessment questions.
+                    </p>
+                  </div>
+                  <Link
+                    href="/dashboard/questions"
+                    className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
+                  >
+                    Manage questions
+                  </Link>
+                </div>
+              ) : null}
+
+              {showSuperAdminTools && dbContext ? (
+                <div className="border-t border-red-200 pt-5">
+                  <p className="text-sm font-medium text-foreground">
+                    Database branch
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Each Vercel preview deployment uses its own isolated Neon
+                    branch.
+                  </p>
+                  <dl className="mt-4 space-y-3 text-sm">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted">Connection</dt>
+                      <dd className="font-medium text-foreground">
+                        {dbContext.connected ? "Connected" : "Not configured"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted">Neon branch</dt>
+                      <dd className="font-medium text-foreground">
+                        {dbContext.neonBranch ?? "—"}
+                      </dd>
+                    </div>
+                    {dbContext.neonBranchId &&
+                    dbContext.neonBranch !== dbContext.neonBranchId ? (
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-muted">Neon branch ID</dt>
+                        <dd className="font-medium text-foreground">
+                          {dbContext.neonBranchId}
+                        </dd>
+                      </div>
+                    ) : null}
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted">Git branch</dt>
+                      <dd className="font-medium text-foreground">
+                        {dbContext.gitBranch ?? "local"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted">Environment</dt>
+                      <dd className="font-medium text-foreground">
+                        {dbContext.vercelEnv}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              ) : null}
             </div>
           </DangerZone>
         ) : null}

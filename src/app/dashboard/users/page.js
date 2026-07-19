@@ -1,8 +1,11 @@
 import { searchUsers } from "@/actions/users";
 import Link from "@/components/atoms/Link/Link";
+import StatCard from "@/components/molecules/StatCard/StatCard";
 import UserList from "@/components/organisms/UserList/UserList";
+import UserSearchEmptyToast from "@/components/organisms/UserSearchEmptyToast/UserSearchEmptyToast";
 import UserSearchForm from "@/components/organisms/UserSearchForm/UserSearchForm";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { getUserAccessCounts } from "@/lib/users";
 
 export async function generateMetadata() {
   return buildSimplePageMetadata(
@@ -14,8 +17,13 @@ export async function generateMetadata() {
 export default async function UsersPage({ searchParams }) {
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q : "";
-  const hasSearched = Object.prototype.hasOwnProperty.call(params, "q");
-  const users = hasSearched ? await searchUsers(query) : [];
+  const hasSearched =
+    Object.prototype.hasOwnProperty.call(params, "q") &&
+    query.trim().length >= 3;
+  const [users, counts] = await Promise.all([
+    hasSearched ? searchUsers(query) : Promise.resolve([]),
+    getUserAccessCounts(),
+  ]);
 
   return (
     <div className="bg-background px-6 py-16">
@@ -34,14 +42,24 @@ export default async function UsersPage({ searchParams }) {
           Search by name or email, then edit a user’s role or access.
         </p>
 
-        <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+        <dl className="mt-8 grid grid-cols-2 gap-6 rounded-2xl border border-border bg-surface p-6">
+          <StatCard value={counts.active} label="Active" />
+          <StatCard value={counts.disabled} label="Disabled" />
+        </dl>
+
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
           <UserSearchForm initialQuery={query} />
 
           {hasSearched ? (
-            <UserList users={users} />
+            <>
+              <UserList users={users} />
+              {users.length === 0 ? (
+                <UserSearchEmptyToast key={query.trim()} />
+              ) : null}
+            </>
           ) : (
             <p className="mt-6 text-sm text-muted">
-              Enter a name or email to find users.
+              Enter at least 3 characters to search by name or email.
             </p>
           )}
         </div>

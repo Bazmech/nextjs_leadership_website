@@ -1,22 +1,27 @@
 ---
-description: Use Radix UI primitives for accessible forms and interactive UI
-globs: src/components/**/*
-alwaysApply: false
+description: Prefer Radix UI primitives whenever a suitable one exists
+alwaysApply: true
 ---
 
 # Radix UI
 
-Use **Radix primitives** (`@radix-ui/react-*`) for accessible, keyboard-friendly behavior. Style with Tailwind and project semantic tokens (`dark-mode-ui.mdc`). Wrap primitives in atoms/molecules (`atomic-components.mdc`) — do not import Radix directly in page files or organisms.
+When building interactive or accessible UI, **use a Radix primitive if one fits the job**. Do not hand-roll modals, menus, toasts, tooltips, selects, switches, accordions, or similar behavior when `@radix-ui/react-*` already covers it.
 
-## Install per primitive
+Style with Tailwind and project semantic tokens (`dark-mode-ui.mdc`). Wrap primitives in atoms/molecules (`atomic-components.mdc`) — do not import Radix directly in `src/app/` routes or organisms.
+
+## Required workflow
+
+1. Check whether a [Radix Primitive](https://www.radix-ui.com/primitives/docs/overview/getting-started) matches the interaction (dialog, toast, select, dropdown, tabs, tooltip, popover, accordion, collapsible, checkbox, switch, radio, slider, scroll area, etc.)
+2. Prefer an existing project wrapper under `src/components/` if one already exists
+3. If none exists, install the matching package and create the atom/molecule wrapper first
+4. Only use a custom DOM + hooks implementation when no Radix primitive is suitable
 
 ```bash
-yarn add @radix-ui/react-label @radix-ui/react-checkbox
+# Install only the primitives you need
+yarn add @radix-ui/react-toast
 ```
 
-Add only the packages a feature needs.
-
-## Use Radix for
+## Existing wrappers (non-exhaustive)
 
 | Primitive | Package | Typical wrapper |
 |-----------|---------|-----------------|
@@ -31,6 +36,9 @@ Add only the packages a feature needs.
 | Popover | `@radix-ui/react-popover` | `molecules/Popover` |
 | Accordion | `@radix-ui/react-accordion` | `molecules/Accordion` |
 | Collapsible | `@radix-ui/react-collapsible` | `atoms/Collapsible` |
+| Toast | `@radix-ui/react-toast` | `atoms/Toast` |
+
+This table is a map of what is already wrapped — **not** a closed list. New suitable primitives should still be used and wrapped the same way.
 
 ## Forms
 
@@ -46,8 +54,20 @@ import * as Label from "@radix-ui/react-label";
 <input id="email" name="email" type="email" required />
 ```
 
+```js
+// ❌ BAD — custom toast/modal/menu when Radix already provides one
+<div role="status">No users matched…</div>
+```
+
+```js
+// ✅ GOOD — wrap Radix and reuse the atom
+import Toast from "@/components/atoms/Toast/Toast";
+<Toast message="No users matched…" duration={5000} />
+```
+
 ## Avoid
 
-- Raw `<button>` / `<div>` for modals, menus, or tabs when a Radix primitive exists
-- Third-party UI kits (MUI, Chakra) for patterns Radix already covers
-- Inline Radix imports in `src/app/` routes — always wrap in `src/components/`
+- Custom accessible behavior for patterns Radix already covers
+- Third-party UI kits (MUI, Chakra, Headless UI) for the same jobs
+- Inline Radix imports in `src/app/` — always wrap in `src/components/`
+- Installing alternate libraries for toasts, dialogs, selects, etc. when Radix fits

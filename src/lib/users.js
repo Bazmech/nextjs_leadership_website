@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { count, eq, inArray } from "drizzle-orm";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { userRoles, users } from "@/db/schema";
@@ -125,6 +125,10 @@ export function isStaffRole(roleName) {
   return STAFF_ROLE_NAMES.has(roleName);
 }
 
+export function isSuperAdminRole(roleName) {
+  return roleName === "super_admin";
+}
+
 /** Admins may not edit or assign the `super_admin` role. */
 export function canManageUser(actorRoleName, targetRoleName) {
   if (!isStaffRole(actorRoleName)) {
@@ -183,6 +187,17 @@ export async function requireStaffAppUser() {
   return appUser;
 }
 
+/** Redirect non-super-admin callers away from exclusive super_admin surfaces. */
+export async function requireSuperAdminAppUser() {
+  const appUser = await getCurrentAppUser();
+
+  if (!isSuperAdminRole(appUser?.roleName)) {
+    redirect("/dashboard");
+  }
+
+  return appUser;
+}
+
 export async function getAppUserById(userId) {
   if (!userId) {
     return null;
@@ -230,6 +245,41 @@ async function getAppUsersByClerkIds(clerkUserIds) {
 }
 
 /**
+ * Staff-only: totals of enabled (active) and disabled rows in `users`.
+ * Cross-user admin surface — see user-data-authorization.mdc.
+ */
+export async function getUserAccessCounts() {
+  const actor = await getCurrentAppUser();
+
+  if (!isStaffRole(actor?.roleName)) {
+    return { active: 0, disabled: 0 };
+  }
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      enabled: users.enabled,
+      total: count(),
+    })
+    .from(users)
+    .groupBy(users.enabled);
+
+  let active = 0;
+  let disabled = 0;
+
+  for (const row of rows) {
+    const total = Number(row.total) || 0;
+    if (row.enabled) {
+      active = total;
+    } else {
+      disabled = total;
+    }
+  }
+
+  return { active, disabled };
+}
+
+/**
  * Staff-only: search Clerk users by name/email and join local role/enabled.
  * Cross-user admin surface — see user-data-authorization.mdc.
  */
@@ -241,9 +291,14 @@ export async function searchAppUsers(query) {
   }
 
   const trimmed = query?.trim() ?? "";
+
+  if (trimmed.length < 3) {
+    return [];
+  }
+
   const client = await clerkClient();
   const { data: clerkUsers } = await client.users.getUserList({
-    ...(trimmed ? { query: trimmed } : {}),
+    query: trimmed,
     limit: 25,
     orderBy: "-created_at",
   });

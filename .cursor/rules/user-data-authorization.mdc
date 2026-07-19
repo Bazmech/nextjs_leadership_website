@@ -14,9 +14,11 @@ Any database read or write that involves **user-owned data** must verify the cal
 | `Public` | Not a DB role — signed-out / anonymous visitors only |
 | `default` | Own data only (`clerk_user_id` must match session) |
 | `admin` | Staff admin surfaces only; **cannot** edit or assign `super_admin` |
-| `super_admin` | Staff admin surfaces; may manage all roles including other staff |
+| `super_admin` | Staff admin surfaces; may manage all roles including other staff; exclusive surfaces (e.g. `/dashboard/questions`) |
 
-Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`) and visibility helpers in `src/lib/roles.js` (`canAccessByRole`, `getViewerVisibilityRole`).
+Use helpers in `src/lib/users.js` (`getCurrentAppUser`, `assertCanAccessUserData`, `canManageUser`, `canAssignRole`, `requireStaffAppUser`, `requireSuperAdminAppUser`) and visibility helpers in `src/lib/roles.js` (`canAccessByRole`, `getViewerVisibilityRole`).
+
+Gate staff-only routes with `requireStaffAppUser()`. Gate `super_admin`-only routes with `requireSuperAdminAppUser()` — do not rely on UI hiding alone.
 
 ## Cascading visibility (CMS / nav)
 

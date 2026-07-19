@@ -20,11 +20,7 @@ function formatRole(roleName) {
 
 export default function UserList({ users }) {
   if (!users.length) {
-    return (
-      <p className="mt-6 text-sm text-muted">
-        No users matched that search. Try another name or email.
-      </p>
-    );
+    return null;
   }
 
   return (

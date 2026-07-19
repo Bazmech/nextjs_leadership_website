@@ -1,5 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { PrismicPreview } from "@prismicio/next";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { buildRootMetadata } from "@/lib/prismic-seo";
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
           <div className="flex min-h-full flex-1 flex-col">{children}</div>
         </ClerkProvider>
         <PrismicPreview repositoryName={repositoryName} />
+        <Analytics />
       </body>
     </html>
   );
