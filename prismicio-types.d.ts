@@ -591,6 +591,17 @@ interface SettingsDocumentData {
 	 * - **Documentation**: https://prismic.io/docs/fields/content-relationship
 	 */
 	account_disabled_page: ContentRelationshipFieldWithData<[{"id":"page","fields":["title"]}]>;
+	
+	/**
+	 * Introduction text field in *Settings*
+	 *
+	 * - **Field Type**: Rich Text
+	 * - **Placeholder**: Welcome back
+	 * - **API ID Path**: settings.introduction_text
+	 * - **Tab**: Account access
+	 * - **Documentation**: https://prismic.io/docs/fields/rich-text
+	 */
+	introduction_text: prismic.RichTextField;
 }
 
 /**

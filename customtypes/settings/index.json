@@ -187,6 +187,15 @@
             }
           ]
         }
+      },
+      "introduction_text": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Introduction text",
+          "placeholder": "Welcome back",
+          "multi": "heading1,heading2,heading3,paragraph,strong,em,hyperlink,list-item,o-list-item",
+          "allowTargetBlank": true
+        }
       }
     }
   },

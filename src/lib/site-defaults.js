@@ -20,4 +20,5 @@ export const siteDefaults = {
   footerCopyright: "ProductiveLeadership",
   socialLinks: [],
   accountDisabledPath: "/account-disabled",
+  introductionText: null,
 };

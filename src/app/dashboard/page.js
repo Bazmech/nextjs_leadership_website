@@ -1,9 +1,12 @@
+import { isFilled } from "@prismicio/client";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "@/components/atoms/Link/Link";
 import DangerZone from "@/components/molecules/DangerZone/DangerZone";
 import ManageAccountButton from "@/components/molecules/ManageAccountButton/ManageAccountButton";
+import RichText from "@/components/molecules/RichText/RichText";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { getSiteSettings } from "@/lib/prismic-settings";
 import {
   getCurrentAppUser,
   isStaffRole,
@@ -15,21 +18,23 @@ export async function generateMetadata() {
 }
 
 export default async function DashboardPage() {
-  const [user, appUser] = await Promise.all([
+  const [user, appUser, settings] = await Promise.all([
     currentUser(),
     getCurrentAppUser(),
+    getSiteSettings(),
   ]);
   const showStaffTools = isStaffRole(appUser?.roleName);
   const showSuperAdminTools = isSuperAdminRole(appUser?.roleName);
   const dbContext = showSuperAdminTools ? await getDatabaseContext() : null;
-
   return (
     <div className="bg-background px-6 py-16">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Welcome back
-          {user?.firstName ? `, ${user.firstName}` : ""}
-        </h1>
+        {isFilled.richText(settings.introductionText) ? (
+          <RichText
+            field={settings.introductionText}
+            className="[&_h1]:text-3xl [&_h1]:md:text-3xl"
+          />
+        ) : null}
         <p className="mt-3 text-lg text-muted">
           This protected route is available only to signed-in users. Use it for
           coaching resources, session notes, and program progress.

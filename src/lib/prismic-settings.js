@@ -85,6 +85,9 @@ function mapSettingsData(data = {}) {
     accountDisabledPath:
       resolveDocumentPathname(data.account_disabled_page) ||
       siteDefaults.accountDisabledPath,
+    introductionText: Array.isArray(data.introduction_text)
+      ? data.introduction_text
+      : siteDefaults.introductionText,
   };
 }
 
