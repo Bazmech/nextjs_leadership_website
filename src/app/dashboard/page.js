@@ -17,6 +17,49 @@ export async function generateMetadata() {
   return buildSimplePageMetadata("Dashboard", "Your leadership coaching dashboard.");
 }
 
+function StartAssessmentIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 shrink-0"
+      aria-hidden="true"
+    >
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <path d="M12 11h4" />
+      <path d="M12 16h4" />
+      <path d="M8 11h.01" />
+      <path d="M8 16h.01" />
+    </svg>
+  );
+}
+
+function PastAssessmentsIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 shrink-0"
+      aria-hidden="true"
+    >
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+      <path d="M12 7v5l4 2" />
+    </svg>
+  );
+}
+
 export default async function DashboardPage() {
   const [user, appUser, settings] = await Promise.all([
     currentUser(),
@@ -29,18 +72,36 @@ export default async function DashboardPage() {
   return (
     <div className="bg-background px-6 py-16">
       <div className="mx-auto max-w-3xl">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Welcome back
+          {user?.firstName ? `, ${user.firstName}` : ""}
+        </h1>
         {isFilled.richText(settings.introductionText) ? (
           <RichText
             field={settings.introductionText}
-            className="[&_h1]:text-3xl [&_h1]:md:text-3xl"
+            className="mt-3 text-lg [&_p]:text-lg"
           />
         ) : null}
-        <p className="mt-3 text-lg text-muted">
-          This protected route is available only to signed-in users. Use it for
-          coaching resources, session notes, and program progress.
-        </p>
 
         <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+          <h2 className="text-lg font-semibold text-foreground">Assessments</h2>
+          <div className="mt-4 flex flex-col gap-3">
+            <Link className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light">
+              <StartAssessmentIcon />
+              <span className="underline decoration-primary/30 underline-offset-4">
+                Start Assessment
+              </span>
+            </Link>
+            <Link className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light">
+              <PastAssessmentsIcon />
+              <span className="underline decoration-primary/30 underline-offset-4">
+                Past Assessments (3)
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <h2 className="text-lg font-semibold text-foreground">Account</h2>
             <ManageAccountButton />
