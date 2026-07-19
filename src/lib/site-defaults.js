@@ -1,10 +1,10 @@
 export const siteDefaults = {
-  siteName: "ProductiveLeadership",
-  titlePostfix: " | ProductiveLeadership",
+  siteName: "Productive Leadership",
+  titlePostfix: " | Productive Leadership",
   tagline: "Executive Coaching & Leadership Development",
-  logoLabel: "ProductiveLeadership",
+  logoLabel: "Productive Leadership",
   logoAccent: "Leadership",
-  defaultMetaTitle: "ProductiveLeadership | Executive Coaching & Leadership Development",
+  defaultMetaTitle: "Productiv eLeadership | Executive Coaching & Leadership Development",
   defaultMetaDescription:
     "Partner with experienced coaches to build high-performing teams, sharpen your leadership skills, and drive lasting organizational impact.",
   defaultMetaImageUrl: null,
@@ -17,7 +17,7 @@ export const siteDefaults = {
   contactPhone: null,
   headerCtaLabel: "Explore Services",
   headerCtaHref: "#services",
-  footerCopyright: "ProductiveLeadership",
+  footerCopyright: "Productive Leadership",
   socialLinks: [],
   accountDisabledPath: "/account-disabled",
   introductionText: null,
