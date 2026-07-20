@@ -6,7 +6,6 @@ import Listing from "./Listing";
 import Media from "./Media";
 import RichText from "./RichText";
 import SectionIntro from "./SectionIntro";
-import Services from "./Services";
 import TextImage from "./TextImage";
 
 export const components = {
@@ -16,6 +15,5 @@ export const components = {
 	media: Media,
 	rich_text: RichText,
 	section_intro: SectionIntro,
-	services: Services,
 	text_image: TextImage
 };

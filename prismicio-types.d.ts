@@ -119,7 +119,7 @@ interface HeaderMenuDocumentData {
  */
 export type HeaderMenuDocument<Lang extends string = string> = prismic.PrismicDocumentWithoutUID<Simplify<HeaderMenuDocumentData>, "header_menu", Lang>;
 
-type HomepageDocumentDataSlicesSlice = HeroSlice | ServicesSlice | AboutSlice | MediaSlice | TextImageSlice | ListingSlice | SectionIntroSlice | RichTextSlice
+type HomepageDocumentDataSlicesSlice = HeroSlice | AboutSlice | MediaSlice | TextImageSlice | ListingSlice | SectionIntroSlice | RichTextSlice
 
 /**
  * Content for Homepage documents
@@ -235,7 +235,7 @@ interface HomepageDocumentData {
  */
 export type HomepageDocument<Lang extends string = string> = prismic.PrismicDocumentWithoutUID<Simplify<HomepageDocumentData>, "homepage", Lang>;
 
-type PageDocumentDataSlicesSlice = HeroSlice | ServicesSlice | AboutSlice | MediaSlice | TextImageSlice | ListingSlice | SectionIntroSlice | RichTextSlice
+type PageDocumentDataSlicesSlice = HeroSlice | AboutSlice | MediaSlice | TextImageSlice | ListingSlice | SectionIntroSlice | RichTextSlice
 
 /**
  * Content for Page documents
@@ -1046,99 +1046,6 @@ type SectionIntroSliceVariation = SectionIntroSliceDefault
 export type SectionIntroSlice = prismic.SharedSlice<"section_intro", SectionIntroSliceVariation>;
 
 /**
- * Primary content in *Services → Default → Primary*
- */
-export interface ServicesSliceDefaultPrimary {
-	/**
-	 * Eyebrow field in *Services → Default → Primary*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: What We Offer
-	 * - **API ID Path**: services.default.primary.eyebrow
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	eyebrow: prismic.KeyTextField;
-	
-	/**
-	 * Heading field in *Services → Default → Primary*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: Programs designed for lasting impact
-	 * - **API ID Path**: services.default.primary.heading
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	heading: prismic.KeyTextField;
-	
-	/**
-	 * Description field in *Services → Default → Primary*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: *None*
-	 * - **API ID Path**: services.default.primary.description
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	description: prismic.KeyTextField;
-}
-
-/**
- * Primary content in *Services → Items*
- */
-export interface ServicesSliceDefaultItem {
-	/**
-	 * Icon field in *Services → Items*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: ◆
-	 * - **API ID Path**: services.items[].icon
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	icon: prismic.KeyTextField;
-	
-	/**
-	 * Title field in *Services → Items*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: Executive Coaching
-	 * - **API ID Path**: services.items[].title
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	title: prismic.KeyTextField;
-	
-	/**
-	 * Description field in *Services → Items*
-	 *
-	 * - **Field Type**: Text
-	 * - **Placeholder**: *None*
-	 * - **API ID Path**: services.items[].description
-	 * - **Documentation**: https://prismic.io/docs/fields/text
-	 */
-	description: prismic.KeyTextField;
-}
-
-/**
- * Default variation for Services Slice
- *
- * - **API ID**: `default`
- * - **Description**: Default services layout
- * - **Documentation**: https://prismic.io/docs/slices
- */
-export type ServicesSliceDefault = prismic.SharedSliceVariation<"default", Simplify<ServicesSliceDefaultPrimary>, Simplify<ServicesSliceDefaultItem>>;
-
-/**
- * Slice variation for *Services*
- */
-type ServicesSliceVariation = ServicesSliceDefault
-
-/**
- * Services Shared Slice
- *
- * - **API ID**: `services`
- * - **Description**: Services grid section
- * - **Documentation**: https://prismic.io/docs/slices
- */
-export type ServicesSlice = prismic.SharedSlice<"services", ServicesSliceVariation>;
-
-/**
  * Primary content in *TextImage → Default → Primary*
  */
 export interface TextImageSliceDefaultPrimary {
@@ -1261,11 +1168,6 @@ declare module "@prismicio/client" {
 			SectionIntroSliceDefaultPrimary,
 			SectionIntroSliceVariation,
 			SectionIntroSliceDefault,
-			ServicesSlice,
-			ServicesSliceDefaultPrimary,
-			ServicesSliceDefaultItem,
-			ServicesSliceVariation,
-			ServicesSliceDefault,
 			TextImageSlice,
 			TextImageSliceDefaultPrimary,
 			TextImageSliceVariation,
