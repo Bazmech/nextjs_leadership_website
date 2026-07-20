@@ -25,7 +25,8 @@ export default function Button({
   children,
   ...props
 }) {
-  const classes = `${variants[variant] ?? variants.primary} ${className}`.trim();
+  const classes =
+    `cursor-pointer ${variants[variant] ?? variants.primary} ${className}`.trim();
 
   if (as === "a" || href) {
     return (
