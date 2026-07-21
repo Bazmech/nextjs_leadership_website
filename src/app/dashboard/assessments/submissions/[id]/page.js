@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "@/components/atoms/Link/Link";
 import DeleteSubmissionButton from "@/components/organisms/DeleteSubmissionButton/DeleteSubmissionButton";
+import ExportSubmissionPdfButton from "@/components/organisms/ExportSubmissionPdfButton/ExportSubmissionPdfButton";
 import RenameSubmissionTitle from "@/components/organisms/RenameSubmissionTitle/RenameSubmissionTitle";
 import TakeAssessmentForm from "@/components/organisms/TakeAssessmentForm/TakeAssessmentForm";
 import { getOwnedSubmission } from "@/lib/assessments";
@@ -54,9 +55,11 @@ export default async function SubmissionPage({ params }) {
               </p>
             )}
           </div>
-          {!readOnly ? (
+          {readOnly ? (
+            <ExportSubmissionPdfButton submissionId={submission.id} />
+          ) : (
             <DeleteSubmissionButton submissionId={submission.id} />
-          ) : null}
+          )}
         </div>
 
         <div className="mt-8">
