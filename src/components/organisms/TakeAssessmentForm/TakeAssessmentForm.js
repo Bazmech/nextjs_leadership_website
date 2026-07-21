@@ -7,6 +7,11 @@ import {
   saveAssessmentAnswers,
 } from "@/actions/assessments";
 import Button from "@/components/atoms/Button/Button";
+import {
+  CollapsibleContent,
+  CollapsibleRoot,
+  CollapsibleTrigger,
+} from "@/components/atoms/Collapsible/Collapsible";
 import LocalDateTime from "@/components/atoms/LocalDateTime/LocalDateTime";
 import ScoreRadioGroup from "@/components/atoms/ScoreRadioGroup/ScoreRadioGroup";
 import {
@@ -15,6 +20,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/molecules/Tabs/Tabs";
+import LeadershipProfileRadar from "@/components/organisms/LeadershipProfileRadar/LeadershipProfileRadar";
 
 const AUTOSAVE_MS = 30_000;
 
@@ -145,55 +151,53 @@ export default function TakeAssessmentForm({
         ) : null}
       </div>
 
+      {readOnly ? (
+        <LeadershipProfileRadar assessment={assessment} answers={answers} />
+      ) : null}
+
       {domains.length === 0 ? (
         <p className="text-sm text-muted">This assessment has no domains.</p>
+      ) : readOnly ? (
+        <CollapsibleRoot
+          defaultOpen={false}
+          className="rounded-2xl border border-border bg-surface shadow-sm"
+        >
+          <CollapsibleTrigger className="group flex w-full items-start justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
+            <span className="min-w-0">
+              <span className="block text-lg font-semibold text-foreground">
+                Statement scores
+              </span>
+              <span className="mt-1 block text-sm text-muted">
+                Reveal your individual statement responses, grouped by domain
+                and attribute.
+              </span>
+            </span>
+            <span
+              className="mt-1 shrink-0 text-primary transition-transform group-data-[state=open]:rotate-180"
+              aria-hidden="true"
+            >
+              <ChevronIcon />
+            </span>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="overflow-hidden">
+            <div className="border-t border-border px-6 py-5">
+              <StatementScores
+                domains={domains}
+                defaultTab={defaultTab}
+                answers={answers}
+                readOnly
+              />
+            </div>
+          </CollapsibleContent>
+        </CollapsibleRoot>
       ) : (
-        <Tabs defaultValue={defaultTab}>
-          <TabsList>
-            {domains.map((domain) => (
-              <TabsTrigger key={domain.id} value={domain.id}>
-                {domain.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {domains.map((domain) => (
-            <TabsContent key={domain.id} value={domain.id}>
-              <div className="space-y-8">
-                {(domain.attributes ?? []).map((attribute) => (
-                  <section key={attribute.id}>
-                    <h2 className="text-lg font-semibold text-foreground">
-                      {attribute.name}
-                    </h2>
-                    <ul className="mt-4 space-y-6">
-                      {(attribute.statements ?? []).map((statement) => (
-                        <li key={statement.id} className="space-y-3">
-                          <p className="text-sm leading-relaxed text-foreground">
-                            {statement.text}
-                          </p>
-                          {readOnly ? (
-                            <p className="text-sm font-medium text-primary">
-                              Score: {answers[statement.id] ?? "—"}
-                            </p>
-                          ) : (
-                            <ScoreRadioGroup
-                              id={`score-${statement.id}`}
-                              name={`score-${statement.id}`}
-                              value={answers[statement.id]}
-                              onValueChange={(score) =>
-                                setScore(statement.id, score)
-                              }
-                            />
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <StatementScores
+          domains={domains}
+          defaultTab={defaultTab}
+          answers={answers}
+          readOnly={false}
+          setScore={setScore}
+        />
       )}
 
       {!readOnly ? (
@@ -276,5 +280,80 @@ export default function TakeAssessmentForm({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function StatementScores({
+  domains,
+  defaultTab,
+  answers,
+  readOnly,
+  setScore,
+}) {
+  return (
+    <Tabs defaultValue={defaultTab}>
+      <TabsList>
+        {domains.map((domain) => (
+          <TabsTrigger key={domain.id} value={domain.id}>
+            {domain.name}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {domains.map((domain) => (
+        <TabsContent key={domain.id} value={domain.id}>
+          <div className="space-y-8">
+            {(domain.attributes ?? []).map((attribute) => (
+              <section key={attribute.id}>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {attribute.name}
+                </h2>
+                <ul className="mt-4 space-y-6">
+                  {(attribute.statements ?? []).map((statement) => (
+                    <li key={statement.id} className="space-y-3">
+                      <p className="text-sm leading-relaxed text-foreground">
+                        {statement.text}
+                      </p>
+                      {readOnly ? (
+                        <p className="text-sm font-medium text-primary">
+                          Score: {answers[statement.id] ?? "—"}
+                        </p>
+                      ) : (
+                        <ScoreRadioGroup
+                          id={`score-${statement.id}`}
+                          name={`score-${statement.id}`}
+                          value={answers[statement.id]}
+                          onValueChange={(score) =>
+                            setScore(statement.id, score)
+                          }
+                        />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08Z"
+        clipRule="evenodd"
+      />
+    </svg>
   );
 }

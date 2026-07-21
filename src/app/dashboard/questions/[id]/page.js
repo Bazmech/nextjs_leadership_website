@@ -6,6 +6,7 @@ import {
   countStatementsInTree,
   getAssessmentTree,
 } from "@/lib/assessments";
+import { isAssessmentStructureLocked } from "@/lib/schemas/assessment";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
 
 export async function generateMetadata({ params }) {
@@ -23,6 +24,7 @@ export default async function EditAssessmentPage({ params }) {
   if (!assessment) notFound();
 
   const statementCount = countStatementsInTree(assessment);
+  const structureLocked = isAssessmentStructureLocked(assessment.status);
 
   return (
     <div className="bg-background px-6 py-16">
@@ -53,8 +55,9 @@ export default async function EditAssessmentPage({ params }) {
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-foreground">Structure</h2>
           <p className="mt-1 text-sm text-muted">
-            Domains contain attributes; attributes contain statements scored
-            1–5.
+            {structureLocked
+              ? "Domains, attributes, and statements are locked for available and archived assessments."
+              : "Domains contain attributes; attributes contain statements scored 1–5."}
           </p>
           <div className="mt-5">
             <AssessmentStructureBuilder assessment={assessment} />

@@ -21,6 +21,8 @@ Use **Yarn** (`yarn add`, `yarn.lock`). Do not add `package-lock.json` or switch
 | CMS | `@prismicio/*` | `src/prismicio.js`, slices in `src/slices/` |
 | Database | `drizzle-orm`, `@neondatabase/serverless` | `src/lib/db.js`, `src/db/schema` |
 | Web Analytics | `@vercel/analytics` | `<Analytics />` in `src/app/layout.js` |
+| Charts | `recharts` | Radar/profile charts (e.g. completed assessment Leadership Profile) |
+| Drag and drop reorder | `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` | Assessment structure builder (domains / attributes / statements) |
 
 ## Before adding a dependency
 

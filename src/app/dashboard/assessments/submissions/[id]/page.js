@@ -25,7 +25,7 @@ export default async function SubmissionPage({ params }) {
 
   return (
     <div className="bg-background px-6 py-16">
-      <div className="mx-auto max-w-3xl">
+      <div className={`mx-auto ${readOnly ? "max-w-5xl" : "max-w-3xl"}`}>
         <Link
           href={readOnly ? "/dashboard/assessments/past" : "/dashboard/assessments"}
           className="text-sm font-medium text-muted transition-colors hover:text-foreground"
@@ -44,8 +44,8 @@ export default async function SubmissionPage({ params }) {
             </p>
             {readOnly ? (
               <p className="mt-2 text-sm text-muted">
-                Completed assessment — scores are grouped by domain and
-                attribute.
+                Completed assessment — attribute averages appear in the profile
+                chart; statement scores are grouped by domain below.
               </p>
             ) : (
               <p className="mt-2 text-sm text-muted">

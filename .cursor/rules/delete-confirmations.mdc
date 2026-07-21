@@ -1,0 +1,51 @@
+---
+description: Require confirmation dialogs before any destructive delete action
+alwaysApply: true
+---
+
+# Delete Confirmations
+
+Any UI that **deletes** data (records, nested structure, submissions, etc.) must ask for confirmation before submitting the delete action. Do not delete on a single click.
+
+## Required pattern
+
+1. Use Radix **Alert Dialog** (`@radix-ui/react-alert-dialog`) — same pattern as `DeleteSubmissionButton`
+2. Trigger opens the dialog; only the dialog’s confirm control submits the Server Action / form
+3. Include a clear title, short consequence description, **Cancel**, and a destructive confirm button
+4. Prefer an existing shared wrapper under `src/components/` when one exists; otherwise follow the inline Alert Dialog pattern already in the app
+
+```js
+// ✅ GOOD — confirm, then submit
+<AlertDialog.Root>
+  <AlertDialog.Trigger asChild>
+    <button type="button">Delete</button>
+  </AlertDialog.Trigger>
+  <AlertDialog.Portal>
+    {/* overlay + title + description */}
+    <form action={deleteAction}>
+      <AlertDialog.Cancel asChild>
+        <Button type="button">Cancel</Button>
+      </AlertDialog.Cancel>
+      <Button type="submit">Delete</Button>
+    </form>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
+```
+
+```js
+// ❌ BAD — immediate delete
+<button type="submit" formAction={deleteAction}>Delete</button>
+<form action={deleteAction}>
+  <button type="submit">Delete</button>
+</form>
+```
+
+## Scope
+
+Applies to domains, attributes, statements, submissions, users, and any future delete controls — including icon-only or “×” delete buttons.
+
+## Avoid
+
+- `window.confirm` / `confirm()` — use Radix Alert Dialog
+- Custom modal implementations when Alert Dialog already fits
+- Skipping confirmation because the action “feels small” or is admin-only

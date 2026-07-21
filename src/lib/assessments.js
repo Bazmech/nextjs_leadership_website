@@ -13,6 +13,9 @@ import {
   requireEnabledAppUser,
   requireSuperAdminAppUser,
 } from "@/lib/users";
+import { isAssessmentStructureLocked } from "@/lib/schemas/assessment";
+
+export { isAssessmentStructureLocked };
 
 const FREQUENCY_MS = {
   daily: 24 * 60 * 60 * 1000,
@@ -40,9 +43,34 @@ export function formatStatusLabel(status) {
   return labels[status] ?? status;
 }
 
+const STRUCTURE_LOCKED_ERROR =
+  "This assessment is available and can no longer be edited. Domains, attributes, and statements are locked.";
+
+const DRAFT_REVERT_ERROR =
+  "Once an assessment is available, it cannot be set back to draft.";
+
 function nextSortOrder(rows) {
   if (!rows.length) return 0;
   return Math.max(...rows.map((row) => row.sortOrder ?? 0)) + 1;
+}
+
+async function getAssessmentStatus(assessmentId) {
+  const db = getDb();
+  const [row] = await db
+    .select({ status: assessments.status })
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  return row?.status ?? null;
+}
+
+async function assertStructureEditable(assessmentId) {
+  const status = await getAssessmentStatus(assessmentId);
+  if (!status) return { ok: false, error: "Assessment not found." };
+  if (isAssessmentStructureLocked(status)) {
+    return { ok: false, error: STRUCTURE_LOCKED_ERROR };
+  }
+  return { ok: true };
 }
 
 /** Load assessment tree: domains → attributes → statements. */
@@ -181,6 +209,18 @@ export async function updateAssessmentTemplate({
 }) {
   await requireSuperAdminAppUser();
   const db = getDb();
+
+  const [existing] = await db
+    .select({ status: assessments.status })
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Assessment not found." };
+
+  if (existing.status !== "draft" && status === "draft") {
+    return { ok: false, error: DRAFT_REVERT_ERROR };
+  }
+
   const [row] = await db
     .update(assessments)
     .set({
@@ -192,7 +232,8 @@ export async function updateAssessmentTemplate({
     })
     .where(eq(assessments.id, assessmentId))
     .returning();
-  return row ?? null;
+
+  return { ok: true, assessment: row };
 }
 
 export async function touchAssessment(assessmentId) {
@@ -205,14 +246,10 @@ export async function touchAssessment(assessmentId) {
 
 export async function createDomain({ assessmentId, name }) {
   await requireSuperAdminAppUser();
-  const db = getDb();
+  const editable = await assertStructureEditable(assessmentId);
+  if (!editable.ok) return editable;
 
-  const [assessment] = await db
-    .select({ id: assessments.id })
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment) return { ok: false, error: "Assessment not found." };
+  const db = getDb();
 
   const siblings = await db
     .select({ sortOrder: assessmentDomains.sortOrder })
@@ -235,6 +272,17 @@ export async function createDomain({ assessmentId, name }) {
 export async function updateDomain({ domainId, name }) {
   await requireSuperAdminAppUser();
   const db = getDb();
+
+  const [existing] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, domainId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(existing.assessmentId);
+  if (!editable.ok) return editable;
+
   const [row] = await db
     .update(assessmentDomains)
     .set({ name })
@@ -248,6 +296,17 @@ export async function updateDomain({ domainId, name }) {
 export async function deleteDomain({ domainId }) {
   await requireSuperAdminAppUser();
   const db = getDb();
+
+  const [existing] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, domainId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(existing.assessmentId);
+  if (!editable.ok) return editable;
+
   const [row] = await db
     .delete(assessmentDomains)
     .where(eq(assessmentDomains.id, domainId))
@@ -267,6 +326,9 @@ export async function createAttribute({ domainId, name }) {
     .where(eq(assessmentDomains.id, domainId))
     .limit(1);
   if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
 
   const siblings = await db
     .select({ sortOrder: assessmentAttributes.sortOrder })
@@ -289,6 +351,24 @@ export async function createAttribute({ domainId, name }) {
 export async function updateAttribute({ attributeId, name }) {
   await requireSuperAdminAppUser();
   const db = getDb();
+
+  const [existing] = await db
+    .select()
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.id, attributeId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, existing.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
   const [row] = await db
     .update(assessmentAttributes)
     .set({ name })
@@ -296,17 +376,12 @@ export async function updateAttribute({ attributeId, name }) {
     .returning();
   if (!row) return { ok: false, error: "Attribute not found." };
 
-  const [domain] = await db
-    .select({ assessmentId: assessmentDomains.assessmentId })
-    .from(assessmentDomains)
-    .where(eq(assessmentDomains.id, row.domainId))
-    .limit(1);
-  if (domain) await touchAssessment(domain.assessmentId);
+  await touchAssessment(domain.assessmentId);
 
   return {
     ok: true,
     attribute: row,
-    assessmentId: domain?.assessmentId ?? null,
+    assessmentId: domain.assessmentId,
   };
 }
 
@@ -326,13 +401,17 @@ export async function deleteAttribute({ attributeId }) {
     .from(assessmentDomains)
     .where(eq(assessmentDomains.id, existing.domainId))
     .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
 
   await db
     .delete(assessmentAttributes)
     .where(eq(assessmentAttributes.id, attributeId));
 
-  if (domain) await touchAssessment(domain.assessmentId);
-  return { ok: true, assessmentId: domain?.assessmentId ?? null };
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
 }
 
 export async function createStatement({ attributeId, text }) {
@@ -345,6 +424,16 @@ export async function createStatement({ attributeId, text }) {
     .where(eq(assessmentAttributes.id, attributeId))
     .limit(1);
   if (!attribute) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, attribute.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
 
   const siblings = await db
     .select({ sortOrder: assessmentStatements.sortOrder })
@@ -360,23 +449,43 @@ export async function createStatement({ attributeId, text }) {
     })
     .returning();
 
-  const [domain] = await db
-    .select({ assessmentId: assessmentDomains.assessmentId })
-    .from(assessmentDomains)
-    .where(eq(assessmentDomains.id, attribute.domainId))
-    .limit(1);
-  if (domain) await touchAssessment(domain.assessmentId);
+  await touchAssessment(domain.assessmentId);
 
   return {
     ok: true,
     statement: row,
-    assessmentId: domain?.assessmentId ?? null,
+    assessmentId: domain.assessmentId,
   };
 }
 
 export async function updateStatement({ statementId, text }) {
   await requireSuperAdminAppUser();
   const db = getDb();
+
+  const [existing] = await db
+    .select()
+    .from(assessmentStatements)
+    .where(eq(assessmentStatements.id, statementId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Statement not found." };
+
+  const [attribute] = await db
+    .select({ domainId: assessmentAttributes.domainId })
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.id, existing.attributeId))
+    .limit(1);
+  if (!attribute) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, attribute.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
   const [row] = await db
     .update(assessmentStatements)
     .set({ text })
@@ -384,26 +493,12 @@ export async function updateStatement({ statementId, text }) {
     .returning();
   if (!row) return { ok: false, error: "Statement not found." };
 
-  const [attribute] = await db
-    .select({ domainId: assessmentAttributes.domainId })
-    .from(assessmentAttributes)
-    .where(eq(assessmentAttributes.id, row.attributeId))
-    .limit(1);
-  if (attribute) {
-    const [domain] = await db
-      .select({ assessmentId: assessmentDomains.assessmentId })
-      .from(assessmentDomains)
-      .where(eq(assessmentDomains.id, attribute.domainId))
-      .limit(1);
-    if (domain) await touchAssessment(domain.assessmentId);
-    return {
-      ok: true,
-      statement: row,
-      assessmentId: domain?.assessmentId ?? null,
-    };
-  }
-
-  return { ok: true, statement: row, assessmentId: null };
+  await touchAssessment(domain.assessmentId);
+  return {
+    ok: true,
+    statement: row,
+    assessmentId: domain.assessmentId,
+  };
 }
 
 export async function deleteStatement({ statementId }) {
@@ -422,25 +517,306 @@ export async function deleteStatement({ statementId }) {
     .from(assessmentAttributes)
     .where(eq(assessmentAttributes.id, existing.attributeId))
     .limit(1);
+  if (!attribute) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, attribute.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
 
   await db
     .delete(assessmentStatements)
     .where(eq(assessmentStatements.id, statementId));
 
-  let assessmentId = null;
-  if (attribute) {
-    const [domain] = await db
-      .select({ assessmentId: assessmentDomains.assessmentId })
-      .from(assessmentDomains)
-      .where(eq(assessmentDomains.id, attribute.domainId))
-      .limit(1);
-    if (domain) {
-      assessmentId = domain.assessmentId;
-      await touchAssessment(domain.assessmentId);
-    }
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
+}
+
+async function swapSortOrder(rows, id, direction) {
+  const index = rows.findIndex((row) => row.id === id);
+  if (index < 0) return { ok: false, error: "Item not found." };
+
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= rows.length) {
+    return { ok: false, error: "Already at the edge." };
   }
 
+  const reordered = [...rows];
+  const [item] = reordered.splice(index, 1);
+  reordered.splice(swapIndex, 0, item);
+
+  return { ok: true, reordered };
+}
+
+async function applySortOrders(table, idColumn, reordered) {
+  const db = getDb();
+  for (let i = 0; i < reordered.length; i += 1) {
+    if (reordered[i].sortOrder === i) continue;
+    await db
+      .update(table)
+      .set({ sortOrder: i })
+      .where(eq(idColumn, reordered[i].id));
+  }
+}
+
+export async function moveDomain({ domainId, direction }) {
+  await requireSuperAdminAppUser();
+  const db = getDb();
+
+  const [existing] = await db
+    .select()
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, domainId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(existing.assessmentId);
+  if (!editable.ok) return editable;
+
+  const siblings = await db
+    .select({
+      id: assessmentDomains.id,
+      sortOrder: assessmentDomains.sortOrder,
+    })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.assessmentId, existing.assessmentId))
+    .orderBy(asc(assessmentDomains.sortOrder), asc(assessmentDomains.createdAt));
+
+  const swap = await swapSortOrder(siblings, domainId, direction);
+  if (!swap.ok) return swap;
+
+  await applySortOrders(assessmentDomains, assessmentDomains.id, swap.reordered);
+  await touchAssessment(existing.assessmentId);
+  return { ok: true, assessmentId: existing.assessmentId };
+}
+
+export async function moveAttribute({ attributeId, direction }) {
+  await requireSuperAdminAppUser();
+  const db = getDb();
+
+  const [existing] = await db
+    .select()
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.id, attributeId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, existing.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
+  const siblings = await db
+    .select({
+      id: assessmentAttributes.id,
+      sortOrder: assessmentAttributes.sortOrder,
+    })
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.domainId, existing.domainId))
+    .orderBy(
+      asc(assessmentAttributes.sortOrder),
+      asc(assessmentAttributes.createdAt),
+    );
+
+  const swap = await swapSortOrder(siblings, attributeId, direction);
+  if (!swap.ok) return swap;
+
+  await applySortOrders(
+    assessmentAttributes,
+    assessmentAttributes.id,
+    swap.reordered,
+  );
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
+}
+
+export async function moveStatement({ statementId, direction }) {
+  await requireSuperAdminAppUser();
+  const db = getDb();
+
+  const [existing] = await db
+    .select()
+    .from(assessmentStatements)
+    .where(eq(assessmentStatements.id, statementId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Statement not found." };
+
+  const [attribute] = await db
+    .select({ domainId: assessmentAttributes.domainId })
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.id, existing.attributeId))
+    .limit(1);
+  if (!attribute) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, attribute.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
+  const siblings = await db
+    .select({
+      id: assessmentStatements.id,
+      sortOrder: assessmentStatements.sortOrder,
+    })
+    .from(assessmentStatements)
+    .where(eq(assessmentStatements.attributeId, existing.attributeId))
+    .orderBy(
+      asc(assessmentStatements.sortOrder),
+      asc(assessmentStatements.createdAt),
+    );
+
+  const swap = await swapSortOrder(siblings, statementId, direction);
+  if (!swap.ok) return swap;
+
+  await applySortOrders(
+    assessmentStatements,
+    assessmentStatements.id,
+    swap.reordered,
+  );
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
+}
+
+function sameIdSet(expectedIds, orderedIds) {
+  if (expectedIds.length !== orderedIds.length) return false;
+  const expected = new Set(expectedIds);
+  return orderedIds.every((id) => expected.has(id));
+}
+
+export async function setDomainOrder({ assessmentId, orderedIds }) {
+  await requireSuperAdminAppUser();
+  const editable = await assertStructureEditable(assessmentId);
+  if (!editable.ok) return editable;
+
+  const db = getDb();
+  const siblings = await db
+    .select({
+      id: assessmentDomains.id,
+      sortOrder: assessmentDomains.sortOrder,
+    })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.assessmentId, assessmentId))
+    .orderBy(asc(assessmentDomains.sortOrder), asc(assessmentDomains.createdAt));
+
+  if (!sameIdSet(siblings.map((row) => row.id), orderedIds)) {
+    return { ok: false, error: "Domain order is out of date. Refresh and try again." };
+  }
+
+  const byId = new Map(siblings.map((row) => [row.id, row]));
+  const reordered = orderedIds.map((id) => byId.get(id));
+  await applySortOrders(assessmentDomains, assessmentDomains.id, reordered);
+  await touchAssessment(assessmentId);
   return { ok: true, assessmentId };
+}
+
+export async function setAttributeOrder({ domainId, orderedIds }) {
+  await requireSuperAdminAppUser();
+  const db = getDb();
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
+  const siblings = await db
+    .select({
+      id: assessmentAttributes.id,
+      sortOrder: assessmentAttributes.sortOrder,
+    })
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.domainId, domainId))
+    .orderBy(
+      asc(assessmentAttributes.sortOrder),
+      asc(assessmentAttributes.createdAt),
+    );
+
+  if (!sameIdSet(siblings.map((row) => row.id), orderedIds)) {
+    return {
+      ok: false,
+      error: "Attribute order is out of date. Refresh and try again.",
+    };
+  }
+
+  const byId = new Map(siblings.map((row) => [row.id, row]));
+  const reordered = orderedIds.map((id) => byId.get(id));
+  await applySortOrders(
+    assessmentAttributes,
+    assessmentAttributes.id,
+    reordered,
+  );
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
+}
+
+export async function setStatementOrder({ attributeId, orderedIds }) {
+  await requireSuperAdminAppUser();
+  const db = getDb();
+
+  const [attribute] = await db
+    .select({ domainId: assessmentAttributes.domainId })
+    .from(assessmentAttributes)
+    .where(eq(assessmentAttributes.id, attributeId))
+    .limit(1);
+  if (!attribute) return { ok: false, error: "Attribute not found." };
+
+  const [domain] = await db
+    .select({ assessmentId: assessmentDomains.assessmentId })
+    .from(assessmentDomains)
+    .where(eq(assessmentDomains.id, attribute.domainId))
+    .limit(1);
+  if (!domain) return { ok: false, error: "Domain not found." };
+
+  const editable = await assertStructureEditable(domain.assessmentId);
+  if (!editable.ok) return editable;
+
+  const siblings = await db
+    .select({
+      id: assessmentStatements.id,
+      sortOrder: assessmentStatements.sortOrder,
+    })
+    .from(assessmentStatements)
+    .where(eq(assessmentStatements.attributeId, attributeId))
+    .orderBy(
+      asc(assessmentStatements.sortOrder),
+      asc(assessmentStatements.createdAt),
+    );
+
+  if (!sameIdSet(siblings.map((row) => row.id), orderedIds)) {
+    return {
+      ok: false,
+      error: "Statement order is out of date. Refresh and try again.",
+    };
+  }
+
+  const byId = new Map(siblings.map((row) => [row.id, row]));
+  const reordered = orderedIds.map((id) => byId.get(id));
+  await applySortOrders(
+    assessmentStatements,
+    assessmentStatements.id,
+    reordered,
+  );
+  await touchAssessment(domain.assessmentId);
+  return { ok: true, assessmentId: domain.assessmentId };
 }
 
 /**

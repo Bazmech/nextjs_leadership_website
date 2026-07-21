@@ -3,6 +3,11 @@ import { z } from "zod";
 export const ASSESSMENT_STATUSES = ["draft", "available", "archived"];
 export const ASSESSMENT_FREQUENCIES = ["daily", "weekly", "monthly", "yearly"];
 
+/** Structure edits are only allowed while the assessment is still a draft. */
+export function isAssessmentStructureLocked(status) {
+  return status !== "draft";
+}
+
 export const createAssessmentSchema = z.object({
   title: z.string().trim().min(1, "Enter a title.").max(200),
   description: z
@@ -63,6 +68,44 @@ export const updateStatementSchema = z.object({
 
 export const deleteStatementSchema = z.object({
   statementId: z.string().uuid("Invalid statement."),
+});
+
+const moveDirectionSchema = z.enum(["up", "down"], {
+  error: "Select a valid direction.",
+});
+
+export const moveDomainSchema = z.object({
+  domainId: z.string().uuid("Invalid domain."),
+  direction: moveDirectionSchema,
+});
+
+export const moveAttributeSchema = z.object({
+  attributeId: z.string().uuid("Invalid attribute."),
+  direction: moveDirectionSchema,
+});
+
+export const moveStatementSchema = z.object({
+  statementId: z.string().uuid("Invalid statement."),
+  direction: moveDirectionSchema,
+});
+
+const orderedIdsSchema = z
+  .array(z.string().uuid("Invalid item."))
+  .min(1, "Provide at least one item.");
+
+export const setDomainOrderSchema = z.object({
+  assessmentId: z.string().uuid("Invalid assessment."),
+  orderedIds: orderedIdsSchema,
+});
+
+export const setAttributeOrderSchema = z.object({
+  domainId: z.string().uuid("Invalid domain."),
+  orderedIds: orderedIdsSchema,
+});
+
+export const setStatementOrderSchema = z.object({
+  attributeId: z.string().uuid("Invalid attribute."),
+  orderedIds: orderedIdsSchema,
 });
 
 export const startSubmissionSchema = z.object({
