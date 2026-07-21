@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "@/components/atoms/Link/Link";
 import DeleteSubmissionButton from "@/components/organisms/DeleteSubmissionButton/DeleteSubmissionButton";
+import ExportSubmissionCsvButton from "@/components/organisms/ExportSubmissionCsvButton/ExportSubmissionCsvButton";
 import ExportSubmissionPdfButton from "@/components/organisms/ExportSubmissionPdfButton/ExportSubmissionPdfButton";
 import RenameSubmissionTitle from "@/components/organisms/RenameSubmissionTitle/RenameSubmissionTitle";
 import TakeAssessmentForm from "@/components/organisms/TakeAssessmentForm/TakeAssessmentForm";
@@ -56,7 +57,10 @@ export default async function SubmissionPage({ params }) {
             )}
           </div>
           {readOnly ? (
-            <ExportSubmissionPdfButton submissionId={submission.id} />
+            <div className="flex flex-wrap items-center gap-2">
+              <ExportSubmissionPdfButton submissionId={submission.id} />
+              <ExportSubmissionCsvButton submissionId={submission.id} />
+            </div>
           ) : (
             <DeleteSubmissionButton submissionId={submission.id} />
           )}
