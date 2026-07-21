@@ -1,9 +1,11 @@
 import { isFilled } from "@prismicio/client";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "@/components/atoms/Link/Link";
+import LocalDateTime from "@/components/atoms/LocalDateTime/LocalDateTime";
 import DangerZone from "@/components/molecules/DangerZone/DangerZone";
 import ManageAccountButton from "@/components/molecules/ManageAccountButton/ManageAccountButton";
 import RichText from "@/components/molecules/RichText/RichText";
+import { getDashboardAssessmentSummary } from "@/lib/assessments";
 import { getDatabaseContext } from "@/lib/db-context";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
 import { getSiteSettings } from "@/lib/prismic-settings";
@@ -61,10 +63,11 @@ function PastAssessmentsIcon() {
 }
 
 export default async function DashboardPage() {
-  const [user, appUser, settings] = await Promise.all([
+  const [user, appUser, settings, assessmentSummary] = await Promise.all([
     currentUser(),
     getCurrentAppUser(),
     getSiteSettings(),
+    getDashboardAssessmentSummary(),
   ]);
   const showStaffTools = isStaffRole(appUser?.roleName);
   const showSuperAdminTools = isSuperAdminRole(appUser?.roleName);
@@ -86,16 +89,22 @@ export default async function DashboardPage() {
         <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
           <h2 className="text-lg font-semibold text-foreground">Assessments</h2>
           <div className="mt-4 flex flex-col gap-3">
-            <Link className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light">
+            <Link
+              href="/dashboard/assessments"
+              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+            >
               <StartAssessmentIcon />
               <span className="underline decoration-primary/30 underline-offset-4">
                 Start Assessment
               </span>
             </Link>
-            <Link className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light">
+            <Link
+              href="/dashboard/assessments/past"
+              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+            >
               <PastAssessmentsIcon />
               <span className="underline decoration-primary/30 underline-offset-4">
-                Past Assessments (3)
+                Past Assessments ({assessmentSummary.pastCount})
               </span>
             </Link>
           </div>
@@ -116,9 +125,11 @@ export default async function DashboardPage() {
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Member since</dt>
               <dd className="font-medium text-foreground">
-                {user?.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString()
-                  : "—"}
+                {user?.createdAt ? (
+                  <LocalDateTime value={user.createdAt} mode="date" />
+                ) : (
+                  "—"
+                )}
               </dd>
             </div>
           </dl>
@@ -148,17 +159,18 @@ export default async function DashboardPage() {
                 <div className="flex flex-wrap items-center justify-between gap-4 border-t border-red-200 pt-5">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">
-                      Manage questions
+                      Manage assessments
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      Create and edit coaching and assessment questions.
+                      Create assessment templates, domains, attributes, and
+                      statements.
                     </p>
                   </div>
                   <Link
                     href="/dashboard/questions"
                     className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
                   >
-                    Manage questions
+                    Manage assessments
                   </Link>
                 </div>
               ) : null}

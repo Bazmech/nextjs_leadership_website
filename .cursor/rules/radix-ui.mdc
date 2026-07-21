@@ -28,8 +28,8 @@ yarn add @radix-ui/react-toast
 | Labels | `@radix-ui/react-label` | `FormField`, `atoms/Label` |
 | Checkbox / Switch | `@radix-ui/react-checkbox`, `@radix-ui/react-switch` | `atoms/Checkbox`, `atoms/Switch` |
 | Select | `@radix-ui/react-select` | `atoms/Select` or `molecules/SelectField` |
-| Radio group | `@radix-ui/react-radio-group` | `molecules/RadioGroupField` |
-| Dialog / Alert dialog | `@radix-ui/react-dialog`, `@radix-ui/react-alert-dialog` | `molecules/Modal`, `molecules/ConfirmDialog` |
+| Radio group | `@radix-ui/react-radio-group` | `atoms/ScoreRadioGroup` |
+| Dialog / Alert dialog | `@radix-ui/react-dialog`, `@radix-ui/react-alert-dialog` | `molecules/Modal`, or inline in organisms (e.g. `DeleteSubmissionButton`) |
 | Dropdown menu | `@radix-ui/react-dropdown-menu` | `molecules/DropdownMenu` |
 | Tabs | `@radix-ui/react-tabs` | `molecules/Tabs` |
 | Tooltip | `@radix-ui/react-tooltip` | `atoms/Tooltip` |
