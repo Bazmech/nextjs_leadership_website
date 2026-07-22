@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  /* nhs.uk brand: #005eb8, #fff, #f0f4f5, #d2e2f1 */
+  /* nhs.uk brand: #005eb8, #fff, #f0f4f5, #d2e2f1; muted = NHS grey-1 secondary text */
   --background: #f0f4f5;
   --foreground: #005eb8;
   --primary: #005eb8;
   --primary-light: #005eb8;
   --accent: #005eb8;
   --accent-light: #d2e2f1;
-  --muted: #005eb8;
+  --muted: #4c6272;
   --surface: #ffffff;
   --border: #d2e2f1;
   --container-lg: 64rem;
@@ -38,7 +38,7 @@
     --primary-light: #005eb8;
     --accent: #005eb8;
     --accent-light: #d2e2f1;
-    --muted: #005eb8;
+    --muted: #4c6272;
     --surface: #ffffff;
     --border: #d2e2f1;
   }
