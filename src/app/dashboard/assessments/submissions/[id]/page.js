@@ -26,7 +26,9 @@ export default async function SubmissionPage({ params }) {
   const readOnly = submission.status === "completed";
 
   return (
-    <div className="bg-background px-6 py-16">
+    <div
+      className={`bg-background px-6 ${readOnly ? "py-16" : "pt-16"}`}
+    >
       <div className={`mx-auto ${readOnly ? "max-w-5xl" : "max-w-3xl"}`}>
         <Link
           href={readOnly ? "/dashboard/assessments/past" : "/dashboard/assessments"}

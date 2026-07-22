@@ -24,7 +24,15 @@ export default async function Footer() {
       <Container className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
         <div className="grid gap-3">
           <p className="text-sm text-white/90">
-            &copy; {year} {settings.footerCopyright}. All rights reserved.
+            &copy; {year} Productive Leadership produced in partnership with{" "}
+            <a
+              href="https://www.horizonsnhs.com"
+              target="_blank"
+              rel="noreferrer"
+              className="underline-offset-2 transition-colors hover:text-white underline"
+            >
+              NHS Horizons
+            </a>
           </p>
           {settings.contactEmail || settings.contactPhone ? (
             <p className="text-sm text-white/90">

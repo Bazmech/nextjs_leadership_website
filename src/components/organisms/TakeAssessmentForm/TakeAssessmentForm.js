@@ -105,7 +105,12 @@ export default function TakeAssessmentForm({
   function setScore(statementId, score) {
     if (readOnly) return;
     setAnswers((prev) => {
-      const next = { ...prev, [statementId]: score };
+      const next = { ...prev };
+      if (score == null) {
+        delete next[statementId];
+      } else {
+        next[statementId] = score;
+      }
       answersRef.current = next;
       return next;
     });
@@ -121,161 +126,168 @@ export default function TakeAssessmentForm({
   const defaultTab = domains[0]?.id ?? "none";
 
   return (
-    <div className={readOnly ? undefined : "pb-28"}>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm text-muted">
-            Started <LocalDateTime value={submission.startedAt} />
-            {submission.completedAt ? (
-              <>
-                {" · Completed "}
-                <LocalDateTime value={submission.completedAt} />
-              </>
-            ) : null}
-          </p>
+    <div>
+      <div className={readOnly ? undefined : "pb-28"}>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-muted">
+              Started <LocalDateTime value={submission.startedAt} />
+              {submission.completedAt ? (
+                <>
+                  {" · Completed "}
+                  <LocalDateTime value={submission.completedAt} />
+                </>
+              ) : null}
+            </p>
+          </div>
+          {!readOnly ? (
+            <p className="text-sm text-muted" role="status" aria-live="polite">
+              {saveStatus === "saving"
+                ? "Saving…"
+                : saveStatus === "saved"
+                  ? `Saved${lastSavedAt ? ` ${lastSavedAt.toLocaleTimeString()}` : ""}`
+                  : saveStatus === "error"
+                    ? "Save failed"
+                    : dirty
+                      ? "Unsaved changes"
+                      : lastSavedAt
+                        ? `Saved ${lastSavedAt.toLocaleTimeString()}`
+                        : "All changes saved"}
+            </p>
+          ) : null}
         </div>
+
+        {readOnly ? (
+          <LeadershipProfileRadar assessment={assessment} answers={answers} />
+        ) : null}
+
+        {domains.length === 0 ? (
+          <p className="text-sm text-muted">This assessment has no domains.</p>
+        ) : readOnly ? (
+          <CollapsibleRoot
+            defaultOpen={false}
+            className="rounded-2xl border border-border bg-surface shadow-sm"
+          >
+            <CollapsibleTrigger className="group flex w-full items-start justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
+              <span className="min-w-0">
+                <span className="block text-lg font-semibold text-foreground">
+                  Statement scores
+                </span>
+                <span className="mt-1 block text-sm text-muted">
+                  Reveal your individual statement responses, grouped by domain
+                  and attribute.
+                </span>
+              </span>
+              <span
+                className="mt-1 shrink-0 text-primary transition-transform group-data-[state=open]:rotate-180"
+                aria-hidden="true"
+              >
+                <ChevronIcon />
+              </span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="overflow-hidden">
+              <div className="border-t border-border px-6 py-5">
+                <StatementScores
+                  domains={domains}
+                  defaultTab={defaultTab}
+                  answers={answers}
+                  readOnly
+                />
+              </div>
+            </CollapsibleContent>
+          </CollapsibleRoot>
+        ) : (
+          <StatementScores
+            domains={domains}
+            defaultTab={defaultTab}
+            answers={answers}
+            readOnly={false}
+            setScore={setScore}
+          />
+        )}
+
         {!readOnly ? (
-          <p className="text-sm text-muted" role="status" aria-live="polite">
-            {saveStatus === "saving"
-              ? "Saving…"
-              : saveStatus === "saved"
-                ? `Saved${lastSavedAt ? ` ${lastSavedAt.toLocaleTimeString()}` : ""}`
-                : saveStatus === "error"
-                  ? "Save failed"
-                  : dirty
-                    ? "Unsaved changes"
-                    : lastSavedAt
-                      ? `Saved ${lastSavedAt.toLocaleTimeString()}`
-                      : "All changes saved"}
-          </p>
+          <form action={completeAction} className="mt-10">
+            <input type="hidden" name="submissionId" value={submission.id} />
+            <input
+              type="hidden"
+              name="answers"
+              value={JSON.stringify(answers)}
+            />
+            {completeState.error ? (
+              <p
+                className="mb-3 text-sm text-red-600 dark:text-red-300"
+                role="alert"
+              >
+                {completeState.error}
+              </p>
+            ) : null}
+            {completeState.success ? (
+              <p
+                className="mb-3 text-sm text-emerald-700 dark:text-emerald-300"
+                role="status"
+              >
+                {completeState.message}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void persistAnswers()}
+                className="!text-sm !px-5 !py-2"
+              >
+                Save now
+              </Button>
+              <Button
+                type="submit"
+                variant="accent-sm"
+                disabled={isCompleting || answered < total}
+                className="disabled:opacity-70"
+              >
+                {isCompleting ? "Submitting…" : "Complete assessment"}
+              </Button>
+            </div>
+          </form>
         ) : null}
       </div>
 
-      {readOnly ? (
-        <LeadershipProfileRadar assessment={assessment} answers={answers} />
-      ) : null}
-
-      {domains.length === 0 ? (
-        <p className="text-sm text-muted">This assessment has no domains.</p>
-      ) : readOnly ? (
-        <CollapsibleRoot
-          defaultOpen={false}
-          className="rounded-2xl border border-border bg-surface shadow-sm"
-        >
-          <CollapsibleTrigger className="group flex w-full items-start justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface">
-            <span className="min-w-0">
-              <span className="block text-lg font-semibold text-foreground">
-                Statement scores
-              </span>
-              <span className="mt-1 block text-sm text-muted">
-                Reveal your individual statement responses, grouped by domain
-                and attribute.
-              </span>
-            </span>
-            <span
-              className="mt-1 shrink-0 text-primary transition-transform group-data-[state=open]:rotate-180"
-              aria-hidden="true"
-            >
-              <ChevronIcon />
-            </span>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="overflow-hidden">
-            <div className="border-t border-border px-6 py-5">
-              <StatementScores
-                domains={domains}
-                defaultTab={defaultTab}
-                answers={answers}
-                readOnly
-              />
-            </div>
-          </CollapsibleContent>
-        </CollapsibleRoot>
-      ) : (
-        <StatementScores
-          domains={domains}
-          defaultTab={defaultTab}
-          answers={answers}
-          readOnly={false}
-          setScore={setScore}
-        />
-      )}
-
       {!readOnly ? (
-        <form action={completeAction} className="mt-10">
-          <input type="hidden" name="submissionId" value={submission.id} />
-          <input
-            type="hidden"
-            name="answers"
-            value={JSON.stringify(answers)}
-          />
-          {completeState.error ? (
-            <p
-              className="mb-3 text-sm text-red-600 dark:text-red-300"
-              role="alert"
-            >
-              {completeState.error}
-            </p>
-          ) : null}
-          {completeState.success ? (
-            <p
-              className="mb-3 text-sm text-emerald-700 dark:text-emerald-300"
-              role="status"
-            >
-              {completeState.message}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => void persistAnswers()}
-              className="!text-sm !px-5 !py-2"
-            >
-              Save now
-            </Button>
-            <Button
-              type="submit"
-              variant="accent-sm"
-              disabled={isCompleting || answered < total}
-              className="disabled:opacity-70"
-            >
-              {isCompleting ? "Submitting…" : "Complete assessment"}
-            </Button>
-          </div>
-        </form>
-      ) : null}
-
-      {!readOnly ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur">
-          <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-3">
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex justify-between text-xs text-muted">
-                <span>Progress</span>
-                <span>
-                  {answered} / {total} statements
-                </span>
-              </div>
-              <div
-                className="h-2 overflow-hidden rounded-full bg-border"
-                role="progressbar"
-                aria-valuenow={answered}
-                aria-valuemin={0}
-                aria-valuemax={total}
-                aria-label="Assessment progress"
-              >
+        <div className="sticky bottom-0 z-40">
+          <div className="relative left-1/2 w-screen -translate-x-1/2 border-t border-border bg-surface/95 backdrop-blur">
+            <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-3">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex justify-between text-xs text-muted">
+                  <span>Progress</span>
+                  <span>
+                    {answered} / {total} statements
+                  </span>
+                </div>
                 <div
-                  className="h-full rounded-full bg-primary transition-[width] duration-300"
-                  style={{ width: `${progressPct}%` }}
-                />
+                  className="h-2 overflow-hidden rounded-full bg-border"
+                  role="progressbar"
+                  aria-valuenow={answered}
+                  aria-valuemin={0}
+                  aria-valuemax={total}
+                  aria-label="Assessment progress"
+                >
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
               </div>
+              <span
+                className="inline-block w-[5.5rem] shrink-0 text-right text-xs text-muted"
+                aria-live="polite"
+              >
+                {saveStatus === "saved"
+                  ? "Saved"
+                  : dirty
+                    ? "Unsaved"
+                    : "Up to date"}
+              </span>
             </div>
-            <span className="shrink-0 text-xs text-muted" aria-live="polite">
-              {saveStatus === "saved"
-                ? "Saved"
-                : dirty
-                  ? "Unsaved"
-                  : "Up to date"}
-            </span>
           </div>
         </div>
       ) : null}

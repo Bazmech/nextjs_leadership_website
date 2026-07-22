@@ -352,7 +352,7 @@ function DeleteButton({
       <AlertDialog.Trigger asChild>
         <button
           type="button"
-          className={`${iconButtonClassName} text-red-700 hover:border-red-300 hover:bg-red-50 hover:text-red-800 dark:text-red-300 dark:hover:border-red-400/40 dark:hover:bg-red-950/40 dark:hover:text-red-200`}
+          className={`${iconButtonClassName} text-red-600 hover:border-red-500/40 hover:bg-red-500/10 dark:text-red-400`}
           aria-label={label}
           title={label}
         >

@@ -27,7 +27,7 @@ export default function DeleteSubmissionButton({
           <Button
             type="button"
             variant="secondary"
-            className="!border-red-300 !px-5 !py-2 !text-sm !text-red-700 hover:!bg-red-50 dark:!border-red-800 dark:!text-red-300 dark:hover:!bg-red-950/40"
+            className="!px-5 !py-2 !text-sm !text-red-700 hover:!border-red-500/40 hover:!bg-red-500/10 dark:!text-red-400"
           >
             Delete assessment
           </Button>

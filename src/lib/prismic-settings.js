@@ -80,7 +80,10 @@ function mapSettingsData(data = {}) {
     contactPhone: getText(data.contact_phone) || null,
     headerCtaLabel: getText(data.header_cta_label, siteDefaults.headerCtaLabel),
     headerCtaHref: resolveLinkHref(data.header_cta_link) || siteDefaults.headerCtaHref,
-    footerCopyright: getText(data.footer_copyright, siteName),
+    footerCopyright: getText(
+      data.footer_copyright,
+      siteDefaults.footerCopyright,
+    ),
     socialLinks: mapSocialLinks(data.social_links),
     accountDisabledPath:
       resolveDocumentPathname(data.account_disabled_page) ||

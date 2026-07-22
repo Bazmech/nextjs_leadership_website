@@ -1,4 +1,5 @@
 import AuthNav from "@/components/molecules/AuthNav/AuthNav";
+import MobileNav from "@/components/molecules/MobileNav/MobileNav";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
 import Container from "@/components/atoms/Container/Container";
 import Logo from "@/components/molecules/Logo/Logo";
@@ -11,10 +12,11 @@ export default async function Header() {
     getCurrentAppUser(),
   ]);
   const accountDisabled = Boolean(appUser && !appUser.enabled);
+  const showUserLinks = !accountDisabled;
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-white">
-      <Container className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 md:grid-cols-[auto_1fr_auto]">
+      <Container className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
         <Logo className="text-white" />
         <nav className="hidden justify-self-center md:block" aria-label="Main">
           <NavMenuList
@@ -24,8 +26,11 @@ export default async function Header() {
             tone="inverse"
           />
         </nav>
-        <div className="grid grid-flow-col items-center justify-end gap-4">
-          <AuthNav inverse showUserLinks={!accountDisabled} />
+        <div className="grid grid-flow-col items-center justify-end gap-3">
+          <div className="hidden md:block">
+            <AuthNav inverse showUserLinks={showUserLinks} />
+          </div>
+          <MobileNav menuItems={menuItems} showUserLinks={showUserLinks} />
         </div>
       </Container>
     </header>

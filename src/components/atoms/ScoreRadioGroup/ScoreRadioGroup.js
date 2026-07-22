@@ -20,7 +20,7 @@ export default function ScoreRadioGroup({
   disabled = false,
   className = "",
 }) {
-  const stringValue = value != null ? String(value) : undefined;
+  const stringValue = value != null ? String(value) : "";
 
   return (
     <div
@@ -42,6 +42,12 @@ export default function ScoreRadioGroup({
           <RadixRadioGroup.Item
             key={score}
             value={String(score)}
+            onClick={() => {
+              if (disabled) return;
+              if (stringValue === String(score)) {
+                onValueChange?.(null);
+              }
+            }}
             className="group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-sm font-medium text-foreground transition-colors hover:border-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="group-hover:hidden group-focus-visible:hidden">
