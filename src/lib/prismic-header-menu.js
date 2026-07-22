@@ -7,8 +7,12 @@ import {
   normalizeVisibilityRole,
   PUBLIC_ROLE_NAME,
 } from "@/lib/roles";
-import { mainNavLinks } from "@/lib/site-nav";
+import { mainNavLinks, removedNavLabels } from "@/lib/site-nav";
 import { getCurrentAppUser } from "@/lib/users";
+
+const removedNavLabelSet = new Set(
+  removedNavLabels.map((label) => label.trim().toLowerCase()),
+);
 
 function getLabel(value, fallback = "") {
   if (!value || typeof value !== "string") return fallback;
@@ -84,6 +88,17 @@ function stripUserPageLinks(items) {
     }));
 }
 
+function stripRemovedNavItems(items) {
+  return items
+    .filter(
+      (item) => !removedNavLabelSet.has(item.label.trim().toLowerCase()),
+    )
+    .map((item) => ({
+      ...item,
+      children: stripRemovedNavItems(item.children),
+    }));
+}
+
 function mapFallbackLinks() {
   return mainNavLinks.map((link, index) => ({
     id: `fallback-${index}`,
@@ -122,6 +137,6 @@ export const getHeaderMenuLinks = cache(async () => {
       ? buildMenuTree(rows)
       : mapFallbackLinks();
 
-  const filtered = filterMenuTree(tree, viewerRole);
+  const filtered = stripRemovedNavItems(filterMenuTree(tree, viewerRole));
   return accountDisabled ? stripUserPageLinks(filtered) : filtered;
 });

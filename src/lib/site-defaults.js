@@ -17,7 +17,8 @@ export const siteDefaults = {
   contactPhone: null,
   headerCtaLabel: "Explore Services",
   headerCtaHref: "#services",
-  footerCopyright: "Productive Leadership",
+  footerCopyright:
+    "Productive Leadership produced in partnership with NHS Horizons",
   socialLinks: [],
   accountDisabledPath: "/account-disabled",
   introductionText: null,
