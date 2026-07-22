@@ -131,6 +131,7 @@ Clerk handles sign-in, sign-up, and session management.
 | Header auth controls | `src/components/molecules/AuthNav/AuthNav.js` |
 | Protected route example | `src/app/dashboard/page.js` |
 | Sync Clerk user → Neon | `src/lib/users.js` + `src/app/dashboard/layout.js` |
+| Purge user data on Clerk delete | `src/app/api/webhooks/clerk/` + `deleteAppUserDataByClerkId` |
 | Branded Clerk UI | `src/lib/clerk-appearance.js` |
 
 **Route access**
@@ -156,6 +157,10 @@ After sign-in / sign-up, Clerk redirects to `/dashboard`. The dashboard layout c
    - Local: `http://localhost:3000`
    - Production: your Vercel domain
 4. Optional: customize sign-in methods, social providers, and branding in the Clerk Dashboard.
+5. Optional but recommended for account deletion: **Webhooks → Add Endpoint**
+   - URL: `https://your-domain.com/api/webhooks/clerk`
+   - Subscribe to: `user.deleted`
+   - Copy the Signing Secret into `CLERK_WEBHOOK_SIGNING_SECRET` (`.env.local` / Vercel)
 
 **Note:** Clerk v7 uses `useAuth`, `SignInButton`, and `UserButton` — not the deprecated `SignedIn` / `SignedOut` components.
 
@@ -257,6 +262,7 @@ Content is managed in [Prismic](https://prismic.io) using Slice Machine. The hom
 | Slice simulator | `src/app/slice-simulator/page.js` |
 | Preview endpoints | `src/app/api/preview/`, `src/app/api/exit-preview/` |
 | Revalidation webhook | `src/app/api/revalidate/` |
+| Clerk account-deleted webhook | `src/app/api/webhooks/clerk/` |
 | Preview toolbar | `PrismicPreview` in `src/app/layout.js` |
 
 **Custom types**
@@ -360,7 +366,7 @@ Copy `.env.example` to `.env.local` and configure:
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | Recommended | Legacy Clerk redirect (keep in sync with FORCE URL) |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | Recommended | Legacy Clerk redirect (keep in sync with FORCE URL) |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_OUT_URL` | Recommended | Redirect after sign-out (default: `/`) |
-| `CLERK_WEBHOOK_SECRET` | Optional | Only if using Clerk webhooks |
+| `CLERK_WEBHOOK_SIGNING_SECRET` | Optional | Clerk webhook signing secret for `/api/webhooks/clerk` (`user.deleted` purge) |
 | `DATABASE_URL` | Yes (for DB features) | Pooled Neon connection string |
 | `DATABASE_URL_UNPOOLED` | Recommended | Direct connection (used for migrations) |
 | `NEON_PROJECT_ID` | Optional | Neon project ID for CLI branch workflow |

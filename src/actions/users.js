@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateUserSchema } from "@/lib/schemas/user";
+import { updateUserSchema, waitlistDecisionSchema } from "@/lib/schemas/user";
 import {
+  decideWaitlistEntries,
   getManagedUser,
   searchAppUsers,
   updateManagedUser,
@@ -78,6 +79,69 @@ export async function updateUser(_prevState, formData) {
     };
   } catch (error) {
     console.error("updateUser failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+function parseWaitlistEntryIds(formData) {
+  const fromAll = formData
+    .getAll("entryIds")
+    .filter((value) => typeof value === "string" && value);
+  if (fromAll.length) {
+    return fromAll;
+  }
+
+  const single = formData.get("entryId");
+  return typeof single === "string" && single ? [single] : [];
+}
+
+/**
+ * Staff: accept (invite) or deny (reject) Clerk waitlist entries.
+ * Cross-user admin surface — see user-data-authorization.mdc.
+ */
+export async function decideWaitlist(_prevState, formData) {
+  const parsed = waitlistDecisionSchema.safeParse({
+    decision: formData.get("decision"),
+    entryIds: parseWaitlistEntryIds(formData),
+  });
+
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const firstError =
+      Object.values(fieldErrors).flat()[0] ?? "Please fix the highlighted fields.";
+
+    return {
+      success: false,
+      error: firstError,
+      message: null,
+    };
+  }
+
+  try {
+    const result = await decideWaitlistEntries(parsed.data);
+
+    if (!result.ok) {
+      return {
+        success: false,
+        error: result.error,
+        message: null,
+      };
+    }
+
+    revalidatePath("/dashboard/users");
+    revalidatePath("/dashboard/users/waitlist");
+
+    return {
+      success: true,
+      error: null,
+      message: result.message,
+    };
+  } catch (error) {
+    console.error("decideWaitlist failed:", error);
     return {
       success: false,
       error: "Something went wrong. Please try again shortly.",

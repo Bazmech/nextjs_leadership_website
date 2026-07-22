@@ -45,7 +45,13 @@ export default async function UsersPage({ searchParams }) {
         <dl className="mt-8 grid grid-cols-2 gap-6 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-3">
           <StatCard value={counts.active} label="Active" />
           <StatCard value={counts.disabled} label="Disabled" />
-          <StatCard value={counts.waitingRoom} label="Login Waitlist" />
+          <StatCard
+            value={counts.waitingRoom}
+            label="Wait list"
+            href={
+              counts.waitingRoom >= 1 ? "/dashboard/users/waitlist" : undefined
+            }
+          />
         </dl>
 
         <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
