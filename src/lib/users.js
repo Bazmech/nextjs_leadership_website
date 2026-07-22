@@ -2,7 +2,7 @@ import { count, eq, inArray } from "drizzle-orm";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { userRoles, users } from "@/db/schema";
+import { assessmentSubmissions, userRoles, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { getSiteSettings } from "@/lib/prismic-settings";
 
@@ -154,6 +154,27 @@ export async function getAppUserByClerkId(clerkUserId) {
     .limit(1);
 
   return row ?? null;
+}
+
+/**
+ * Delete only this Clerk user's app-owned rows (submissions + users row).
+ * Does not delete assessment templates they may have created for others.
+ * Idempotent — safe for Clerk webhook retries.
+ */
+export async function deleteAppUserDataByClerkId(clerkUserId) {
+  if (!clerkUserId) {
+    return { ok: false, error: "Missing Clerk user id." };
+  }
+
+  const db = getDb();
+
+  await db
+    .delete(assessmentSubmissions)
+    .where(eq(assessmentSubmissions.clerkUserId, clerkUserId));
+
+  await db.delete(users).where(eq(users.clerkUserId, clerkUserId));
+
+  return { ok: true };
 }
 
 /**
@@ -310,24 +331,28 @@ async function getAppUsersByClerkIds(clerkUserIds) {
 }
 
 /**
- * Staff-only: totals of enabled (active) and disabled rows in `users`.
+ * Staff-only: totals of enabled (active) and disabled rows in `users`,
+ * plus pending Clerk waitlist (waiting room) entries.
  * Cross-user admin surface — see user-data-authorization.mdc.
  */
 export async function getUserAccessCounts() {
   const actor = await getCurrentAppUser();
 
   if (!isStaffRole(actor?.roleName)) {
-    return { active: 0, disabled: 0 };
+    return { active: 0, disabled: 0, waitingRoom: 0 };
   }
 
   const db = getDb();
-  const rows = await db
-    .select({
-      enabled: users.enabled,
-      total: count(),
-    })
-    .from(users)
-    .groupBy(users.enabled);
+  const [rows, waitingRoom] = await Promise.all([
+    db
+      .select({
+        enabled: users.enabled,
+        total: count(),
+      })
+      .from(users)
+      .groupBy(users.enabled),
+    getClerkWaitingRoomCount(),
+  ]);
 
   let active = 0;
   let disabled = 0;
@@ -341,7 +366,149 @@ export async function getUserAccessCounts() {
     }
   }
 
-  return { active, disabled };
+  return { active, disabled, waitingRoom };
+}
+
+/** Pending Clerk waitlist entries (waiting room). */
+async function getClerkWaitingRoomCount() {
+  try {
+    const client = await clerkClient();
+    const { totalCount } = await client.waitlistEntries.list({
+      status: "pending",
+      limit: 1,
+    });
+    return Number(totalCount) || 0;
+  } catch (error) {
+    console.error("Failed to load Clerk waiting room count:", error);
+    return 0;
+  }
+}
+
+const WAITLIST_PAGE_SIZE = 10;
+
+/**
+ * Staff-only: list pending Clerk waitlist entries with search + paging.
+ * Cross-user admin surface — see user-data-authorization.mdc.
+ */
+export async function listWaitlistEntries({
+  query = "",
+  page = 1,
+  pageSize = WAITLIST_PAGE_SIZE,
+} = {}) {
+  const actor = await getCurrentAppUser();
+
+  if (!isStaffRole(actor?.roleName)) {
+    return { entries: [], totalCount: 0, page: 1, pageSize, totalPages: 0 };
+  }
+
+  const safePageSize = Math.min(Math.max(Number(pageSize) || WAITLIST_PAGE_SIZE, 1), 50);
+  const safePage = Math.max(Number(page) || 1, 1);
+  const trimmed = query?.trim() ?? "";
+
+  try {
+    const client = await clerkClient();
+    const { data, totalCount } = await client.waitlistEntries.list({
+      status: "pending",
+      limit: safePageSize,
+      offset: (safePage - 1) * safePageSize,
+      orderBy: "-created_at",
+      ...(trimmed ? { query: trimmed } : {}),
+    });
+
+    const total = Number(totalCount) || 0;
+    const totalPages = total > 0 ? Math.ceil(total / safePageSize) : 0;
+
+    return {
+      entries: (data ?? []).map((entry) => ({
+        id: entry.id,
+        email: entry.emailAddress,
+        status: entry.status,
+        createdAt: entry.createdAt,
+      })),
+      totalCount: total,
+      page: safePage,
+      pageSize: safePageSize,
+      totalPages,
+    };
+  } catch (error) {
+    console.error("Failed to list Clerk waitlist entries:", error);
+    return {
+      entries: [],
+      totalCount: 0,
+      page: safePage,
+      pageSize: safePageSize,
+      totalPages: 0,
+    };
+  }
+}
+
+/**
+ * Staff-only: invite (accept) or reject (deny) waitlist entries via Clerk.
+ * Cross-user admin surface — see user-data-authorization.mdc.
+ */
+export async function decideWaitlistEntries({ decision, entryIds }) {
+  const actor = await getCurrentAppUser();
+
+  if (!isStaffRole(actor?.roleName)) {
+    return { ok: false, error: "You do not have permission to manage the wait list." };
+  }
+
+  const ids = [...new Set(entryIds.filter(Boolean))];
+  if (!ids.length) {
+    return { ok: false, error: "Select at least one wait list entry." };
+  }
+
+  const client = await clerkClient();
+  const failures = [];
+
+  for (const id of ids) {
+    try {
+      if (decision === "accept") {
+        await client.waitlistEntries.invite(id);
+      } else {
+        await client.waitlistEntries.reject(id);
+      }
+    } catch (error) {
+      console.error(`Waitlist ${decision} failed for ${id}:`, error);
+      failures.push(id);
+    }
+  }
+
+  if (failures.length === ids.length) {
+    return {
+      ok: false,
+      error:
+        decision === "accept"
+          ? "Could not accept the selected wait list entries."
+          : "Could not deny the selected wait list entries.",
+    };
+  }
+
+  if (failures.length) {
+    return {
+      ok: true,
+      partial: true,
+      error: null,
+      message:
+        decision === "accept"
+          ? `Accepted ${ids.length - failures.length} of ${ids.length} entries.`
+          : `Denied ${ids.length - failures.length} of ${ids.length} entries.`,
+    };
+  }
+
+  return {
+    ok: true,
+    partial: false,
+    error: null,
+    message:
+      decision === "accept"
+        ? ids.length === 1
+          ? "Invitation sent."
+          : `Accepted ${ids.length} wait list entries.`
+        : ids.length === 1
+          ? "Wait list entry denied."
+          : `Denied ${ids.length} wait list entries.`,
+  };
 }
 
 /**
