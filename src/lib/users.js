@@ -310,24 +310,28 @@ async function getAppUsersByClerkIds(clerkUserIds) {
 }
 
 /**
- * Staff-only: totals of enabled (active) and disabled rows in `users`.
+ * Staff-only: totals of enabled (active) and disabled rows in `users`,
+ * plus pending Clerk waitlist (waiting room) entries.
  * Cross-user admin surface — see user-data-authorization.mdc.
  */
 export async function getUserAccessCounts() {
   const actor = await getCurrentAppUser();
 
   if (!isStaffRole(actor?.roleName)) {
-    return { active: 0, disabled: 0 };
+    return { active: 0, disabled: 0, waitingRoom: 0 };
   }
 
   const db = getDb();
-  const rows = await db
-    .select({
-      enabled: users.enabled,
-      total: count(),
-    })
-    .from(users)
-    .groupBy(users.enabled);
+  const [rows, waitingRoom] = await Promise.all([
+    db
+      .select({
+        enabled: users.enabled,
+        total: count(),
+      })
+      .from(users)
+      .groupBy(users.enabled),
+    getClerkWaitingRoomCount(),
+  ]);
 
   let active = 0;
   let disabled = 0;
@@ -341,7 +345,22 @@ export async function getUserAccessCounts() {
     }
   }
 
-  return { active, disabled };
+  return { active, disabled, waitingRoom };
+}
+
+/** Pending Clerk waitlist entries (waiting room). */
+async function getClerkWaitingRoomCount() {
+  try {
+    const client = await clerkClient();
+    const { totalCount } = await client.waitlistEntries.list({
+      status: "pending",
+      limit: 1,
+    });
+    return Number(totalCount) || 0;
+  } catch (error) {
+    console.error("Failed to load Clerk waiting room count:", error);
+    return 0;
+  }
 }
 
 /**
