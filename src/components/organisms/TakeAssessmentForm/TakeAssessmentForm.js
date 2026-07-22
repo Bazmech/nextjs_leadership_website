@@ -292,6 +292,12 @@ function StatementScores({
 }) {
   return (
     <Tabs defaultValue={defaultTab}>
+      {!readOnly ? (
+        <p className="mb-4 text-base font-semibold leading-relaxed text-muted">
+          Rate your agreement with each statement on a scale of 1 (Strongly
+          Disagree) to 5 (Strongly Agree).
+        </p>
+      ) : null}
       <TabsList>
         {domains.map((domain) => (
           <TabsTrigger key={domain.id} value={domain.id}>
@@ -319,14 +325,25 @@ function StatementScores({
                           Score: {answers[statement.id] ?? "—"}
                         </p>
                       ) : (
-                        <ScoreRadioGroup
-                          id={`score-${statement.id}`}
-                          name={`score-${statement.id}`}
-                          value={answers[statement.id]}
-                          onValueChange={(score) =>
-                            setScore(statement.id, score)
-                          }
-                        />
+                        <div className="space-y-3">
+                          <ScoreRadioGroup
+                            id={`score-${statement.id}`}
+                            name={`score-${statement.id}`}
+                            value={answers[statement.id]}
+                            onValueChange={(score) =>
+                              setScore(statement.id, score)
+                            }
+                          />
+                          <ScoreRadioGroup
+                            id={`score-emoji-${statement.id}`}
+                            name={`score-emoji-${statement.id}`}
+                            variant="emoji"
+                            value={answers[statement.id]}
+                            onValueChange={(score) =>
+                              setScore(statement.id, score)
+                            }
+                          />
+                        </div>
                       )}
                     </li>
                   ))}
