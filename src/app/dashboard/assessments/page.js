@@ -2,6 +2,7 @@ import Link from "@/components/atoms/Link/Link";
 import LocalDateTime from "@/components/atoms/LocalDateTime/LocalDateTime";
 import StartAssessmentForm from "@/components/organisms/StartAssessmentForm/StartAssessmentForm";
 import {
+  buildDefaultSubmissionTitle,
   formatFrequencyLabel,
   formatStatusLabel,
   listAssessmentsForUser,
@@ -87,7 +88,10 @@ export default async function AssessmentsPage() {
                     ) : (
                       <StartAssessmentForm
                         assessmentId={assessment.id}
-                        defaultTitle={assessment.title}
+                        defaultTitle={buildDefaultSubmissionTitle(
+                          assessment.title,
+                          assessment.frequency,
+                        )}
                         disabled={!canStart}
                         disabledReason={
                           reason || nextAvailableAt ? (

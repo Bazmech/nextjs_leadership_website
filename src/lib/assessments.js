@@ -34,6 +34,49 @@ export function formatFrequencyLabel(frequency) {
   return labels[frequency] ?? frequency;
 }
 
+function dayOfYear(date) {
+  const start = new Date(date.getFullYear(), 0, 1);
+  const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.floor((current - start) / (24 * 60 * 60 * 1000)) + 1;
+}
+
+/** ISO week number (1–53). */
+function isoWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  // Thursday in current week decides the year.
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d - yearStart) / (24 * 60 * 60 * 1000) + 1) / 7);
+}
+
+/**
+ * Default submission title from assessment name + start frequency.
+ * daily → "{Name} {Year} {dayOfYear}"
+ * weekly → "{Name} {Year} week {weekNumber}"
+ * monthly → "{Name} {Year} {MonthName}"
+ * yearly → "{Name} {Year}"
+ */
+export function buildDefaultSubmissionTitle(
+  assessmentName,
+  frequency,
+  date = new Date(),
+) {
+  const name = String(assessmentName ?? "").trim() || "Assessment";
+  const year = date.getFullYear();
+
+  switch (frequency) {
+    case "daily":
+      return `${name} ${year} Day ${dayOfYear(date)}`;
+    case "weekly":
+      return `${name} ${year} week ${isoWeekNumber(date)}`;
+    case "monthly":
+      return `${name} ${year} ${date.toLocaleString("en-US", { month: "long" })}`;
+    case "yearly":
+    default:
+      return `${name} ${year}`;
+  }
+}
+
 export function formatStatusLabel(status) {
   const labels = {
     draft: "Draft",

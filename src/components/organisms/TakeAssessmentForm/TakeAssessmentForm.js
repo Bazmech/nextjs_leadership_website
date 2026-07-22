@@ -292,6 +292,12 @@ function StatementScores({
 }) {
   return (
     <Tabs defaultValue={defaultTab}>
+      {!readOnly ? (
+        <p className="mb-4 text-base font-semibold leading-relaxed text-muted">
+          Rate your agreement with each statement on a scale of 1 (Strongly
+          Disagree) to 5 (Strongly Agree).
+        </p>
+      ) : null}
       <TabsList>
         {domains.map((domain) => (
           <TabsTrigger key={domain.id} value={domain.id}>
