@@ -19,10 +19,8 @@ export default function ScoreRadioGroup({
   onValueChange,
   disabled = false,
   className = "",
-  variant = "numeric",
 }) {
   const stringValue = value != null ? String(value) : undefined;
-  const isEmoji = variant === "emoji";
 
   return (
     <div
@@ -44,20 +42,17 @@ export default function ScoreRadioGroup({
           <RadixRadioGroup.Item
             key={score}
             value={String(score)}
-            className={
-              isEmoji
-                ? "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-lg transition-colors hover:border-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary/10 data-[state=checked]:ring-2 data-[state=checked]:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
-                : "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-sm font-medium text-foreground transition-colors hover:border-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-white disabled:cursor-not-allowed disabled:opacity-60"
-            }
+            className="group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-sm font-medium text-foreground transition-colors hover:border-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isEmoji ? (
-              <span aria-hidden="true">{EMOJI_BY_SCORE[score]}</span>
-            ) : (
-              score
-            )}
-            {isEmoji ? (
-              <span className="sr-only">{score}</span>
-            ) : null}
+            <span className="group-hover:hidden group-focus-visible:hidden">
+              {score}
+            </span>
+            <span
+              className="hidden text-lg group-hover:inline group-focus-visible:inline"
+              aria-hidden="true"
+            >
+              {EMOJI_BY_SCORE[score]}
+            </span>
           </RadixRadioGroup.Item>
         ))}
       </RadixRadioGroup.Root>

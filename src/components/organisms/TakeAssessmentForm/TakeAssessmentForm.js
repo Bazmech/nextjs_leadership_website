@@ -325,25 +325,14 @@ function StatementScores({
                           Score: {answers[statement.id] ?? "—"}
                         </p>
                       ) : (
-                        <div className="space-y-3">
-                          <ScoreRadioGroup
-                            id={`score-${statement.id}`}
-                            name={`score-${statement.id}`}
-                            value={answers[statement.id]}
-                            onValueChange={(score) =>
-                              setScore(statement.id, score)
-                            }
-                          />
-                          <ScoreRadioGroup
-                            id={`score-emoji-${statement.id}`}
-                            name={`score-emoji-${statement.id}`}
-                            variant="emoji"
-                            value={answers[statement.id]}
-                            onValueChange={(score) =>
-                              setScore(statement.id, score)
-                            }
-                          />
-                        </div>
+                        <ScoreRadioGroup
+                          id={`score-${statement.id}`}
+                          name={`score-${statement.id}`}
+                          value={answers[statement.id]}
+                          onValueChange={(score) =>
+                            setScore(statement.id, score)
+                          }
+                        />
                       )}
                     </li>
                   ))}
