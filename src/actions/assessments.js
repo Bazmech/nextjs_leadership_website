@@ -12,8 +12,14 @@ import {
   deleteDomain,
   deleteOwnedSubmission,
   deleteStatement,
+  moveAttribute,
+  moveDomain,
+  moveStatement,
   renameOwnedSubmission,
   saveSubmissionAnswers,
+  setAttributeOrder,
+  setDomainOrder,
+  setStatementOrder,
   startSubmission,
   updateAssessmentTemplate,
   updateAttribute,
@@ -30,8 +36,14 @@ import {
   deleteDomainSchema,
   deleteStatementSchema,
   deleteSubmissionSchema,
+  moveAttributeSchema,
+  moveDomainSchema,
+  moveStatementSchema,
   renameSubmissionSchema,
   saveSubmissionAnswersSchema,
+  setAttributeOrderSchema,
+  setDomainOrderSchema,
+  setStatementOrderSchema,
   startSubmissionSchema,
   updateAssessmentSchema,
   updateAttributeSchema,
@@ -100,9 +112,9 @@ export async function updateAssessment(_prevState, formData) {
   }
 
   try {
-    const row = await updateAssessmentTemplate(parsed.data);
-    if (!row) {
-      return { success: false, error: "Assessment not found.", message: null };
+    const result = await updateAssessmentTemplate(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
     }
     revalidatePath("/dashboard/questions");
     revalidatePath(`/dashboard/questions/${parsed.data.assessmentId}`);
@@ -365,6 +377,169 @@ export async function removeStatement(_prevState, formData) {
     return { success: true, error: null, message: "Statement deleted." };
   } catch (error) {
     console.error("removeStatement failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function reorderDomain(_prevState, formData) {
+  const parsed = moveDomainSchema.safeParse({
+    domainId: formData.get("domainId"),
+    direction: formData.get("direction"),
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await moveDomain(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    if (result.assessmentId) {
+      revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    }
+    return { success: true, error: null, message: "Domain moved." };
+  } catch (error) {
+    console.error("reorderDomain failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function reorderAttribute(_prevState, formData) {
+  const parsed = moveAttributeSchema.safeParse({
+    attributeId: formData.get("attributeId"),
+    direction: formData.get("direction"),
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await moveAttribute(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    if (result.assessmentId) {
+      revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    }
+    return { success: true, error: null, message: "Attribute moved." };
+  } catch (error) {
+    console.error("reorderAttribute failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function reorderStatement(_prevState, formData) {
+  const parsed = moveStatementSchema.safeParse({
+    statementId: formData.get("statementId"),
+    direction: formData.get("direction"),
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await moveStatement(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    if (result.assessmentId) {
+      revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    }
+    return { success: true, error: null, message: "Statement moved." };
+  } catch (error) {
+    console.error("reorderStatement failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function saveDomainOrder(assessmentId, orderedIds) {
+  const parsed = setDomainOrderSchema.safeParse({ assessmentId, orderedIds });
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await setDomainOrder(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    return { success: true, error: null, message: "Domain order saved." };
+  } catch (error) {
+    console.error("saveDomainOrder failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function saveAttributeOrder(domainId, orderedIds) {
+  const parsed = setAttributeOrderSchema.safeParse({ domainId, orderedIds });
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await setAttributeOrder(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    if (result.assessmentId) {
+      revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    }
+    return { success: true, error: null, message: "Attribute order saved." };
+  } catch (error) {
+    console.error("saveAttributeOrder failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+export async function saveStatementOrder(attributeId, orderedIds) {
+  const parsed = setStatementOrderSchema.safeParse({
+    attributeId,
+    orderedIds,
+  });
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await setStatementOrder(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    if (result.assessmentId) {
+      revalidatePath(`/dashboard/questions/${result.assessmentId}`);
+    }
+    return { success: true, error: null, message: "Statement order saved." };
+  } catch (error) {
+    console.error("saveStatementOrder failed:", error);
     return {
       success: false,
       error: "Something went wrong. Please try again shortly.",
