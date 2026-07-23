@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { PrismicPreview } from "@prismicio/next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { clerkAppearance } from "@/lib/clerk-appearance";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }) {
         </ClerkProvider>
         <PrismicPreview repositoryName={repositoryName} />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
