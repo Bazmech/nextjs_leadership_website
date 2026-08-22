@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 function format(date, mode) {
   if (mode === "date") return date.toLocaleDateString();
@@ -10,18 +12,12 @@ function format(date, mode) {
 
 /**
  * Renders a date/time using the browser's locale and timezone.
- * Server render uses the server locale; the effect re-formats after
- * hydration so the visitor always sees their own local formatting.
+ * Server render uses the server locale; a client snapshot after
+ * hydration re-formats so the visitor always sees their own local formatting.
  */
 export default function LocalDateTime({ value, mode = "datetime", className }) {
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const date = value ? new Date(value) : null;
-  const [text, setText] = useState(null);
-
-  useEffect(() => {
-    if (value) {
-      setText(format(new Date(value), mode));
-    }
-  }, [value, mode]);
 
   if (!date || Number.isNaN(date.getTime())) {
     return <span className={className}>—</span>;
@@ -31,9 +27,10 @@ export default function LocalDateTime({ value, mode = "datetime", className }) {
     <time
       dateTime={date.toISOString()}
       className={className}
+      data-hydrated={isClient ? "" : undefined}
       suppressHydrationWarning
     >
-      {text ?? format(date, mode)}
+      {format(date, mode)}
     </time>
   );
 }

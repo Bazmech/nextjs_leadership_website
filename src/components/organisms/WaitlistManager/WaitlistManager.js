@@ -130,12 +130,15 @@ function WaitlistConfirmDialog({
 export default function WaitlistManager({ entries }) {
   const router = useRouter();
   const entryIds = useMemo(() => entries.map((entry) => entry.id), [entries]);
+  const entryKey = entryIds.join("|");
   const [selected, setSelected] = useState(() => new Set());
+  const [prevEntryKey, setPrevEntryKey] = useState(entryKey);
   const [dialog, setDialog] = useState(null);
 
-  useEffect(() => {
+  if (entryKey !== prevEntryKey) {
+    setPrevEntryKey(entryKey);
     setSelected(new Set());
-  }, [entryIds.join("|")]);
+  }
 
   const allSelected =
     entryIds.length > 0 && entryIds.every((id) => selected.has(id));

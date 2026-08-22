@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   completeAssessmentSubmission,
@@ -73,7 +73,7 @@ export default function TakeAssessmentForm({
     }
   }, [completeState.success, router]);
 
-  async function persistAnswers() {
+  const persistAnswers = useCallback(async () => {
     if (readOnly || !dirtyRef.current) return;
     setSaveStatus("saving");
     const result = await saveAssessmentAnswers(
@@ -90,7 +90,7 @@ export default function TakeAssessmentForm({
     } else {
       setSaveStatus("error");
     }
-  }
+  }, [readOnly, submission.id]);
 
   useEffect(() => {
     if (readOnly) return undefined;
@@ -100,7 +100,7 @@ export default function TakeAssessmentForm({
     }, AUTOSAVE_MS);
 
     return () => clearInterval(id);
-  }, [readOnly, submission.id]);
+  }, [readOnly, persistAnswers]);
 
   function setScore(statementId, score) {
     if (readOnly) return;
