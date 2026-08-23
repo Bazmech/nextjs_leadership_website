@@ -35,23 +35,25 @@ export async function generateMetadata() {
 }
 
 export default async function Home() {
+  let homepage = null;
+
   try {
     const client = createClient();
-    const homepage = await client.getSingle("homepage");
-
-    if (homepage.data.slices?.length > 0) {
-      return (
-        <>
-          <Header />
-          <main className="flex-1">
-            <SliceZone slices={homepage.data.slices} components={components} />
-          </main>
-          <Footer />
-        </>
-      );
-    }
+    homepage = await client.getSingle("homepage");
   } catch (error) {
     console.warn("Prismic homepage unavailable, using static fallback:", error.message);
+  }
+
+  if (homepage?.data.slices?.length > 0) {
+    return (
+      <>
+        <Header />
+        <main className="flex-1">
+          <SliceZone slices={homepage.data.slices} components={components} />
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   return <StaticHome />;

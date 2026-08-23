@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { renameAssessmentSubmission } from "@/actions/assessments";
 import Button from "@/components/atoms/Button/Button";
 import Input from "@/components/atoms/Input/Input";
@@ -15,20 +15,22 @@ const initialState = {
 export default function RenameSubmissionTitle({ submissionId, title }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title);
+  const [prevTitle, setPrevTitle] = useState(title);
+  const [handledSuccess, setHandledSuccess] = useState(false);
   const [state, formAction, isPending] = useActionState(
     renameAssessmentSubmission,
     initialState,
   );
 
-  useEffect(() => {
+  if (title !== prevTitle) {
+    setPrevTitle(title);
     setValue(title);
-  }, [title]);
+  }
 
-  useEffect(() => {
-    if (state.success) {
-      setEditing(false);
-    }
-  }, [state.success]);
+  if (state.success && editing && !handledSuccess) {
+    setHandledSuccess(true);
+    setEditing(false);
+  }
 
   if (!editing) {
     return (
@@ -38,7 +40,10 @@ export default function RenameSubmissionTitle({ submissionId, title }) {
         </h1>
         <button
           type="button"
-          onClick={() => setEditing(true)}
+          onClick={() => {
+            setHandledSuccess(false);
+            setEditing(true);
+          }}
           className="cursor-pointer text-sm font-medium text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary-light"
         >
           Rename

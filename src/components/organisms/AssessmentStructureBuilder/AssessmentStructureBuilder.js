@@ -206,10 +206,6 @@ function InlineRenameForm({
   const [state, formAction, isPending] = useActionState(action, emptyState);
 
   useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
     if (state.success) {
       onCancel();
     }
@@ -524,7 +520,10 @@ function SortableDomain({
 }
 
 function AttributeList({ domain, locked, onAttributesChange }) {
-  const attributes = domain.attributes ?? [];
+  const attributes = useMemo(
+    () => domain.attributes ?? [],
+    [domain.attributes],
+  );
   const sensors = useSortableSensors();
   const [, startTransition] = useTransition();
   const ids = useMemo(
@@ -696,7 +695,10 @@ function SortableAttribute({
 }
 
 function StatementList({ attribute, locked, onStatementsChange }) {
-  const statements = attribute.statements ?? [];
+  const statements = useMemo(
+    () => attribute.statements ?? [],
+    [attribute.statements],
+  );
   const sensors = useSortableSensors();
   const [, startTransition] = useTransition();
   const ids = useMemo(
@@ -856,7 +858,9 @@ function SortableStatement({
 
 export default function AssessmentStructureBuilder({ assessment }) {
   const locked = isAssessmentStructureLocked(assessment.status);
-  const [domains, setDomains] = useState(assessment.domains ?? []);
+  const serverDomains = assessment.domains ?? [];
+  const [domains, setDomains] = useState(serverDomains);
+  const [prevServerDomains, setPrevServerDomains] = useState(serverDomains);
   const [, startTransition] = useTransition();
   const sensors = useSortableSensors();
   const domainIds = useMemo(
@@ -864,9 +868,10 @@ export default function AssessmentStructureBuilder({ assessment }) {
     [domains],
   );
 
-  useEffect(() => {
-    setDomains(assessment.domains ?? []);
-  }, [assessment.domains]);
+  if (serverDomains !== prevServerDomains) {
+    setPrevServerDomains(serverDomains);
+    setDomains(serverDomains);
+  }
 
   function handleDomainDragEnd(event) {
     if (locked) return;
