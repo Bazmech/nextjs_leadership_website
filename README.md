@@ -341,7 +341,7 @@ Content is managed in [Prismic](https://prismic.io) using Slice Machine. The hom
 6. Configure revalidation webhook in Prismic (**Settings → Webhooks**):
    - URL: `https://your-domain.com/api/revalidate`
    - Triggers: document published / unpublished
-   - Optional: set `PRISMIC_WEBHOOK_SECRET` in Vercel and Prismic webhook headers
+   - Set `PRISMIC_WEBHOOK_SECRET` in Vercel and put the **same value** in the Prismic webhook **Secret** field (sent as JSON `secret`). A custom header `x-prismic-webhook-secret` also works.
 
 7. If your Prismic API is private, generate an access token and set `PRISMIC_ACCESS_TOKEN` in `.env.local` and Vercel.
 
