@@ -21,7 +21,10 @@ import {
   requireEnabledAppUser,
   requireSuperAdminAppUser,
 } from "@/lib/users";
-import { isAssessmentStructureLocked } from "@/lib/schemas/assessment";
+import {
+  assessmentQueryIdSchema,
+  isAssessmentStructureLocked,
+} from "@/lib/schemas/assessment";
 
 export { isAssessmentStructureLocked };
 
@@ -92,6 +95,12 @@ export function formatStatusLabel(status) {
     archived: "Archived",
   };
   return labels[status] ?? status;
+}
+
+export function parseAssessmentQueryId(value) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const parsed = assessmentQueryIdSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
 }
 
 const STRUCTURE_LOCKED_ERROR =
@@ -1279,12 +1288,17 @@ async function ensureOverallAveragesCached() {
  * Dashboard-gated via requireEnabledAppUser.
  * See user-data-authorization.mdc (aggregate statistic, not per-user records).
  */
-export async function getOverallAssessmentAverages() {
+export async function getOverallAssessmentAverages(assessmentId) {
   await requireEnabledAppUser();
   await ensureOverallAveragesCached();
   const db = getDb();
 
-  const rows = await db.select().from(assessmentOverallAverages);
+  const rows = assessmentId
+    ? await db
+        .select()
+        .from(assessmentOverallAverages)
+        .where(eq(assessmentOverallAverages.assessmentId, assessmentId))
+    : await db.select().from(assessmentOverallAverages);
   const groups = [];
   for (const row of rows) {
     const tree = await getAssessmentTree(row.assessmentId);
@@ -1306,11 +1320,31 @@ export async function getOverallAssessmentAverages() {
 }
 
 /** Past list plus domain and attribute series for `/dashboard/assessments/past`. */
-export async function getPastAssessmentsPageData() {
-  const { past } = await listAssessmentsForUser();
+export async function getPastAssessmentsPageData(assessmentId) {
+  const { startable, past } = await listAssessmentsForUser();
+  const filtered = assessmentId
+    ? past.filter(({ submission }) => submission.assessmentId === assessmentId)
+    : past;
   const { domainSeries, attributeSeries } =
-    await buildPastAverageSeries(past);
-  return { past, domainSeries, attributeSeries };
+    await buildPastAverageSeries(filtered);
+
+  let assessmentTitle = null;
+  if (assessmentId) {
+    assessmentTitle =
+      filtered.find(({ assessment }) => assessment?.id === assessmentId)
+        ?.assessment?.title ??
+      startable.find(({ assessment }) => assessment.id === assessmentId)
+        ?.assessment.title ??
+      null;
+  }
+
+  return {
+    past: filtered,
+    domainSeries,
+    attributeSeries,
+    assessmentId: assessmentId ?? null,
+    assessmentTitle,
+  };
 }
 
 function sortCompletedPast(items) {
@@ -1523,22 +1557,44 @@ export async function deleteOwnedSubmission({ submissionId }) {
   return { ok: true };
 }
 
-/** Dashboard card: takeable assessments plus past-submission count. */
+/** One dashboard card per assessment template the user can see. */
 export async function getDashboardAssessmentSummary() {
   const { startable, past } = await listAssessmentsForUser();
-  const takeable = startable
-    .filter((item) => item.canStart)
-    .map(({ assessment, inProgress }) => ({
+  const pastByAssessment = new Map();
+  for (const item of past) {
+    const id = item.submission.assessmentId;
+    pastByAssessment.set(id, (pastByAssessment.get(id) ?? 0) + 1);
+  }
+
+  const cards = [];
+  const seen = new Set();
+
+  for (const { assessment, inProgress } of startable) {
+    seen.add(assessment.id);
+    cards.push({
       id: assessment.id,
       title: assessment.title,
       inProgress: Boolean(inProgress),
-      href: inProgress
+      showStart: true,
+      startHref: inProgress
         ? `/dashboard/assessments/submissions/${inProgress.id}`
         : `/dashboard/assessments#assessment-${assessment.id}`,
-    }));
+      pastCount: pastByAssessment.get(assessment.id) ?? 0,
+    });
+  }
 
-  return {
-    pastCount: past.length,
-    takeable,
-  };
+  for (const { submission, assessment } of past) {
+    if (!assessment || seen.has(assessment.id)) continue;
+    seen.add(assessment.id);
+    cards.push({
+      id: assessment.id,
+      title: assessment.title,
+      inProgress: false,
+      showStart: false,
+      startHref: null,
+      pastCount: pastByAssessment.get(assessment.id) ?? 0,
+    });
+  }
+
+  return { cards };
 }

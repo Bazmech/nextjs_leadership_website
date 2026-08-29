@@ -62,6 +62,25 @@ function PastAssessmentsIcon() {
   );
 }
 
+function AssessmentAverageIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 shrink-0"
+      aria-hidden="true"
+    >
+      <path d="M3 3v18h18" />
+      <path d="M7 14l4-4 4 4 6-6" />
+    </svg>
+  );
+}
+
 export default async function DashboardPage() {
   const [user, appUser, settings, assessmentSummary] = await Promise.all([
     currentUser(),
@@ -72,7 +91,7 @@ export default async function DashboardPage() {
   const showStaffTools = isStaffRole(appUser?.roleName);
   const showSuperAdminTools = isSuperAdminRole(appUser?.roleName);
   const dbContext = showSuperAdminTools ? await getDatabaseContext() : null;
-  const takeable = assessmentSummary.takeable ?? [];
+  const cards = assessmentSummary.cards ?? [];
   return (
     <div className="bg-background px-6 py-16">
       <div className="mx-auto max-w-3xl">
@@ -87,32 +106,61 @@ export default async function DashboardPage() {
           />
         ) : null}
 
-        <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
-          <h2 className="text-lg font-semibold text-foreground">Assessments</h2>
-          <div className="mt-4 grid gap-3">
-            {takeable.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+        <div className="mt-10 grid gap-6">
+          {cards.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-6">
+              <h2 className="text-lg font-semibold text-foreground">
+                Assessments
+              </h2>
+              <p className="mt-3 text-sm text-muted">
+                No assessments are available right now.
+              </p>
+            </div>
+          ) : (
+            cards.map((card) => (
+              <div
+                key={card.id}
+                className="rounded-2xl border border-border bg-surface p-6"
               >
-                <StartAssessmentIcon />
-                <span className="underline decoration-primary/30 underline-offset-4">
-                  {item.inProgress ? "Continue Assessment" : "Start Assessment"}
-                  {takeable.length > 1 ? ` — ${item.title}` : ""}
-                </span>
-              </Link>
-            ))}
-            <Link
-              href="/dashboard/assessments/past"
-              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
-            >
-              <PastAssessmentsIcon />
-              <span className="underline decoration-primary/30 underline-offset-4">
-                Past Assessments ({assessmentSummary.pastCount})
-              </span>
-            </Link>
-          </div>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {card.title}
+                </h2>
+                <div className="mt-4 grid gap-3">
+                  {card.showStart ? (
+                    <Link
+                      href={card.startHref}
+                      className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+                    >
+                      <StartAssessmentIcon />
+                      <span className="underline decoration-primary/30 underline-offset-4">
+                        {card.inProgress
+                          ? "Continue Assessment"
+                          : "Start Assessment"}
+                      </span>
+                    </Link>
+                  ) : null}
+                  <Link
+                    href={`/dashboard/assessments/past?assessment=${card.id}`}
+                    className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+                  >
+                    <PastAssessmentsIcon />
+                    <span className="underline decoration-primary/30 underline-offset-4">
+                      Past Assessments ({card.pastCount})
+                    </span>
+                  </Link>
+                  <Link
+                    href={`/dashboard/assessments/average?assessment=${card.id}`}
+                    className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+                  >
+                    <AssessmentAverageIcon />
+                    <span className="underline decoration-primary/30 underline-offset-4">
+                      Overall average
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="mt-6 rounded-2xl border border-border bg-surface p-6">

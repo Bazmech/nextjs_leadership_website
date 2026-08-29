@@ -113,6 +113,8 @@ export const startSubmissionSchema = z.object({
   title: z.string().trim().min(1, "Name this assessment.").max(200),
 });
 
+export const assessmentQueryIdSchema = z.string().uuid("Invalid assessment.");
+
 export const saveSubmissionAnswersSchema = z.object({
   submissionId: z.string().uuid("Invalid submission."),
   answers: z.record(

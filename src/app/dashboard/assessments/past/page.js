@@ -2,7 +2,10 @@ import Link from "@/components/atoms/Link/Link";
 import LocalDateTime from "@/components/atoms/LocalDateTime/LocalDateTime";
 import DomainAveragesLineChart from "@/components/organisms/DomainAveragesLineChart/DomainAveragesLineChart";
 import IncludeInAverageCheckbox from "@/components/organisms/IncludeInAverageCheckbox/IncludeInAverageCheckbox";
-import { getPastAssessmentsPageData } from "@/lib/assessments";
+import {
+  getPastAssessmentsPageData,
+  parseAssessmentQueryId,
+} from "@/lib/assessments";
 import { buildSimplePageMetadata } from "@/lib/prismic-seo";
 
 export async function generateMetadata() {
@@ -12,9 +15,19 @@ export async function generateMetadata() {
   );
 }
 
-export default async function PastAssessmentsPage() {
-  const { past, domainSeries = [], attributeSeries = [] } =
-    await getPastAssessmentsPageData();
+export default async function PastAssessmentsPage({ searchParams }) {
+  const params = await searchParams;
+  const assessmentId = parseAssessmentQueryId(params.assessment);
+  const {
+    past,
+    domainSeries = [],
+    attributeSeries = [],
+    assessmentTitle,
+  } = await getPastAssessmentsPageData(assessmentId);
+
+  const averageHref = assessmentId
+    ? `/dashboard/assessments/average?assessment=${assessmentId}`
+    : "/dashboard/assessments/average";
 
   return (
     <div className="bg-background px-6 py-16">
@@ -32,12 +45,13 @@ export default async function PastAssessmentsPage() {
               Past assessments
             </h1>
             <p className="mt-3 text-lg text-muted">
-              Your previous submissions. Completed assessments can be included
-              in the overall domain and attribute averages.
+              {assessmentTitle
+                ? `Your previous ${assessmentTitle} submissions. Completed assessments can be included in the overall domain and attribute averages.`
+                : "Your previous submissions. Completed assessments can be included in the overall domain and attribute averages."}
             </p>
           </div>
           <Link
-            href="/dashboard/assessments/average"
+            href={averageHref}
             className="inline-flex shrink-0 items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
           >
             Overall average
@@ -64,7 +78,9 @@ export default async function PastAssessmentsPage() {
           {past.length === 0 ? (
             <div className="rounded-2xl border border-border bg-surface p-6">
               <p className="text-sm text-muted">
-                You have not started any assessments yet.
+                {assessmentTitle
+                  ? `You have not started ${assessmentTitle} yet.`
+                  : "You have not started any assessments yet."}
               </p>
             </div>
           ) : (
@@ -81,9 +97,11 @@ export default async function PastAssessmentsPage() {
                     <h3 className="text-base font-semibold text-foreground">
                       {submission.title}
                     </h3>
-                    <p className="mt-1 text-sm text-muted">
-                      Assessment: {assessment?.title ?? "—"}
-                    </p>
+                    {!assessmentId ? (
+                      <p className="mt-1 text-sm text-muted">
+                        Assessment: {assessment?.title ?? "—"}
+                      </p>
+                    ) : null}
                   </Link>
                   <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted">
                     {submission.status === "completed"

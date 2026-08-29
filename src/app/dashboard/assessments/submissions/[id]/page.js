@@ -32,7 +32,11 @@ export default async function SubmissionPage({ params }) {
     >
       <div className={`mx-auto ${readOnly ? "max-w-5xl" : "max-w-3xl"}`}>
         <Link
-          href={readOnly ? "/dashboard/assessments/past" : "/dashboard/assessments"}
+          href={
+            readOnly
+              ? `/dashboard/assessments/past?assessment=${assessment.id}`
+              : "/dashboard/assessments"
+          }
           className="text-sm font-medium text-muted transition-colors hover:text-foreground"
         >
           {readOnly ? "← Past assessments" : "← Assessments"}
