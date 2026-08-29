@@ -38,12 +38,20 @@ export default async function AssessmentsPage() {
               Start a new assessment or continue where you left off.
             </p>
           </div>
-          <Link
-            href="/dashboard/assessments/past"
-            className="inline-flex shrink-0 items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
-          >
-            Past assessments
-          </Link>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Link
+              href="/dashboard/assessments/past"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
+            >
+              Past assessments
+            </Link>
+            <Link
+              href="/dashboard/assessments/average"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
+            >
+              Assessment average
+            </Link>
+          </div>
         </div>
 
         <div className="mt-10 space-y-4">

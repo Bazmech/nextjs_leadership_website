@@ -1092,6 +1092,104 @@ export async function renameOwnedSubmission({ submissionId, title }) {
   return { ok: true, submission: row };
 }
 
+/**
+ * Toggle whether own submission is included in the assessment average.
+ * Allowed in progress or completed so past assessments can be opted in or out.
+ * See user-data-authorization.mdc.
+ */
+export async function setOwnedSubmissionIncludeInAverage({
+  submissionId,
+  includeInAverage,
+}) {
+  const appUser = await requireEnabledAppUser();
+  const db = getDb();
+
+  const [submission] = await db
+    .select()
+    .from(assessmentSubmissions)
+    .where(eq(assessmentSubmissions.id, submissionId))
+    .limit(1);
+
+  if (!submission || submission.clerkUserId !== appUser.clerkUserId) {
+    return { ok: false, error: "Submission not found." };
+  }
+
+  const [row] = await db
+    .update(assessmentSubmissions)
+    .set({
+      includeInAverage,
+      updatedAt: new Date(),
+    })
+    .where(eq(assessmentSubmissions.id, submissionId))
+    .returning();
+
+  return { ok: true, submission: row };
+}
+
+function averageSubmissionAnswers(submissions) {
+  const sums = {};
+  const counts = {};
+
+  for (const submission of submissions) {
+    for (const [statementId, score] of Object.entries(
+      submission.answers ?? {},
+    )) {
+      const n = Number(score);
+      if (!Number.isFinite(n)) continue;
+      sums[statementId] = (sums[statementId] ?? 0) + n;
+      counts[statementId] = (counts[statementId] ?? 0) + 1;
+    }
+  }
+
+  const averaged = {};
+  for (const statementId of Object.keys(sums)) {
+    averaged[statementId] =
+      Math.round((sums[statementId] / counts[statementId]) * 100) / 100;
+  }
+  return averaged;
+}
+
+/**
+ * Completed, opted-in submissions for the current user, grouped by template.
+ * Own data only — see user-data-authorization.mdc.
+ */
+export async function getOwnedAssessmentAverages() {
+  const appUser = await requireEnabledAppUser();
+  const db = getDb();
+
+  const submissions = await db
+    .select()
+    .from(assessmentSubmissions)
+    .where(
+      and(
+        eq(assessmentSubmissions.clerkUserId, appUser.clerkUserId),
+        eq(assessmentSubmissions.status, "completed"),
+        eq(assessmentSubmissions.includeInAverage, true),
+      ),
+    )
+    .orderBy(desc(assessmentSubmissions.completedAt));
+
+  const byAssessment = new Map();
+  for (const submission of submissions) {
+    const list = byAssessment.get(submission.assessmentId) ?? [];
+    list.push(submission);
+    byAssessment.set(submission.assessmentId, list);
+  }
+
+  const groups = [];
+  for (const [assessmentId, group] of byAssessment) {
+    const tree = await getAssessmentTree(assessmentId);
+    if (!tree) continue;
+    groups.push({
+      assessment: tree,
+      submissions: group,
+      answers: averageSubmissionAnswers(group),
+    });
+  }
+
+  return groups;
+}
+
 export async function saveSubmissionAnswers({ submissionId, answers }) {
   const appUser = await requireEnabledAppUser();
   const db = getDb();

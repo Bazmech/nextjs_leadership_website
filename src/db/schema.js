@@ -102,6 +102,7 @@ export const assessmentStatements = pgTable("assessment_statements", {
 /**
  * A user's filled assessment instance.
  * `answers` is JSONB: { [statementId]: score 1–5 }.
+ * `includeInAverage` opts this submission into the user's assessment average.
  */
 export const assessmentSubmissions = pgTable("assessment_submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -112,6 +113,7 @@ export const assessmentSubmissions = pgTable("assessment_submissions", {
   title: text("title").notNull(),
   status: submissionStatusEnum("status").default("in_progress").notNull(),
   answers: jsonb("answers").default({}).notNull(),
+  includeInAverage: boolean("include_in_average").default(false).notNull(),
   startedAt: timestamp("started_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

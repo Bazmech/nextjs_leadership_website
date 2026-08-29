@@ -17,6 +17,7 @@ import {
   moveStatement,
   renameOwnedSubmission,
   saveSubmissionAnswers,
+  setOwnedSubmissionIncludeInAverage,
   setAttributeOrder,
   setDomainOrder,
   setStatementOrder,
@@ -41,6 +42,7 @@ import {
   moveStatementSchema,
   renameSubmissionSchema,
   saveSubmissionAnswersSchema,
+  setSubmissionIncludeInAverageSchema,
   setAttributeOrderSchema,
   setDomainOrderSchema,
   setStatementOrderSchema,
@@ -649,6 +651,7 @@ export async function completeAssessmentSubmission(_prevState, formData) {
     }
     revalidatePath("/dashboard/assessments");
     revalidatePath("/dashboard/assessments/past");
+    revalidatePath("/dashboard/assessments/average");
     revalidatePath(`/dashboard/assessments/submissions/${parsed.data.submissionId}`);
     revalidatePath("/dashboard");
     return {
@@ -720,6 +723,7 @@ export async function renameAssessmentSubmission(_prevState, formData) {
     }
     revalidatePath("/dashboard/assessments");
     revalidatePath("/dashboard/assessments/past");
+    revalidatePath("/dashboard/assessments/average");
     revalidatePath(
       `/dashboard/assessments/submissions/${parsed.data.submissionId}`,
     );
@@ -731,6 +735,49 @@ export async function renameAssessmentSubmission(_prevState, formData) {
     };
   } catch (error) {
     console.error("renameAssessmentSubmission failed:", error);
+    return {
+      success: false,
+      error: "Something went wrong. Please try again shortly.",
+      message: null,
+    };
+  }
+}
+
+/**
+ * Toggle include-in-average on own submission (in progress or completed).
+ * See user-data-authorization.mdc.
+ */
+export async function setSubmissionIncludeInAverage(_prevState, formData) {
+  const parsed = setSubmissionIncludeInAverageSchema.safeParse({
+    submissionId: formData.get("submissionId"),
+    includeInAverage: formData.get("includeInAverage"),
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: firstZodError(parsed), message: null };
+  }
+
+  try {
+    const result = await setOwnedSubmissionIncludeInAverage(parsed.data);
+    if (!result.ok) {
+      return { success: false, error: result.error, message: null };
+    }
+    revalidatePath("/dashboard/assessments");
+    revalidatePath("/dashboard/assessments/past");
+    revalidatePath("/dashboard/assessments/average");
+    revalidatePath(
+      `/dashboard/assessments/submissions/${parsed.data.submissionId}`,
+    );
+    revalidatePath("/dashboard");
+    return {
+      success: true,
+      error: null,
+      message: parsed.data.includeInAverage
+        ? "Included in assessment average."
+        : "Removed from assessment average.",
+    };
+  } catch (error) {
+    console.error("setSubmissionIncludeInAverage failed:", error);
     return {
       success: false,
       error: "Something went wrong. Please try again shortly.",

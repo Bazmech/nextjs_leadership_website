@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  Cell,
   PolarAngleAxis,
   PolarGrid,
   PolarRadiusAxis,
   Radar,
   RadarChart,
+  RadialBar,
+  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
@@ -14,12 +17,27 @@ import {
   SCORE_INTERPRETATION,
   getAttributeAverages,
   getDomainAverages,
+  getOverallAverage,
   getScoreBand,
 } from "@/lib/assessment-scores";
 
 const CHART_STROKE = "#005eb8";
 const CHART_FILL = "rgba(0, 94, 184, 0.25)";
 const GRID_STROKE = "#c5d8ea";
+const RING_TRACK = "#e8eef4";
+const SCORE_MAX = 5;
+
+/** Distinct ring colours (NHS-adjacent); first domain is the outer ring. */
+const DOMAIN_RING_COLORS = [
+  "#005eb8",
+  "#d5281b",
+  "#ed8b00",
+  "#00a499",
+  "#330072",
+  "#ae2573",
+  "#003087",
+  "#768692",
+];
 
 function wrapLabel(text, maxChars = 18) {
   const words = String(text).split(/\s+/);
@@ -69,17 +87,115 @@ function AttributeTick({ payload, x, y, cx, cy, textAnchor }) {
 function ScoreTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload;
-  if (!point) return null;
+  if (!point || typeof point.average !== "number") return null;
+  const label = point.fullName ?? point.name;
 
   return (
     <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm shadow-md">
-      <p className="font-semibold text-foreground">{point.fullName}</p>
+      <p className="font-semibold text-foreground">{label}</p>
       <p className="mt-0.5 text-muted">
-        Average: {point.average.toFixed(2)} / 5
+        Average: {point.average.toFixed(2)} / {SCORE_MAX}
       </p>
-      <p className="text-xs text-muted">
-        {point.scoredCount} of {point.statementCount} statements
-      </p>
+      {point.scoredCount != null ? (
+        <p className="text-xs text-muted">
+          {point.scoredCount} of {point.statementCount} statements
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function domainRingColor(index) {
+  return DOMAIN_RING_COLORS[index % DOMAIN_RING_COLORS.length];
+}
+
+function DomainAveragesRadialChart({ domains, overall }) {
+  const chartData = domains
+    .map((domain, index) => ({
+      id: domain.id,
+      name: domain.name,
+      fullName: domain.name,
+      average: domain.average,
+      scoredCount: domain.scoredCount,
+      statementCount: domain.statementCount,
+      fill: domainRingColor(index),
+    }))
+    .toReversed();
+
+  const innerRadius =
+    domains.length <= 3 ? "34%" : domains.length <= 5 ? "26%" : "18%";
+
+  return (
+    <div className="mt-6 grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:items-center">
+      <div className="relative mx-auto h-[min(20rem,70vw)] w-full max-w-sm min-h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadialBarChart
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            innerRadius={innerRadius}
+            outerRadius="92%"
+            startAngle={90}
+            endAngle={-270}
+            barCategoryGap="16%"
+            margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+          >
+            <PolarAngleAxis
+              type="number"
+              domain={[0, SCORE_MAX]}
+              tick={false}
+              axisLine={false}
+              tickLine={false}
+            />
+            <RadialBar
+              dataKey="average"
+              background={{ fill: RING_TRACK }}
+              cornerRadius={8}
+              isAnimationActive={false}
+            >
+              {chartData.map((entry) => (
+                <Cell key={entry.id} fill={entry.fill} />
+              ))}
+            </RadialBar>
+            <Tooltip content={<ScoreTooltip />} cursor={false} />
+          </RadialBarChart>
+        </ResponsiveContainer>
+        {overall != null ? (
+          <div className="pointer-events-none absolute inset-0 grid place-items-center">
+            <p className="text-center">
+              <span className="block text-4xl font-semibold tabular-nums leading-none text-foreground">
+                {overall.toFixed(2)}
+              </span>
+              <span className="mt-1 block text-xs text-muted">
+                Overall / {SCORE_MAX}
+              </span>
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <ul className="grid gap-3">
+        {domains.map((domain, index) => (
+          <li
+            key={domain.id}
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3"
+          >
+            <span
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: domainRingColor(index) }}
+              aria-hidden
+            />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium text-foreground">
+                {domain.name}
+              </span>
+              <span className="text-xs tabular-nums text-muted">
+                {domain.average.toFixed(2)} / {SCORE_MAX}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -87,6 +203,7 @@ function ScoreTooltip({ active, payload }) {
 function DomainAveragesTable({ assessment, answers }) {
   const domains = getDomainAverages(assessment, answers);
   if (domains.length === 0) return null;
+  const overall = getOverallAverage(assessment, answers);
 
   return (
     <section
@@ -99,7 +216,16 @@ function DomainAveragesTable({ assessment, answers }) {
       >
         Domain Averages
       </h2>
-      <div className="mt-4">
+      <p className="mt-1 text-sm text-muted">
+        Domain averages from your statement scores (scale 0–{SCORE_MAX}).
+      </p>
+      {overall != null ? (
+        <p className="sr-only">
+          Overall average {overall.toFixed(2)} out of {SCORE_MAX}.
+        </p>
+      ) : null}
+      <DomainAveragesRadialChart domains={domains} overall={overall} />
+      <div className="mt-6">
         <HorizontalScroll>
           <table className="w-full min-w-[20rem] border-collapse text-sm">
             <thead>
@@ -201,7 +327,12 @@ function AttributeAveragesTable({ assessment, answers }) {
   );
 }
 
-export default function LeadershipProfileRadar({ assessment, answers }) {
+export default function LeadershipProfileRadar({
+  assessment,
+  answers,
+  heading = "Leadership Profile",
+  description = "Attribute averages from your statement scores (scale 0–5).",
+}) {
   const averages = getAttributeAverages(assessment, answers);
 
   if (averages.length === 0) return null;
@@ -226,10 +357,10 @@ export default function LeadershipProfileRadar({ assessment, answers }) {
               id="leadership-profile-heading"
               className="text-lg font-semibold text-foreground"
             >
-              Leadership Profile
+              {heading}
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Attribute averages from your statement scores (scale 0–5).
+              {description}
             </p>
             <div className="mt-4 h-[min(28rem,70vw)] w-full min-h-72">
               <ResponsiveContainer width="100%" height="100%">

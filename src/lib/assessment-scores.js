@@ -74,6 +74,18 @@ export function getDomainAverages(assessment, answers = {}) {
 }
 
 /**
+ * Overall average across every answered statement in the assessment.
+ *
+ * @returns {number | null}
+ */
+export function getOverallAverage(assessment, answers = {}) {
+  const statements = (assessment?.domains ?? []).flatMap((domain) =>
+    (domain.attributes ?? []).flatMap((attribute) => attribute.statements ?? []),
+  );
+  return meanScore(collectStatementScores(statements, answers), 2);
+}
+
+/**
  * Score band for interpretation.
  * 0.0–2.4 Growth Priority · 2.5–3.4 Developing · 3.5–4.4 Established · 4.5–5.0 Strength
  */
