@@ -6,7 +6,7 @@ import { buildSimplePageMetadata } from "@/lib/prismic-seo";
 export async function generateMetadata() {
   return buildSimplePageMetadata(
     "Overall assessment average",
-    "View the combined average of opted-in assessments from everyone.",
+    "View stored overall domain and attribute averages from opted-in assessments.",
   );
 }
 
@@ -27,9 +27,9 @@ export default async function AssessmentAveragePage() {
           Overall assessment average
         </h1>
         <p className="mt-3 text-lg text-muted">
-          This is one combined average for everyone, built from completed
-          submissions that have been opted in. Include or exclude your own
-          submissions at any time.
+          Domain averages and attribute averages are stored separately, using
+          only completed submissions that have been opted in. Include or
+          exclude your own completed assessments at any time.
         </p>
 
         <div className="mt-10 space-y-12">
@@ -48,25 +48,36 @@ export default async function AssessmentAveragePage() {
               </p>
             </div>
           ) : (
-            groups.map(({ assessment, submissionCount, answers }) => (
-              <section key={assessment.id}>
-                <h2 className="text-xl font-semibold text-foreground">
-                  {assessment.title}
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Average of {submissionCount} included{" "}
-                  {submissionCount === 1 ? "submission" : "submissions"}.
-                </p>
-                <div className="mt-6">
-                  <LeadershipProfileRadar
-                    assessment={assessment}
-                    answers={answers}
-                    heading="Overall leadership profile"
-                    description="Attribute averages across every opted-in submission (scale 0–5)."
-                  />
-                </div>
-              </section>
-            ))
+            groups.map(
+              ({
+                assessment,
+                submissionCount,
+                domainAverages,
+                attributeAverages,
+              }) => (
+                <section key={assessment.id}>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {assessment.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Average of {submissionCount} included{" "}
+                    {submissionCount === 1 ? "submission" : "submissions"}.
+                  </p>
+                  <div className="mt-6">
+                    <LeadershipProfileRadar
+                      assessment={assessment}
+                      domainAverages={domainAverages}
+                      attributeAverages={attributeAverages}
+                      heading="Overall attribute average"
+                      description="Attribute averages across every opted-in completed submission (scale 0–5)."
+                      domainHeading="Overall domain average"
+                      domainDescription="Domain averages across every opted-in completed submission (scale 0–5)."
+                      attributeHeading="Overall attribute averages"
+                    />
+                  </div>
+                </section>
+              ),
+            )
           )}
         </div>
       </div>

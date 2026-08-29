@@ -85,6 +85,113 @@ export function getOverallAverage(assessment, answers = {}) {
   return meanScore(collectStatementScores(statements, answers), 2);
 }
 
+function compactAverageRows(rows, extraKeys = []) {
+  return rows.map((row) => {
+    const compact = {
+      id: row.id,
+      name: row.name,
+      average: row.average,
+    };
+    for (const key of extraKeys) {
+      if (row[key] != null) compact[key] = row[key];
+    }
+    return compact;
+  });
+}
+
+/** Persistable domain + attribute averages for a completed submission. */
+export function serializeScoreAverages(assessment, answers = {}) {
+  return {
+    domainAverages: compactAverageRows(getDomainAverages(assessment, answers)),
+    attributeAverages: compactAverageRows(
+      getAttributeAverages(assessment, answers),
+      ["domainId", "domainName"],
+    ),
+  };
+}
+
+export function hasStoredAverages(list) {
+  return Array.isArray(list) && list.length > 0;
+}
+
+export function resolveDomainAverages(assessment, answers = {}, stored) {
+  if (hasStoredAverages(stored)) return stored;
+  return compactAverageRows(getDomainAverages(assessment, answers));
+}
+
+export function resolveAttributeAverages(assessment, answers = {}, stored) {
+  if (hasStoredAverages(stored)) return stored;
+  return compactAverageRows(getAttributeAverages(assessment, answers), [
+    "domainId",
+    "domainName",
+  ]);
+}
+
+export function meanOfAverages(rows) {
+  return meanScore(
+    (rows ?? [])
+      .map((row) => Number(row?.average))
+      .filter((value) => Number.isFinite(value)),
+    2,
+  );
+}
+
+/**
+ * Average stored per-item scores across submissions (by item id).
+ * Used for overall domain and attribute averages.
+ */
+export function averageStoredAverages(lists) {
+  const sums = new Map();
+
+  for (const list of lists ?? []) {
+    for (const item of list ?? []) {
+      const id = item?.id;
+      const average = Number(item?.average);
+      if (!id || !Number.isFinite(average)) continue;
+      const prev = sums.get(id) ?? {
+        id,
+        name: item.name,
+        domainId: item.domainId,
+        domainName: item.domainName,
+        total: 0,
+        count: 0,
+      };
+      prev.total += average;
+      prev.count += 1;
+      if (item.name) prev.name = item.name;
+      if (item.domainId) prev.domainId = item.domainId;
+      if (item.domainName) prev.domainName = item.domainName;
+      sums.set(id, prev);
+    }
+  }
+
+  return [...sums.values()].map((row) => {
+    const result = {
+      id: row.id,
+      name: row.name,
+      average: Math.round((row.total / row.count) * 100) / 100,
+    };
+    if (row.domainId) result.domainId = row.domainId;
+    if (row.domainName) result.domainName = row.domainName;
+    return result;
+  });
+}
+
+/** Keep stored averages in assessment-tree order when ids still exist. */
+export function orderAveragesByTree(rows, orderedIds) {
+  if (!orderedIds?.length) return rows ?? [];
+  const byId = new Map((rows ?? []).map((row) => [row.id, row]));
+  const ordered = [];
+  for (const id of orderedIds) {
+    const row = byId.get(id);
+    if (row) ordered.push(row);
+  }
+  for (const row of rows ?? []) {
+    if (!orderedIds.includes(row.id)) ordered.push(row);
+  }
+  return ordered;
+}
+
 /**
  * Score band for interpretation.
  * 0.0–2.4 Growth Priority · 2.5–3.4 Developing · 3.5–4.4 Established · 4.5–5.0 Strength

@@ -62,25 +62,6 @@ function PastAssessmentsIcon() {
   );
 }
 
-function AssessmentAverageIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5 shrink-0"
-      aria-hidden="true"
-    >
-      <path d="M3 3v18h18" />
-      <path d="M7 14l4-4 4 4 6-6" />
-    </svg>
-  );
-}
-
 export default async function DashboardPage() {
   const [user, appUser, settings, assessmentSummary] = await Promise.all([
     currentUser(),
@@ -91,6 +72,7 @@ export default async function DashboardPage() {
   const showStaffTools = isStaffRole(appUser?.roleName);
   const showSuperAdminTools = isSuperAdminRole(appUser?.roleName);
   const dbContext = showSuperAdminTools ? await getDatabaseContext() : null;
+  const takeable = assessmentSummary.takeable ?? [];
   return (
     <div className="bg-background px-6 py-16">
       <div className="mx-auto max-w-3xl">
@@ -107,16 +89,20 @@ export default async function DashboardPage() {
 
         <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
           <h2 className="text-lg font-semibold text-foreground">Assessments</h2>
-          <div className="mt-4 flex flex-col gap-3">
-            <Link
-              href="/dashboard/assessments"
-              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
-            >
-              <StartAssessmentIcon />
-              <span className="underline decoration-primary/30 underline-offset-4">
-                Start Assessment
-              </span>
-            </Link>
+          <div className="mt-4 grid gap-3">
+            {takeable.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+              >
+                <StartAssessmentIcon />
+                <span className="underline decoration-primary/30 underline-offset-4">
+                  {item.inProgress ? "Continue Assessment" : "Start Assessment"}
+                  {takeable.length > 1 ? ` — ${item.title}` : ""}
+                </span>
+              </Link>
+            ))}
             <Link
               href="/dashboard/assessments/past"
               className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
@@ -124,15 +110,6 @@ export default async function DashboardPage() {
               <PastAssessmentsIcon />
               <span className="underline decoration-primary/30 underline-offset-4">
                 Past Assessments ({assessmentSummary.pastCount})
-              </span>
-            </Link>
-            <Link
-              href="/dashboard/assessments/average"
-              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
-            >
-              <AssessmentAverageIcon />
-              <span className="underline decoration-primary/30 underline-offset-4">
-                Overall average
               </span>
             </Link>
           </div>

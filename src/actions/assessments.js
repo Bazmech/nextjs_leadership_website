@@ -744,7 +744,8 @@ export async function renameAssessmentSubmission(_prevState, formData) {
 }
 
 /**
- * Toggle include-in-average on own submission (in progress or completed).
+ * Toggle include-in-average on own completed submission.
+ * Recalculates stored overall domain and attribute averages.
  * See user-data-authorization.mdc.
  */
 export async function setSubmissionIncludeInAverage(_prevState, formData) {

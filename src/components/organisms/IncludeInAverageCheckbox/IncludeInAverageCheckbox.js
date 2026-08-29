@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { setSubmissionIncludeInAverage } from "@/actions/assessments";
 import CheckboxField from "@/components/molecules/CheckboxField/CheckboxField";
@@ -17,8 +17,6 @@ export default function IncludeInAverageCheckbox({
   compact = false,
 }) {
   const router = useRouter();
-  const formRef = useRef(null);
-  const valueRef = useRef(null);
   const [checked, setChecked] = useState(Boolean(includeInAverage));
   const [state, formAction, isPending] = useActionState(
     setSubmissionIncludeInAverage,
@@ -27,9 +25,6 @@ export default function IncludeInAverageCheckbox({
 
   useEffect(() => {
     setChecked(Boolean(includeInAverage));
-    if (valueRef.current) {
-      valueRef.current.value = includeInAverage ? "true" : "false";
-    }
   }, [includeInAverage]);
 
   useEffect(() => {
@@ -45,24 +40,17 @@ export default function IncludeInAverageCheckbox({
 
   return (
     <form
-      ref={formRef}
       action={formAction}
       onClick={(event) => event.stopPropagation()}
+      onSubmit={(event) => event.preventDefault()}
     >
-      <input type="hidden" name="submissionId" value={submissionId} />
-      <input
-        ref={valueRef}
-        type="hidden"
-        name="includeInAverage"
-        defaultValue={includeInAverage ? "true" : "false"}
-      />
       <CheckboxField
         id={checkboxId}
         label="Include in overall average"
         description={
           compact
             ? undefined
-            : "When checked, this submission’s scores are included in the overall assessment average for everyone. You can change this at any time, including after completion."
+            : "When checked, this completed submission’s domain and attribute averages are stored in the overall assessment average. You can change this at any time after completion."
         }
         checked={checked}
         disabled={isPending}
@@ -70,10 +58,10 @@ export default function IncludeInAverageCheckbox({
         onCheckedChange={(value) => {
           const next = value === true;
           setChecked(next);
-          if (valueRef.current) {
-            valueRef.current.value = next ? "true" : "false";
-          }
-          formRef.current?.requestSubmit();
+          const formData = new FormData();
+          formData.set("submissionId", submissionId);
+          formData.set("includeInAverage", next ? "true" : "false");
+          formAction(formData);
         }}
       />
       {state.error ? (

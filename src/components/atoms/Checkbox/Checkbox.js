@@ -36,6 +36,7 @@ export default function Checkbox({
         <input type="hidden" name={name} value={checked ? "true" : "false"} />
       ) : null}
       <RadixCheckbox.Root
+        type="button"
         id={id}
         checked={checked}
         onCheckedChange={onCheckedChange}

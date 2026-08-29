@@ -1,14 +1,22 @@
-import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import {
   assessmentAttributes,
   assessmentDomains,
+  assessmentOverallAverages,
   assessments,
   assessmentStatements,
   assessmentSubmissions,
 } from "@/db/schema";
+import {
+  averageStoredAverages,
+  hasStoredAverages,
+  orderAveragesByTree,
+  resolveAttributeAverages,
+  resolveDomainAverages,
+  serializeScoreAverages,
+} from "@/lib/assessment-scores";
 import { getDb } from "@/lib/db";
 import {
-  getCurrentAppUser,
   isStaffRole,
   requireEnabledAppUser,
   requireSuperAdminAppUser,
@@ -1093,8 +1101,8 @@ export async function renameOwnedSubmission({ submissionId, title }) {
 }
 
 /**
- * Toggle whether own submission is included in the overall (all-users) average.
- * Allowed in progress or completed so past assessments can be opted in or out.
+ * Toggle whether own completed submission is included in the overall average.
+ * Recalculates and stores overall domain and attribute averages for the template.
  * See user-data-authorization.mdc.
  */
 export async function setOwnedSubmissionIncludeInAverage({
@@ -1114,57 +1122,135 @@ export async function setOwnedSubmissionIncludeInAverage({
     return { ok: false, error: "Submission not found." };
   }
 
+  if (includeInAverage && submission.status !== "completed") {
+    return {
+      ok: false,
+      error: "Only completed assessments can be included in the overall average.",
+    };
+  }
+
+  const stored = await ensureSubmissionAverages(submission);
   const [row] = await db
     .update(assessmentSubmissions)
     .set({
       includeInAverage,
+      domainAverages: stored.domainAverages,
+      attributeAverages: stored.attributeAverages,
       updatedAt: new Date(),
     })
     .where(eq(assessmentSubmissions.id, submissionId))
     .returning();
 
+  await refreshOverallAveragesForAssessment(submission.assessmentId);
   return { ok: true, submission: row };
 }
 
-function averageSubmissionAnswers(submissions) {
-  const sums = {};
-  const counts = {};
-
-  for (const submission of submissions) {
-    for (const [statementId, score] of Object.entries(
-      submission.answers ?? {},
-    )) {
-      const n = Number(score);
-      if (!Number.isFinite(n)) continue;
-      sums[statementId] = (sums[statementId] ?? 0) + n;
-      counts[statementId] = (counts[statementId] ?? 0) + 1;
-    }
+async function ensureSubmissionAverages(submission) {
+  const hasDomains =
+    Array.isArray(submission.domainAverages) &&
+    submission.domainAverages.length > 0;
+  const hasAttributes =
+    Array.isArray(submission.attributeAverages) &&
+    submission.attributeAverages.length > 0;
+  if (hasDomains && hasAttributes) {
+    return {
+      domainAverages: submission.domainAverages,
+      attributeAverages: submission.attributeAverages,
+    };
   }
 
-  const averaged = {};
-  for (const statementId of Object.keys(sums)) {
-    averaged[statementId] =
-      Math.round((sums[statementId] / counts[statementId]) * 100) / 100;
-  }
-  return averaged;
+  const tree = await getAssessmentTree(submission.assessmentId);
+  return serializeScoreAverages(tree, submission.answers ?? {});
+}
+
+function orderStoredAverages(tree, domainAverages, attributeAverages) {
+  const domainIds = (tree?.domains ?? []).map((domain) => domain.id);
+  const attributeIds = (tree?.domains ?? []).flatMap((domain) =>
+    (domain.attributes ?? []).map((attribute) => attribute.id),
+  );
+  return {
+    domainAverages: orderAveragesByTree(domainAverages, domainIds),
+    attributeAverages: orderAveragesByTree(attributeAverages, attributeIds),
+  };
 }
 
 /**
- * Overall assessment average across all users, grouped by template.
- * Reads opted-in completed submissions from every user, but returns only
- * averaged scores and a count — never identities, titles, or row ids.
- * Dashboard-gated via requireEnabledAppUser.
- * See user-data-authorization.mdc (aggregate statistic, not per-user records).
+ * Recalculate stored overall domain and attribute averages from opted-in
+ * completed submissions for one template. Aggregate scores only — no identities.
  */
-export async function getOverallAssessmentAverages() {
-  await requireEnabledAppUser();
+async function refreshOverallAveragesForAssessment(assessmentId) {
   const db = getDb();
-
   const submissions = await db
     .select({
-      assessmentId: assessmentSubmissions.assessmentId,
+      domainAverages: assessmentSubmissions.domainAverages,
+      attributeAverages: assessmentSubmissions.attributeAverages,
       answers: assessmentSubmissions.answers,
     })
+    .from(assessmentSubmissions)
+    .where(
+      and(
+        eq(assessmentSubmissions.assessmentId, assessmentId),
+        eq(assessmentSubmissions.status, "completed"),
+        eq(assessmentSubmissions.includeInAverage, true),
+      ),
+    );
+
+  if (submissions.length === 0) {
+    await db
+      .delete(assessmentOverallAverages)
+      .where(eq(assessmentOverallAverages.assessmentId, assessmentId));
+    return;
+  }
+
+  const tree = await getAssessmentTree(assessmentId);
+  const domainLists = [];
+  const attributeLists = [];
+  for (const submission of submissions) {
+    const computed = serializeScoreAverages(tree, submission.answers ?? {});
+    domainLists.push(
+      Array.isArray(submission.domainAverages) &&
+        submission.domainAverages.length
+        ? submission.domainAverages
+        : computed.domainAverages,
+    );
+    attributeLists.push(
+      Array.isArray(submission.attributeAverages) &&
+        submission.attributeAverages.length
+        ? submission.attributeAverages
+        : computed.attributeAverages,
+    );
+  }
+
+  const ordered = orderStoredAverages(
+    tree,
+    averageStoredAverages(domainLists),
+    averageStoredAverages(attributeLists),
+  );
+
+  await db
+    .insert(assessmentOverallAverages)
+    .values({
+      assessmentId,
+      domainAverages: ordered.domainAverages,
+      attributeAverages: ordered.attributeAverages,
+      submissionCount: submissions.length,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: assessmentOverallAverages.assessmentId,
+      set: {
+        domainAverages: ordered.domainAverages,
+        attributeAverages: ordered.attributeAverages,
+        submissionCount: submissions.length,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+async function ensureOverallAveragesCached() {
+  const db = getDb();
+  const optedIn = await db
+    .selectDistinct({ assessmentId: assessmentSubmissions.assessmentId })
     .from(assessmentSubmissions)
     .where(
       and(
@@ -1172,26 +1258,158 @@ export async function getOverallAssessmentAverages() {
         eq(assessmentSubmissions.includeInAverage, true),
       ),
     );
+  if (optedIn.length === 0) return;
 
-  const byAssessment = new Map();
-  for (const submission of submissions) {
-    const list = byAssessment.get(submission.assessmentId) ?? [];
-    list.push(submission);
-    byAssessment.set(submission.assessmentId, list);
+  const cached = await db
+    .select({ assessmentId: assessmentOverallAverages.assessmentId })
+    .from(assessmentOverallAverages);
+  const cachedIds = new Set(cached.map((row) => row.assessmentId));
+
+  for (const row of optedIn) {
+    if (!cachedIds.has(row.assessmentId)) {
+      await refreshOverallAveragesForAssessment(row.assessmentId);
+    }
   }
+}
 
+/**
+ * Overall assessment average across all users, grouped by template.
+ * Reads stored domain and attribute averages (from opted-in completed
+ * submissions). Never returns identities, titles, or row ids.
+ * Dashboard-gated via requireEnabledAppUser.
+ * See user-data-authorization.mdc (aggregate statistic, not per-user records).
+ */
+export async function getOverallAssessmentAverages() {
+  await requireEnabledAppUser();
+  await ensureOverallAveragesCached();
+  const db = getDb();
+
+  const rows = await db.select().from(assessmentOverallAverages);
   const groups = [];
-  for (const [assessmentId, group] of byAssessment) {
-    const tree = await getAssessmentTree(assessmentId);
+  for (const row of rows) {
+    const tree = await getAssessmentTree(row.assessmentId);
     if (!tree) continue;
+    const ordered = orderStoredAverages(
+      tree,
+      row.domainAverages ?? [],
+      row.attributeAverages ?? [],
+    );
     groups.push({
       assessment: tree,
-      submissionCount: group.length,
-      answers: averageSubmissionAnswers(group),
+      submissionCount: row.submissionCount,
+      domainAverages: ordered.domainAverages,
+      attributeAverages: ordered.attributeAverages,
     });
   }
 
   return groups;
+}
+
+/** Past list plus domain and attribute series for `/dashboard/assessments/past`. */
+export async function getPastAssessmentsPageData() {
+  const { past } = await listAssessmentsForUser();
+  const { domainSeries, attributeSeries } =
+    await buildPastAverageSeries(past);
+  return { past, domainSeries, attributeSeries };
+}
+
+function sortCompletedPast(items) {
+  return [...items].sort((a, b) => {
+    const aTime = new Date(a.submission.completedAt ?? a.submission.startedAt);
+    const bTime = new Date(b.submission.completedAt ?? b.submission.startedAt);
+    return aTime - bTime;
+  });
+}
+
+function buildSeriesPoints(sortedItems, resolveItems) {
+  const itemMeta = new Map();
+  const points = sortedItems.map(({ submission, assessment }) => {
+    const items = resolveItems(submission);
+    for (const item of items) {
+      itemMeta.set(item.id, {
+        id: item.id,
+        name: item.domainName ? `${item.name} (${item.domainName})` : item.name,
+      });
+    }
+    const scores = {};
+    for (const item of items) {
+      scores[item.id] = item.average;
+    }
+    return {
+      id: submission.id,
+      title: submission.title,
+      completedAt: submission.completedAt,
+      assessmentTitle: assessment?.title ?? "",
+      ...scores,
+    };
+  });
+  return {
+    assessment: sortedItems[0]?.assessment ?? null,
+    items: [...itemMeta.values()],
+    points,
+  };
+}
+
+/** Completed submissions for the past-assessments line charts. */
+async function buildPastAverageSeries(past) {
+  const completed = past.filter(
+    ({ submission }) => submission.status === "completed",
+  );
+  if (completed.length === 0) {
+    return { domainSeries: [], attributeSeries: [] };
+  }
+
+  const missingTreeIds = [
+    ...new Set(
+      completed
+        .filter(
+          ({ submission }) =>
+            !hasStoredAverages(submission.domainAverages) ||
+            !hasStoredAverages(submission.attributeAverages),
+        )
+        .map(({ submission }) => submission.assessmentId),
+    ),
+  ];
+  const trees = new Map();
+  for (const assessmentId of missingTreeIds) {
+    trees.set(assessmentId, await getAssessmentTree(assessmentId));
+  }
+
+  const byAssessment = new Map();
+  for (const item of completed) {
+    const list = byAssessment.get(item.submission.assessmentId) ?? [];
+    list.push(item);
+    byAssessment.set(item.submission.assessmentId, list);
+  }
+
+  const domainSeries = [];
+  const attributeSeries = [];
+  for (const [assessmentId, items] of byAssessment) {
+    const sorted = sortCompletedPast(items);
+    const tree = trees.get(assessmentId);
+    const domainGroup = buildSeriesPoints(sorted, (submission) =>
+      resolveDomainAverages(
+        tree,
+        submission.answers ?? {},
+        submission.domainAverages,
+      ),
+    );
+    const attributeGroup = buildSeriesPoints(sorted, (submission) =>
+      resolveAttributeAverages(
+        tree,
+        submission.answers ?? {},
+        submission.attributeAverages,
+      ),
+    );
+    if (domainGroup.items.length > 0 && domainGroup.points.length > 0) {
+      domainSeries.push(domainGroup);
+    }
+    if (attributeGroup.items.length > 0 && attributeGroup.points.length > 0) {
+      attributeSeries.push(attributeGroup);
+    }
+  }
+
+  return { domainSeries, attributeSeries };
 }
 
 export async function saveSubmissionAnswers({ submissionId, answers }) {
@@ -1252,6 +1470,7 @@ export async function completeSubmission({ submissionId, answers }) {
     };
   }
 
+  const stored = serializeScoreAverages(owned.assessment, savedAnswers);
   const db = getDb();
   const [row] = await db
     .update(assessmentSubmissions)
@@ -1259,9 +1478,15 @@ export async function completeSubmission({ submissionId, answers }) {
       status: "completed",
       completedAt: new Date(),
       updatedAt: new Date(),
+      domainAverages: stored.domainAverages,
+      attributeAverages: stored.attributeAverages,
     })
     .where(eq(assessmentSubmissions.id, submissionId))
     .returning();
+
+  if (row.includeInAverage) {
+    await refreshOverallAveragesForAssessment(row.assessmentId);
+  }
 
   return { ok: true, submission: row };
 }
@@ -1298,29 +1523,22 @@ export async function deleteOwnedSubmission({ submissionId }) {
   return { ok: true };
 }
 
-/** Dashboard card counts for current user. */
+/** Dashboard card: takeable assessments plus past-submission count. */
 export async function getDashboardAssessmentSummary() {
-  const appUser = await getCurrentAppUser();
-  if (!appUser?.enabled) {
-    return { pastCount: 0, canStartAny: false };
-  }
-
-  const db = getDb();
-  const [pastRow] = await db
-    .select({ value: count() })
-    .from(assessmentSubmissions)
-    .where(eq(assessmentSubmissions.clerkUserId, appUser.clerkUserId));
-
-  const staff = isStaffRole(appUser.roleName);
-  const statuses = staff ? ["draft", "available"] : ["available"];
-
-  const [availableRow] = await db
-    .select({ value: count() })
-    .from(assessments)
-    .where(inArray(assessments.status, statuses));
+  const { startable, past } = await listAssessmentsForUser();
+  const takeable = startable
+    .filter((item) => item.canStart)
+    .map(({ assessment, inProgress }) => ({
+      id: assessment.id,
+      title: assessment.title,
+      inProgress: Boolean(inProgress),
+      href: inProgress
+        ? `/dashboard/assessments/submissions/${inProgress.id}`
+        : `/dashboard/assessments#assessment-${assessment.id}`,
+    }));
 
   return {
-    pastCount: Number(pastRow?.value ?? 0),
-    canStartAny: Number(availableRow?.value ?? 0) > 0,
+    pastCount: past.length,
+    takeable,
   };
 }
