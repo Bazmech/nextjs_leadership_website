@@ -217,7 +217,7 @@ function DomainAveragesTable({ assessment, answers }) {
         Domain Averages
       </h2>
       <p className="mt-1 text-sm text-muted">
-        Domain averages from your statement scores (scale 0–{SCORE_MAX}).
+        Domain averages from statement scores (scale 0–{SCORE_MAX}).
       </p>
       {overall != null ? (
         <p className="sr-only">
@@ -331,7 +331,7 @@ export default function LeadershipProfileRadar({
   assessment,
   answers,
   heading = "Leadership Profile",
-  description = "Attribute averages from your statement scores (scale 0–5).",
+  description = "Attribute averages from statement scores (scale 0–5).",
 }) {
   const averages = getAttributeAverages(assessment, answers);
 

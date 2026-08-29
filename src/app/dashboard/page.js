@@ -132,7 +132,7 @@ export default async function DashboardPage() {
             >
               <AssessmentAverageIcon />
               <span className="underline decoration-primary/30 underline-offset-4">
-                Assessment average
+                Overall average
               </span>
             </Link>
           </div>

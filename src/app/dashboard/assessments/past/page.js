@@ -31,14 +31,14 @@ export default async function PastAssessmentsPage() {
             </h1>
             <p className="mt-3 text-lg text-muted">
               Your previous submissions, including any still in progress. Check
-              submissions to include them in your assessment average.
+              submissions to include them in the overall assessment average.
             </p>
           </div>
           <Link
             href="/dashboard/assessments/average"
             className="inline-flex shrink-0 items-center justify-center rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5"
           >
-            Assessment average
+            Overall average
           </Link>
         </div>
 

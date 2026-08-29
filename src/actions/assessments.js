@@ -773,8 +773,8 @@ export async function setSubmissionIncludeInAverage(_prevState, formData) {
       success: true,
       error: null,
       message: parsed.data.includeInAverage
-        ? "Included in assessment average."
-        : "Removed from assessment average.",
+        ? "Included in the overall assessment average."
+        : "Removed from the overall assessment average.",
     };
   } catch (error) {
     console.error("setSubmissionIncludeInAverage failed:", error);

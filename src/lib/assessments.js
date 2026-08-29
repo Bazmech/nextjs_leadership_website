@@ -1093,7 +1093,7 @@ export async function renameOwnedSubmission({ submissionId, title }) {
 }
 
 /**
- * Toggle whether own submission is included in the assessment average.
+ * Toggle whether own submission is included in the overall (all-users) average.
  * Allowed in progress or completed so past assessments can be opted in or out.
  * See user-data-authorization.mdc.
  */
@@ -1150,24 +1150,28 @@ function averageSubmissionAnswers(submissions) {
 }
 
 /**
- * Completed, opted-in submissions for the current user, grouped by template.
- * Own data only — see user-data-authorization.mdc.
+ * Overall assessment average across all users, grouped by template.
+ * Reads opted-in completed submissions from every user, but returns only
+ * averaged scores and a count — never identities, titles, or row ids.
+ * Dashboard-gated via requireEnabledAppUser.
+ * See user-data-authorization.mdc (aggregate statistic, not per-user records).
  */
-export async function getOwnedAssessmentAverages() {
-  const appUser = await requireEnabledAppUser();
+export async function getOverallAssessmentAverages() {
+  await requireEnabledAppUser();
   const db = getDb();
 
   const submissions = await db
-    .select()
+    .select({
+      assessmentId: assessmentSubmissions.assessmentId,
+      answers: assessmentSubmissions.answers,
+    })
     .from(assessmentSubmissions)
     .where(
       and(
-        eq(assessmentSubmissions.clerkUserId, appUser.clerkUserId),
         eq(assessmentSubmissions.status, "completed"),
         eq(assessmentSubmissions.includeInAverage, true),
       ),
-    )
-    .orderBy(desc(assessmentSubmissions.completedAt));
+    );
 
   const byAssessment = new Map();
   for (const submission of submissions) {
@@ -1182,7 +1186,7 @@ export async function getOwnedAssessmentAverages() {
     if (!tree) continue;
     groups.push({
       assessment: tree,
-      submissions: group,
+      submissionCount: group.length,
       answers: averageSubmissionAnswers(group),
     });
   }

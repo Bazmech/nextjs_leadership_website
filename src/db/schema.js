@@ -102,7 +102,7 @@ export const assessmentStatements = pgTable("assessment_statements", {
 /**
  * A user's filled assessment instance.
  * `answers` is JSONB: { [statementId]: score 1–5 }.
- * `includeInAverage` opts this submission into the user's assessment average.
+ * `includeInAverage` opts this submission into the overall (all-users) assessment average.
  */
 export const assessmentSubmissions = pgTable("assessment_submissions", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -58,11 +58,11 @@ export default function IncludeInAverageCheckbox({
       />
       <CheckboxField
         id={checkboxId}
-        label={compact ? "Include in average" : "Include in assessment average"}
+        label="Include in overall average"
         description={
           compact
             ? undefined
-            : "Use this submission when calculating your assessment average. You can change this at any time, including after completion."
+            : "When checked, this submission’s scores are included in the overall assessment average for everyone. You can change this at any time, including after completion."
         }
         checked={checked}
         disabled={isPending}
