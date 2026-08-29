@@ -1092,6 +1092,108 @@ export async function renameOwnedSubmission({ submissionId, title }) {
   return { ok: true, submission: row };
 }
 
+/**
+ * Toggle whether own submission is included in the overall (all-users) average.
+ * Allowed in progress or completed so past assessments can be opted in or out.
+ * See user-data-authorization.mdc.
+ */
+export async function setOwnedSubmissionIncludeInAverage({
+  submissionId,
+  includeInAverage,
+}) {
+  const appUser = await requireEnabledAppUser();
+  const db = getDb();
+
+  const [submission] = await db
+    .select()
+    .from(assessmentSubmissions)
+    .where(eq(assessmentSubmissions.id, submissionId))
+    .limit(1);
+
+  if (!submission || submission.clerkUserId !== appUser.clerkUserId) {
+    return { ok: false, error: "Submission not found." };
+  }
+
+  const [row] = await db
+    .update(assessmentSubmissions)
+    .set({
+      includeInAverage,
+      updatedAt: new Date(),
+    })
+    .where(eq(assessmentSubmissions.id, submissionId))
+    .returning();
+
+  return { ok: true, submission: row };
+}
+
+function averageSubmissionAnswers(submissions) {
+  const sums = {};
+  const counts = {};
+
+  for (const submission of submissions) {
+    for (const [statementId, score] of Object.entries(
+      submission.answers ?? {},
+    )) {
+      const n = Number(score);
+      if (!Number.isFinite(n)) continue;
+      sums[statementId] = (sums[statementId] ?? 0) + n;
+      counts[statementId] = (counts[statementId] ?? 0) + 1;
+    }
+  }
+
+  const averaged = {};
+  for (const statementId of Object.keys(sums)) {
+    averaged[statementId] =
+      Math.round((sums[statementId] / counts[statementId]) * 100) / 100;
+  }
+  return averaged;
+}
+
+/**
+ * Overall assessment average across all users, grouped by template.
+ * Reads opted-in completed submissions from every user, but returns only
+ * averaged scores and a count — never identities, titles, or row ids.
+ * Dashboard-gated via requireEnabledAppUser.
+ * See user-data-authorization.mdc (aggregate statistic, not per-user records).
+ */
+export async function getOverallAssessmentAverages() {
+  await requireEnabledAppUser();
+  const db = getDb();
+
+  const submissions = await db
+    .select({
+      assessmentId: assessmentSubmissions.assessmentId,
+      answers: assessmentSubmissions.answers,
+    })
+    .from(assessmentSubmissions)
+    .where(
+      and(
+        eq(assessmentSubmissions.status, "completed"),
+        eq(assessmentSubmissions.includeInAverage, true),
+      ),
+    );
+
+  const byAssessment = new Map();
+  for (const submission of submissions) {
+    const list = byAssessment.get(submission.assessmentId) ?? [];
+    list.push(submission);
+    byAssessment.set(submission.assessmentId, list);
+  }
+
+  const groups = [];
+  for (const [assessmentId, group] of byAssessment) {
+    const tree = await getAssessmentTree(assessmentId);
+    if (!tree) continue;
+    groups.push({
+      assessment: tree,
+      submissionCount: group.length,
+      answers: averageSubmissionAnswers(group),
+    });
+  }
+
+  return groups;
+}
+
 export async function saveSubmissionAnswers({ submissionId, answers }) {
   const appUser = await requireEnabledAppUser();
   const db = getDb();

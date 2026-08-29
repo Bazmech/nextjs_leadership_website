@@ -1,0 +1,1 @@
+ALTER TABLE "assessment_submissions" ADD COLUMN "include_in_average" boolean DEFAULT false NOT NULL;

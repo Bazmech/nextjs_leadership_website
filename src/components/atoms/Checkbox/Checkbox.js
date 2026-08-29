@@ -22,24 +22,32 @@ function CheckIcon() {
 
 export default function Checkbox({
   id,
+  name,
   checked,
   onCheckedChange,
   disabled = false,
+  "aria-describedby": ariaDescribedBy,
   "aria-label": ariaLabel,
   className = "",
 }) {
   return (
-    <RadixCheckbox.Root
-      id={id}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded border border-border bg-surface text-white transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary disabled:cursor-not-allowed disabled:opacity-60 ${className}`.trim()}
-    >
-      <RadixCheckbox.Indicator>
-        <CheckIcon />
-      </RadixCheckbox.Indicator>
-    </RadixCheckbox.Root>
+    <>
+      {name ? (
+        <input type="hidden" name={name} value={checked ? "true" : "false"} />
+      ) : null}
+      <RadixCheckbox.Root
+        id={id}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        aria-describedby={ariaDescribedBy}
+        aria-label={ariaLabel}
+        className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded border border-border bg-surface text-white transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary disabled:cursor-not-allowed disabled:opacity-60 ${className}`.trim()}
+      >
+        <RadixCheckbox.Indicator>
+          <CheckIcon />
+        </RadixCheckbox.Indicator>
+      </RadixCheckbox.Root>
+    </>
   );
 }

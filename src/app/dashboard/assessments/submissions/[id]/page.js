@@ -3,6 +3,7 @@ import Link from "@/components/atoms/Link/Link";
 import DeleteSubmissionButton from "@/components/organisms/DeleteSubmissionButton/DeleteSubmissionButton";
 import ExportSubmissionCsvButton from "@/components/organisms/ExportSubmissionCsvButton/ExportSubmissionCsvButton";
 import ExportSubmissionPdfButton from "@/components/organisms/ExportSubmissionPdfButton/ExportSubmissionPdfButton";
+import IncludeInAverageCheckbox from "@/components/organisms/IncludeInAverageCheckbox/IncludeInAverageCheckbox";
 import RenameSubmissionTitle from "@/components/organisms/RenameSubmissionTitle/RenameSubmissionTitle";
 import TakeAssessmentForm from "@/components/organisms/TakeAssessmentForm/TakeAssessmentForm";
 import { getOwnedSubmission } from "@/lib/assessments";
@@ -57,6 +58,12 @@ export default async function SubmissionPage({ params }) {
                 seconds when something has changed.
               </p>
             )}
+            <div className="mt-4">
+              <IncludeInAverageCheckbox
+                submissionId={submission.id}
+                includeInAverage={submission.includeInAverage}
+              />
+            </div>
           </div>
           {readOnly ? (
             <div className="flex flex-wrap items-center gap-2">

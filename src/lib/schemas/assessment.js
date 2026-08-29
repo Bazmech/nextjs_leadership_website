@@ -137,3 +137,10 @@ export const renameSubmissionSchema = z.object({
   submissionId: z.string().uuid("Invalid submission."),
   title: z.string().trim().min(1, "Enter a name.").max(200),
 });
+
+export const setSubmissionIncludeInAverageSchema = z.object({
+  submissionId: z.string().uuid("Invalid submission."),
+  includeInAverage: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true"),
+});

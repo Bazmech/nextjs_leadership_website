@@ -62,6 +62,25 @@ function PastAssessmentsIcon() {
   );
 }
 
+function AssessmentAverageIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 shrink-0"
+      aria-hidden="true"
+    >
+      <path d="M3 3v18h18" />
+      <path d="M7 14l4-4 4 4 6-6" />
+    </svg>
+  );
+}
+
 export default async function DashboardPage() {
   const [user, appUser, settings, assessmentSummary] = await Promise.all([
     currentUser(),
@@ -105,6 +124,15 @@ export default async function DashboardPage() {
               <PastAssessmentsIcon />
               <span className="underline decoration-primary/30 underline-offset-4">
                 Past Assessments ({assessmentSummary.pastCount})
+              </span>
+            </Link>
+            <Link
+              href="/dashboard/assessments/average"
+              className="inline-flex items-center gap-2.5 font-medium text-primary transition-colors hover:text-primary-light"
+            >
+              <AssessmentAverageIcon />
+              <span className="underline decoration-primary/30 underline-offset-4">
+                Overall average
               </span>
             </Link>
           </div>
