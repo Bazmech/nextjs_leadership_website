@@ -102,7 +102,8 @@ export const assessmentStatements = pgTable("assessment_statements", {
 /**
  * A user's filled assessment instance.
  * `answers` is JSONB: { [statementId]: score 1–5 }.
- * `includeInAverage` opts this submission into the overall (all-users) assessment average.
+ * `includeInAverage` opts this completed submission into the overall (all-users) average.
+ * Domain and attribute averages are stored on complete (and refreshed on opt-in).
  */
 export const assessmentSubmissions = pgTable("assessment_submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -114,6 +115,8 @@ export const assessmentSubmissions = pgTable("assessment_submissions", {
   status: submissionStatusEnum("status").default("in_progress").notNull(),
   answers: jsonb("answers").default({}).notNull(),
   includeInAverage: boolean("include_in_average").default(false).notNull(),
+  domainAverages: jsonb("domain_averages").default([]).notNull(),
+  attributeAverages: jsonb("attribute_averages").default([]).notNull(),
   startedAt: timestamp("started_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -122,6 +125,24 @@ export const assessmentSubmissions = pgTable("assessment_submissions", {
     .defaultNow()
     .notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+/**
+ * Cached overall (all-users) domain and attribute averages per template.
+ * Recomputed when someone opts a completed submission in or out.
+ */
+export const assessmentOverallAverages = pgTable("assessment_overall_averages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  assessmentId: uuid("assessment_id")
+    .notNull()
+    .unique()
+    .references(() => assessments.id, { onDelete: "cascade" }),
+  domainAverages: jsonb("domain_averages").default([]).notNull(),
+  attributeAverages: jsonb("attribute_averages").default([]).notNull(),
+  submissionCount: integer("submission_count").default(0).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });

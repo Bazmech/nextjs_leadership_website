@@ -58,12 +58,14 @@ export default async function SubmissionPage({ params }) {
                 seconds when something has changed.
               </p>
             )}
-            <div className="mt-4">
-              <IncludeInAverageCheckbox
-                submissionId={submission.id}
-                includeInAverage={submission.includeInAverage}
-              />
-            </div>
+            {readOnly ? (
+              <div className="mt-4">
+                <IncludeInAverageCheckbox
+                  submissionId={submission.id}
+                  includeInAverage={submission.includeInAverage}
+                />
+              </div>
+            ) : null}
           </div>
           {readOnly ? (
             <div className="flex flex-wrap items-center gap-2">

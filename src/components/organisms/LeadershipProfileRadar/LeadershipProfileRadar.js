@@ -19,6 +19,7 @@ import {
   getDomainAverages,
   getOverallAverage,
   getScoreBand,
+  meanOfAverages,
 } from "@/lib/assessment-scores";
 
 const CHART_STROKE = "#005eb8";
@@ -200,10 +201,13 @@ function DomainAveragesRadialChart({ domains, overall }) {
   );
 }
 
-function DomainAveragesTable({ assessment, answers }) {
-  const domains = getDomainAverages(assessment, answers);
-  if (domains.length === 0) return null;
-  const overall = getOverallAverage(assessment, answers);
+function DomainAveragesTable({
+  domains,
+  overall,
+  heading = "Domain Averages",
+  description = `Domain averages from statement scores (scale 0–${SCORE_MAX}).`,
+}) {
+  if (!domains?.length) return null;
 
   return (
     <section
@@ -214,10 +218,10 @@ function DomainAveragesTable({ assessment, answers }) {
         id="domain-averages-heading"
         className="text-lg font-semibold text-foreground"
       >
-        Domain Averages
+        {heading}
       </h2>
       <p className="mt-1 text-sm text-muted">
-        Domain averages from statement scores (scale 0–{SCORE_MAX}).
+        {description}
       </p>
       {overall != null ? (
         <p className="sr-only">
@@ -266,9 +270,11 @@ function DomainAveragesTable({ assessment, answers }) {
   );
 }
 
-function AttributeAveragesTable({ assessment, answers }) {
-  const attributes = getAttributeAverages(assessment, answers);
-  if (attributes.length === 0) return null;
+function AttributeAveragesTable({
+  attributes,
+  heading = "Attribute Averages",
+}) {
+  if (!attributes?.length) return null;
 
   return (
     <section
@@ -279,7 +285,7 @@ function AttributeAveragesTable({ assessment, answers }) {
         id="attribute-averages-heading"
         className="text-lg font-semibold text-foreground"
       >
-        Attribute Averages
+        {heading}
       </h2>
       <div className="mt-4">
         <HorizontalScroll>
@@ -330,12 +336,24 @@ function AttributeAveragesTable({ assessment, answers }) {
 export default function LeadershipProfileRadar({
   assessment,
   answers,
+  domainAverages: domainAveragesProp,
+  attributeAverages: attributeAveragesProp,
   heading = "Leadership Profile",
   description = "Attribute averages from statement scores (scale 0–5).",
+  domainHeading,
+  domainDescription,
+  attributeHeading,
 }) {
-  const averages = getAttributeAverages(assessment, answers);
+  const averages =
+    attributeAveragesProp ?? getAttributeAverages(assessment, answers);
+  const domains =
+    domainAveragesProp ?? getDomainAverages(assessment, answers);
+  const overall =
+    domainAveragesProp != null
+      ? meanOfAverages(domains)
+      : getOverallAverage(assessment, answers);
 
-  if (averages.length === 0) return null;
+  if (averages.length === 0 && domains.length === 0) return null;
 
   const data = averages.map((row) => ({
     attribute: row.name,
@@ -347,6 +365,7 @@ export default function LeadershipProfileRadar({
 
   return (
     <div className="mb-10">
+      {averages.length > 0 ? (
       <section
         className="rounded-2xl border border-border bg-surface p-6 shadow-sm"
         aria-labelledby="leadership-profile-heading"
@@ -425,9 +444,18 @@ export default function LeadershipProfileRadar({
           </aside>
         </div>
       </section>
+      ) : null}
 
-      <DomainAveragesTable assessment={assessment} answers={answers} />
-      <AttributeAveragesTable assessment={assessment} answers={answers} />
+      <DomainAveragesTable
+        domains={domains}
+        overall={overall}
+        heading={domainHeading}
+        description={domainDescription}
+      />
+      <AttributeAveragesTable
+        attributes={averages}
+        heading={attributeHeading}
+      />
     </div>
   );
 }

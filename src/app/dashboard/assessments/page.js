@@ -66,7 +66,8 @@ export default async function AssessmentsPage() {
               ({ assessment, canStart, inProgress, reason, nextAvailableAt }) => (
                 <div
                   key={assessment.id}
-                  className="rounded-2xl border border-border bg-surface p-6"
+                  id={`assessment-${assessment.id}`}
+                  className="scroll-mt-24 rounded-2xl border border-border bg-surface p-6"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

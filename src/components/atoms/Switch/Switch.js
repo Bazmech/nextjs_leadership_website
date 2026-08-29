@@ -16,6 +16,7 @@ export default function Switch({
         <input type="hidden" name={name} value={checked ? "true" : "false"} />
       ) : null}
       <RadixSwitch.Root
+        type="button"
         id={id}
         checked={checked}
         onCheckedChange={onCheckedChange}
