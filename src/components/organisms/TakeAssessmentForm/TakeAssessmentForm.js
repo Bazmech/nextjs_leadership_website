@@ -302,6 +302,12 @@ function StatementScores({
   readOnly,
   setScore,
 }) {
+  const tabTriggers = domains.map((domain) => (
+    <TabsTrigger key={domain.id} value={domain.id}>
+      {domain.name}
+    </TabsTrigger>
+  ));
+
   return (
     <Tabs defaultValue={defaultTab}>
       {!readOnly ? (
@@ -310,13 +316,17 @@ function StatementScores({
           Disagree) to 5 (Strongly Agree).
         </p>
       ) : null}
-      <TabsList>
-        {domains.map((domain) => (
-          <TabsTrigger key={domain.id} value={domain.id}>
-            {domain.name}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      {readOnly ? (
+        <TabsList>{tabTriggers}</TabsList>
+      ) : (
+        <div className="sticky top-[4.5rem] z-30">
+          <div className="relative left-1/2 w-screen -translate-x-1/2 border-b border-border bg-background/95 backdrop-blur">
+            <div className="mx-auto max-w-3xl px-6 py-3">
+              <TabsList className="border-b-0 pb-0">{tabTriggers}</TabsList>
+            </div>
+          </div>
+        </div>
+      )}
 
       {domains.map((domain) => (
         <TabsContent key={domain.id} value={domain.id}>
