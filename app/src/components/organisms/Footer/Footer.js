@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Container from "@/components/atoms/Container/Container";
 import Link from "@/components/atoms/Link/Link";
+import LogoMark from "@/components/atoms/LogoMark/LogoMark";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
 import { getHeaderMenuLinks } from "@/lib/header-menu";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -29,13 +30,7 @@ export default async function Footer() {
         <div className="grid gap-4">
           <div className="grid w-fit grid-cols-1 items-start gap-4 sm:grid-cols-[auto_auto] sm:items-center">
             <Link href="/" className="inline-grid">
-              <Image
-                src="/logo.png"
-                alt={settings.siteName}
-                width={810}
-                height={748}
-                className={`${footerLogoClassName} shrink-0`}
-              />
+              <LogoMark alt={settings.siteName} className="size-14" />
             </Link>
             <Link href={HORIZONS_URL} className="inline-grid">
               <Image

@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import LogoMark from "@/components/atoms/LogoMark/LogoMark";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export default async function Logo({ className = "text-primary" }) {
@@ -14,14 +14,7 @@ export default async function Logo({ className = "text-primary" }) {
       href="/"
       className={`grid grid-cols-[auto_auto] items-center gap-3 ${className}`.trim()}
     >
-      <Image
-        src="/logo.png"
-        alt=""
-        width={810}
-        height={748}
-        priority
-        className="h-10 w-auto shrink-0"
-      />
+      <LogoMark priority />
       <span className="text-xl font-semibold tracking-tight">
         {primaryText}
         {accent ? <span>{accent}</span> : null}
