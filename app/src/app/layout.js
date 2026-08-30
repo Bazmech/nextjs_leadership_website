@@ -1,0 +1,62 @@
+import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
+import { clerkAppearance } from "@/lib/clerk-appearance";
+import { COOKIEBOT_CBID, shouldLoadCookiebot } from "@/lib/cookiebot";
+import { buildRootMetadata } from "@/lib/site-seo";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export async function generateMetadata() {
+  return buildRootMetadata();
+}
+
+export default function RootLayout({ children }) {
+  const loadCookiebot = shouldLoadCookiebot();
+
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="h-full">
+        {loadCookiebot ? (
+          <Script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            strategy="beforeInteractive"
+            data-cbid={COOKIEBOT_CBID}
+            data-blockingmode="auto"
+          />
+        ) : null}
+        <ClerkProvider
+          appearance={clerkAppearance}
+          signInUrl="/sign-in"
+          signUpUrl="/sign-up"
+          signInForceRedirectUrl="/dashboard"
+          signUpForceRedirectUrl="/dashboard"
+          signInFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/dashboard"
+          afterSignOutUrl="/"
+        >
+          <div className="grid h-full min-h-full grid-rows-[auto_1fr_auto]">
+            {children}
+          </div>
+        </ClerkProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
+  );
+}

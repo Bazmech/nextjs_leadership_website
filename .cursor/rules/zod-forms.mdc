@@ -1,6 +1,6 @@
 ---
 description: Validate form input with Zod schemas in Server Actions
-globs: src/actions/**/*
+globs: app/src/actions/**/*
 alwaysApply: false
 ---
 
