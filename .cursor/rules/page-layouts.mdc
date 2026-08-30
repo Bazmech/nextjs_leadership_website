@@ -13,7 +13,7 @@ Use the shared layout system for all page sections. Max content width is **lg** 
 - **Header and Footer** are full-width; inner content uses `Container`
 - **All other sections** use `Section` (wraps `Container`) or `Container` directly
 - Prefer **Grid** for layout; see `grid-first-layout.mdc`
-- Use `Link` for all links (supports `href`, Prismic `field`, and `target`)
+- Use `Link` for all links (supports `href`, CMS `field`, and `target`)
 
 ## Layout components
 
@@ -22,21 +22,21 @@ Use the shared layout system for all page sections. Max content width is **lg** 
 | Atom | `Container` | lg max-width + horizontal padding |
 | Atom | `AspectMedia` | 16:9 image or video |
 | Atom | `Link` | Unified link with target support |
-| Molecule | `RichText` | Formatted Prismic rich text output |
+| Molecule | `RichText` | Formatted Portable Text output |
 | Molecule | `SectionIntro` | Centered title → subtitle → text → link |
 | Molecule | `TextImage` | 50/50 grid; image always above text on mobile |
-| Molecule | `ListingCard` | Card with image, title, Prismic/URL link |
+| Molecule | `ListingCard` | Card with image, title, CMS/URL link |
 | Organism | `Section` | Full-width section + `Container` |
 | Organism | `MediaBlock`, `TextImageBlock`, `ListingBlock`, `SectionIntroBlock`, `RichTextBlock` | Composed page sections |
 
 ## Rich text
 
-- Always render Prismic structured text through `RichText` (never raw `PrismicRichText` in pages/slices)
+- Always render CMS rich text through `RichText` (never raw `PortableText` in pages/slices)
 - Inline links inside rich text use the shared `Link` atom via `richTextComponents`
 
 ## Listing links
 
-- Prismic **Link** fields support internal document selection or external URLs
+- CMS **Link** fields support internal page references or external URLs
 - Pass `linkField` to `ListingCard` / `Link`; optional `linkLabel` overrides button text
 
 ## Checklist for new sections

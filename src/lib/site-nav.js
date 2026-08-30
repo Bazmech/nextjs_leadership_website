@@ -1,4 +1,4 @@
-/** Fallback nav when the Prismic Header Menu singleton is empty or unavailable. */
+/** Fallback nav when the Header Menu singleton is empty or unavailable. */
 export const mainNavLinks = [];
 
 /** Labels removed from header/footer (case-insensitive). */

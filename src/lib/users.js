@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { assessmentSubmissions, userRoles, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const DEFAULT_ROLE_NAME = "default";
 export const ACCOUNT_DISABLED_PATH_FALLBACK = "/account-disabled";

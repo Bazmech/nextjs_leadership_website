@@ -6,7 +6,7 @@ import {
   getPastAssessmentsPageData,
   parseAssessmentQueryId,
 } from "@/lib/assessments";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 
 export async function generateMetadata() {
   return buildSimplePageMetadata(

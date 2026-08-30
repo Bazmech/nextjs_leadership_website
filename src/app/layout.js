@@ -1,13 +1,11 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import { PrismicPreview } from "@prismicio/next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { COOKIEBOT_CBID, shouldLoadCookiebot } from "@/lib/cookiebot";
-import { buildRootMetadata } from "@/lib/prismic-seo";
-import { repositoryName } from "@/prismicio";
+import { buildRootMetadata } from "@/lib/site-seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -54,7 +52,6 @@ export default function RootLayout({ children }) {
         >
           <div className="flex min-h-full flex-1 flex-col">{children}</div>
         </ClerkProvider>
-        <PrismicPreview repositoryName={repositoryName} />
         <Analytics />
         <SpeedInsights />
       </body>

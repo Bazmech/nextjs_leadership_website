@@ -1,21 +1,26 @@
 import { notFound, redirect } from "next/navigation";
-import { SliceZone } from "@prismicio/react";
 import Header from "@/components/organisms/Header/Header";
 import Footer from "@/components/organisms/Footer/Footer";
-import { createClient } from "@/prismicio";
-import { buildPrismicMetadata } from "@/lib/prismic-seo";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import SliceZone from "@/components/organisms/SliceZone/SliceZone";
+import { buildPageMetadata } from "@/lib/site-seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import { getCurrentAppUser } from "@/lib/users";
+import { sanityFetch } from "@/sanity/lib/client";
+import { pageBySlugQuery, pageSlugsQuery } from "@/sanity/lib/queries";
 import { components } from "@/slices";
 
 export async function generateMetadata({ params }) {
   const { uid } = await params;
 
   try {
-    const [client, settings] = await Promise.all([createClient(), getSiteSettings()]);
-    const page = await client.getByUID("page", uid);
+    const [page, settings] = await Promise.all([
+      sanityFetch(pageBySlugQuery, { uid }),
+      getSiteSettings(),
+    ]);
 
-    return buildPrismicMetadata(page, { path: `/${uid}`, settings });
+    if (!page) return { title: "Page not found" };
+
+    return buildPageMetadata(page, { path: `/${uid}`, settings });
   } catch {
     return { title: "Page not found" };
   }
@@ -23,10 +28,9 @@ export async function generateMetadata({ params }) {
 
 export async function generateStaticParams() {
   try {
-    const client = createClient();
-    const pages = await client.getAllByType("page");
-
-    return pages.map((page) => ({ uid: page.uid }));
+    const pages = await sanityFetch(pageSlugsQuery);
+    if (!Array.isArray(pages)) return [];
+    return pages.filter((page) => page?.uid).map((page) => ({ uid: page.uid }));
   } catch {
     return [];
   }
@@ -35,15 +39,12 @@ export async function generateStaticParams() {
 export default async function Page({ params }) {
   const { uid } = await params;
   const path = `/${uid}`;
-  const [client, settings] = await Promise.all([
-    createClient(),
+  const [page, settings] = await Promise.all([
+    sanityFetch(pageBySlugQuery, { uid }),
     getSiteSettings(),
   ]);
 
-  let page;
-  try {
-    page = await client.getByUID("page", uid);
-  } catch {
+  if (!page) {
     notFound();
   }
 
@@ -63,7 +64,7 @@ export default async function Page({ params }) {
     <>
       <Header />
       <main className="flex-1">
-        <SliceZone slices={page.data.slices} components={components} />
+        <SliceZone slices={page.slices} components={components} />
       </main>
       <Footer />
     </>

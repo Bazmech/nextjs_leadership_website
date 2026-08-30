@@ -1,0 +1,39 @@
+---
+description: Sanity CMS schemas, Studio, GROQ fetches, and page builder slices
+globs: src/sanity/**/*,sanity.config.js,src/slices/**/*,src/app/studio/**/*
+alwaysApply: false
+---
+
+# Sanity CMS
+
+Marketing content lives in Sanity. Assessments, users, and dashboard data stay in Neon.
+
+## Layout
+
+| Piece | Location |
+|-------|----------|
+| Studio | `/studio` (`src/app/studio/`) |
+| Config | `sanity.config.js`, `src/sanity/env.js` |
+| Schemas | `src/sanity/schemaTypes/` |
+| Client / GROQ | `src/sanity/lib/client.js`, `src/sanity/lib/queries.js` |
+| Page builder UI | `src/slices/` rendered by `SliceZone` |
+
+## Fetching
+
+Use `sanityFetch()` from `src/sanity/lib/client.js`. Tag requests with `sanity` so `/api/revalidate` can purge them. If `NEXT_PUBLIC_SANITY_PROJECT_ID` is missing, fetches return `null` and the site uses static fallbacks.
+
+Do not query Sanity from Client Components. Keep reads in Server Components and the existing adapters (`getSiteSettings`, `getHeaderMenuLinks`, `buildPageMetadata`).
+
+## Modeling
+
+- Singletons (`homepage`, `settings`, `headerMenu`) use fixed document IDs
+- Repeatable pages use `slug`
+- Page builder slices are objects in a `slices` array (`hero`, `about`, `media`, `textImage`, `listing`, `sectionIntro`, `richText`)
+- Links are `appLink` (path/URL + optional page reference)
+- Rich text is Portable Text (`portableText`), rendered only through the `RichText` molecule
+
+## Avoid
+
+- `@prismicio/*` or Slice Machine
+- Fetching Sanity from the browser for published page content
+- Rendering Portable Text without the shared `RichText` components

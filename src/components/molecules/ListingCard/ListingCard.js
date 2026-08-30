@@ -1,6 +1,6 @@
 import AspectMedia from "@/components/atoms/AspectMedia/AspectMedia";
 import Link from "@/components/atoms/Link/Link";
-import { getLinkLabel, getLinkTarget } from "@/lib/link-utils";
+import { getLinkLabel, getLinkTarget, isFilledLink } from "@/lib/link-utils";
 
 export default function ListingCard({
   title,
@@ -14,7 +14,7 @@ export default function ListingCard({
 }) {
   const label = linkLabel || getLinkLabel(linkField, title);
   const target = getLinkTarget(linkField, linkTarget);
-  const hasLink = Boolean(linkHref || linkField?.url || linkField?.link_type === "Document");
+  const hasLink = Boolean(linkHref || isFilledLink(linkField));
 
   const card = (
     <article className="group grid h-full overflow-hidden rounded-2xl border border-border bg-surface transition-shadow hover:shadow-lg">

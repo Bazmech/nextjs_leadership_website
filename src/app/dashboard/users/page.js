@@ -4,7 +4,7 @@ import StatCard from "@/components/molecules/StatCard/StatCard";
 import UserList from "@/components/organisms/UserList/UserList";
 import UserSearchEmptyToast from "@/components/organisms/UserSearchEmptyToast/UserSearchEmptyToast";
 import UserSearchForm from "@/components/organisms/UserSearchForm/UserSearchForm";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 import { getUserAccessCounts } from "@/lib/users";
 
 export async function generateMetadata() {

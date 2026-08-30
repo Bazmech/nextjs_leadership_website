@@ -7,7 +7,7 @@ import IncludeInAverageCheckbox from "@/components/organisms/IncludeInAverageChe
 import RenameSubmissionTitle from "@/components/organisms/RenameSubmissionTitle/RenameSubmissionTitle";
 import TakeAssessmentForm from "@/components/organisms/TakeAssessmentForm/TakeAssessmentForm";
 import { getOwnedSubmission } from "@/lib/assessments";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;

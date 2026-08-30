@@ -21,7 +21,7 @@ export const ROLE_VISIBILITY_RANK = {
 };
 
 /**
- * Normalize Prismic Select / display labels to canonical role ids.
+ * Normalize CMS Select / display labels to canonical role ids.
  * @param {string | null | undefined} value
  * @returns {string}
  */

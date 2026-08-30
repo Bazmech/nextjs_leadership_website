@@ -1,14 +1,12 @@
-import { getPrismicText } from "@/lib/prismic-field";
+import { getCmsText } from "@/lib/cms-field";
 import MediaBlock from "@/components/organisms/MediaBlock/MediaBlock";
 
 export default function Media({ slice }) {
-  const { primary } = slice;
-
   return (
-    <div data-slice-type={slice.slice_type} data-slice-variation={slice.variation}>
+    <div data-slice-type={slice._type}>
       <MediaBlock
-        image={primary.image}
-        videoUrl={getPrismicText(primary.video_url) || undefined}
+        image={slice.image}
+        videoUrl={getCmsText(slice.videoUrl) || undefined}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getUserForEdit } from "@/actions/users";
 import Link from "@/components/atoms/Link/Link";
 import EditUserForm from "@/components/organisms/EditUserForm/EditUserForm";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;

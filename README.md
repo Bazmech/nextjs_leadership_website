@@ -10,7 +10,7 @@ Executive coaching and leadership development website built with Next.js 16 (App
 | Language | JavaScript |
 | Styling | Tailwind CSS v4 + CSS variables in `src/app/globals.css` |
 | Auth | [Clerk](https://clerk.com) (`@clerk/nextjs` v7) |
-| CMS | [Prismic](https://prismic.io) (`@prismicio/client`, Slice Machine) |
+| CMS | [Sanity](https://www.sanity.io) (`next-sanity`, embedded Studio at `/studio`) |
 | Database | [Neon](https://neon.tech) Postgres via `@neondatabase/serverless` |
 | ORM / migrations | [Drizzle ORM](https://orm.drizzle.team) + `drizzle-kit` |
 | Deployment | [Vercel](https://vercel.com) with Neon Storage integration |
@@ -243,109 +243,75 @@ yarn db:studio
 
 ---
 
-### Prismic CMS
+### Sanity CMS
 
-Content is managed in [Prismic](https://prismic.io) using Slice Machine. The homepage and additional pages are built from reusable slices.
+Content is managed in [Sanity](https://www.sanity.io). The homepage and additional pages are built from reusable page-builder slices. The Studio is embedded in this app at `/studio`.
 
 **What is implemented**
 
 | Item | Location |
 |------|----------|
-| Prismic client | `src/prismicio.js` |
-| Slice Machine config | `slicemachine.config.json` |
-| Custom types | `customtypes/homepage/` (single), `customtypes/page/` (repeatable), `customtypes/settings/` (site-wide fallbacks) |
-| SEO helper | `src/lib/prismic-seo.js` |
-| Site settings helper | `src/lib/prismic-settings.js` |
-| Slices | `src/slices/` — all layout components (see below) |
-| Homepage (CMS-driven) | `src/app/page.js` — falls back to static components if Prismic is unavailable |
+| Sanity client | `src/sanity/lib/client.js` |
+| Studio config | `sanity.config.js`, `src/sanity/env.js` |
+| Schemas | `src/sanity/schemaTypes/` — homepage, page, settings, header menu, slices |
+| SEO helper | `src/lib/site-seo.js` |
+| Site settings helper | `src/lib/site-settings.js` |
+| Slices | `src/slices/` — rendered by `SliceZone` |
+| Homepage (CMS-driven) | `src/app/page.js` — falls back to static components if Sanity is unavailable |
 | Dynamic pages | `src/app/[uid]/page.js` |
-| Slice simulator | `src/app/slice-simulator/page.js` |
-| Preview endpoints | `src/app/api/preview/`, `src/app/api/exit-preview/` |
+| Studio | `src/app/studio/` |
 | Revalidation webhook | `src/app/api/revalidate/` |
 | Clerk account-deleted webhook | `src/app/api/webhooks/clerk/` |
-| Preview toolbar | `PrismicPreview` in `src/app/layout.js` |
 
-**Custom types**
+**Document types**
 
-| Type | API ID | Repeatable | Route |
-|------|--------|------------|-------|
-| Homepage | `homepage` | No (single type) | `/` |
-| Page | `page` | Yes | `/:uid` |
-| Settings | `settings` | No (single type) | — (not routed) |
+| Type | Repeatable | Route |
+|------|------------|-------|
+| Homepage | No (singleton `homepage`) | `/` |
+| Page | Yes (`slug`) | `/:uid` |
+| Settings | No (singleton `settings`) | — (not routed) |
+| Header menu | No (singleton `headerMenu`) | — (not routed) |
 
-**Settings** (single type) stores site-wide fallbacks used when page-level SEO fields are empty:
+**Settings** stores site-wide fallbacks used when page-level SEO fields are empty:
 
-| Tab | Fields |
-|-----|--------|
+| Group | Fields |
+|-------|--------|
 | Site identity | Site name, title postfix, tagline, logo text/accent |
 | SEO fallbacks | Default meta title/description/image, OG title/description, site URL, Twitter handle, Google verification |
-| Contact & header | Contact email/phone, header CTA label/link, footer copyright |
+| Contact & header | Contact email/phone, header CTA, footer copyright |
 | Social | Repeatable social links (platform + URL) |
+| Account access | Account disabled page, dashboard introduction text |
 
-**Shared fields**
-
-| Field | Homepage | Page |
-|-------|----------|------|
-| Title | Yes | Yes |
-| Slug (`uid`) | No | Yes |
-| Slice zone | Yes | Yes |
-| SEO title | Yes | Yes |
-| SEO description | Yes | Yes |
-| OG title / description | Yes | Yes |
-| OG image (`meta_image`) | Yes | Yes |
-| Canonical URL | Yes | Yes |
-| No index | Yes | Yes |
-
-**Slice types** (available in both custom types)
+**Slice types** (available on homepage and pages)
 
 | Slice | Purpose |
 |-------|---------|
 | `hero` | Headline, CTAs, stats |
-| `services` | Services grid |
 | `about` | About section with highlights |
 | `media` | 16:9 image or video |
-| `text_image` | 50/50 text and image |
+| `textImage` | 50/50 text and image |
 | `listing` | 3-column responsive card listing |
-| `section_intro` | Centered title, subtitle, text, link |
-| `rich_text` | Full-width rich text |
+| `sectionIntro` | Centered title, subtitle, text, link |
+| `richText` | Full-width rich text |
 
 **Additional actions (required for CMS)**
 
-1. Create a Prismic repository at [prismic.io/dashboard](https://prismic.io/dashboard) → **Next.js** → **Connect your own web app**.
-2. Set your repository name in `slicemachine.config.json` and `.env.local`:
+1. Create a Sanity project at [sanity.io/manage](https://www.sanity.io/manage).
+2. Set these in `.env.local` and Vercel:
 
    ```bash
-   PRISMIC_REPOSITORY=your-repo-name
+   NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_SANITY_DATASET=production
    ```
 
-3. Push custom types and slices to Prismic:
-
-   ```bash
-   yarn slicemachine
-   ```
-
-   In Slice Machine, click **Push** to sync models to your repository.
-
-4. Create and publish content in Prismic:
-   - **Settings** (single type) — site-wide fallbacks (SEO, branding, contact, social)
-   - **Homepage** (single type) — one document for `/`
-   - **Page** (repeatable) — additional pages at `/{slug}`
-
-5. Configure previews (local):
-
-   ```bash
-   npx prismic preview add http://localhost:3000/api/preview
-   npx prismic preview set-simulator http://localhost:3000/slice-simulator
-   ```
-
-6. Configure revalidation webhook in Prismic (**Settings → Webhooks**):
+3. Add CORS origins in the Sanity project (**API → CORS Origins**): `http://localhost:3000` and the production site URL, with credentials allowed.
+4. Open `/studio`, sign in, and create the singleton documents **Homepage**, **Settings**, and **Header menu**, plus any **Pages**.
+5. Configure a revalidation webhook in Sanity (**API → Webhooks**):
    - URL: `https://your-domain.com/api/revalidate`
-   - Triggers: document published / unpublished
-   - Optional: set `PRISMIC_WEBHOOK_SECRET` in Vercel and Prismic webhook headers
+   - Trigger on create / update / delete
+   - Set `SANITY_WEBHOOK_SECRET` in Vercel and send the same value as `?secret=` or header `x-sanity-webhook-secret`
 
-7. If your Prismic API is private, generate an access token and set `PRISMIC_ACCESS_TOKEN` in `.env.local` and Vercel.
-
-**Note:** Until Prismic is configured and content is published, the site uses static fallback components automatically.
+**Note:** Until Sanity is configured and content is published, the site uses static fallback components automatically.
 
 ---
 
@@ -371,9 +337,10 @@ Copy `.env.example` to `.env.local` and configure:
 | `DATABASE_URL_UNPOOLED` | Recommended | Direct connection (used for migrations) |
 | `NEON_PROJECT_ID` | Optional | Neon project ID for CLI branch workflow |
 | `NEON_API_KEY` | Optional | Neon API key for CLI branch workflow |
-| `PRISMIC_REPOSITORY` | Yes (for CMS) | Prismic repository name |
-| `PRISMIC_ACCESS_TOKEN` | Optional | Required if Prismic API is private |
-| `PRISMIC_WEBHOOK_SECRET` | Optional | Validates `/api/revalidate` webhook calls |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Yes (for CMS) | Sanity project ID |
+| `NEXT_PUBLIC_SANITY_DATASET` | Yes (for CMS) | Sanity dataset (usually `production`) |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | Optional | GROQ API version (defaults in `src/sanity/env.js`) |
+| `SANITY_WEBHOOK_SECRET` | Optional | Validates `/api/revalidate` webhook calls |
 | `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_GIT_COMMIT_REF` | Auto | Injected by Vercel at deploy time (do not set locally). Cookiebot CMP loads only when `VERCEL_ENV=production` and the production host is `www.productiveleadership.org` (or apex). |
 
 On Vercel, Clerk keys must be added manually in **Project Settings → Environment Variables**. Neon `DATABASE_URL` values are injected by the Storage integration.
@@ -394,7 +361,6 @@ On Vercel, Clerk keys must be added manually in **Project Settings → Environme
 | `yarn db:migrate` | Apply migrations to the database in `DATABASE_URL` |
 | `yarn db:branch` | Show git branch → suggested Neon branch name |
 | `yarn db:studio` | Open Drizzle Studio |
-| `yarn slicemachine` | Start Slice Machine UI to edit models and push to Prismic |
 
 ---
 
@@ -409,10 +375,10 @@ Before going live, confirm:
 - [ ] `DATABASE_URL` available in Production (via Neon integration)
 - [ ] First deploy completes successfully (`yarn build` runs migrations)
 - [ ] Sign-in, sign-up, and dashboard tested on preview and production
-- [ ] Prismic repository created and `PRISMIC_REPOSITORY` set in Vercel
-- [ ] Custom types and slices pushed via Slice Machine
-- [ ] Homepage published in Prismic
-- [ ] Preview and revalidation webhooks configured for production domain
+- [ ] Sanity project created and `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` set in Vercel
+- [ ] CORS origins added for local and production
+- [ ] Homepage, Settings, and Header menu published in Studio (`/studio`)
+- [ ] Revalidation webhook configured for the production domain
 
 ---
 
@@ -422,4 +388,4 @@ Before going live, confirm:
 - [Clerk Next.js Quickstart](https://clerk.com/docs/nextjs/getting-started/quickstart)
 - [Neon + Vercel integration](https://neon.com/docs/guides/vercel-managed-integration)
 - [Drizzle ORM docs](https://orm.drizzle.team/docs/overview)
-- [Prismic + Next.js docs](https://prismic.io/docs/nextjs)
+- [Sanity + Next.js docs](https://www.sanity.io/docs/nextjs)

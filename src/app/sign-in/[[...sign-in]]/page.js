@@ -1,7 +1,7 @@
 import { SignIn } from "@clerk/nextjs";
 import { clerkAppearance } from "@/lib/clerk-appearance";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export async function generateMetadata() {
   const settings = await getSiteSettings();

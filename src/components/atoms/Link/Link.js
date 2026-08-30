@@ -1,6 +1,5 @@
-import { PrismicNextLink } from "@prismicio/next";
 import NextLink from "next/link";
-import { getLinkTarget, isFilledLink } from "@/lib/link-utils";
+import { getLinkTarget, isFilledLink, resolveLinkHref } from "@/lib/link-utils";
 
 export default function Link({
   href,
@@ -10,24 +9,19 @@ export default function Link({
   children,
   ...props
 }) {
+  const resolvedHref = resolveLinkHref(field, href);
   const resolvedTarget = getLinkTarget(field, target);
   const classes = className.trim();
 
-  if (isFilledLink(field)) {
+  if (!resolvedHref && !isFilledLink(field)) {
     return (
-      <PrismicNextLink
-        field={field}
-        target={resolvedTarget}
-        rel={resolvedTarget === "_blank" ? "noopener noreferrer" : undefined}
-        className={classes}
-        {...props}
-      >
+      <span className={classes} {...props}>
         {children}
-      </PrismicNextLink>
+      </span>
     );
   }
 
-  if (!href) {
+  if (!resolvedHref) {
     return (
       <span className={classes} {...props}>
         {children}
@@ -36,12 +30,14 @@ export default function Link({
   }
 
   const isExternal =
-    resolvedTarget === "_blank" || href.startsWith("http") || href.startsWith("mailto:");
+    resolvedTarget === "_blank" ||
+    resolvedHref.startsWith("http") ||
+    resolvedHref.startsWith("mailto:");
 
   if (isExternal) {
     return (
       <a
-        href={href}
+        href={resolvedHref}
         target={resolvedTarget ?? "_blank"}
         rel="noopener noreferrer"
         className={classes}
@@ -53,7 +49,7 @@ export default function Link({
   }
 
   return (
-    <NextLink href={href} target={resolvedTarget} className={classes} {...props}>
+    <NextLink href={resolvedHref} target={resolvedTarget} className={classes} {...props}>
       {children}
     </NextLink>
   );

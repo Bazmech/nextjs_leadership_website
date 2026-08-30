@@ -7,7 +7,7 @@ import {
   getAssessmentTree,
 } from "@/lib/assessments";
 import { isAssessmentStructureLocked } from "@/lib/schemas/assessment";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;

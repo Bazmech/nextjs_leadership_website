@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export default async function Logo({ className = "text-primary" }) {
   const settings = await getSiteSettings();

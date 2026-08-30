@@ -18,7 +18,7 @@ Use **Yarn** (`yarn add`, `yarn.lock`). Do not add `package-lock.json` or switch
 | Form validation | `zod` | `zod-forms.mdc` |
 | Form submission | Server Actions | `server-actions.mdc` — **do not** add a second form-submission rule |
 | Auth | `@clerk/nextjs` | `src/proxy.js`, Clerk provider in layout |
-| CMS | `@prismicio/*` | `src/prismicio.js`, slices in `src/slices/` |
+| CMS | `next-sanity`, `sanity` | `src/sanity/`, Studio at `/studio`, slices in `src/slices/` |
 | Database | `drizzle-orm`, `@neondatabase/serverless` | `src/lib/db.js`, `src/db/schema` |
 | Web Analytics | `@vercel/analytics` | `<Analytics />` in `src/app/layout.js` |
 | Speed Insights | `@vercel/speed-insights` | `<SpeedInsights />` in `src/app/layout.js` |

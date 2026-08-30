@@ -1,4 +1,3 @@
-import { isFilled } from "@prismicio/client";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "@/components/atoms/Link/Link";
 import LocalDateTime from "@/components/atoms/LocalDateTime/LocalDateTime";
@@ -7,8 +6,9 @@ import ManageAccountButton from "@/components/molecules/ManageAccountButton/Mana
 import RichText from "@/components/molecules/RichText/RichText";
 import { getDashboardAssessmentSummary } from "@/lib/assessments";
 import { getDatabaseContext } from "@/lib/db-context";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import { isPortableText } from "@/lib/cms-field";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import {
   getCurrentAppUser,
   isStaffRole,
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
           Welcome back
           {user?.firstName ? `, ${user.firstName}` : ""}
         </h1>
-        {isFilled.richText(settings.introductionText) ? (
+        {isPortableText(settings.introductionText) ? (
           <RichText
             field={settings.introductionText}
             className="mt-3 text-lg [&_p]:text-lg"

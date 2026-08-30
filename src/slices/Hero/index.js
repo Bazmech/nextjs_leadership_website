@@ -1,26 +1,20 @@
-import { getPrismicText } from "@/lib/prismic-field";
-import { PrismicNextLink } from "@prismicio/next";
+import { getCmsText } from "@/lib/cms-field";
+import { getLinkLabel, resolveLinkHref } from "@/lib/link-utils";
 import Button from "@/components/atoms/Button/Button";
 import Container from "@/components/atoms/Container/Container";
 import Eyebrow from "@/components/atoms/Eyebrow/Eyebrow";
+import Link from "@/components/atoms/Link/Link";
 import StatCard from "@/components/molecules/StatCard/StatCard";
 
-function linkHref(field, fallback) {
-  if (field?.link_type === "Web" && field.url) return field.url;
-  if (field?.link_type === "Document" && field.url) return field.url;
-  return fallback;
-}
-
 export default function Hero({ slice }) {
-  const { primary, items } = slice;
-  const eyebrow = getPrismicText(primary.eyebrow);
-  const title = getPrismicText(primary.title);
-  const description = getPrismicText(primary.description);
+  const eyebrow = getCmsText(slice.eyebrow);
+  const title = getCmsText(slice.title);
+  const description = getCmsText(slice.description);
+  const stats = Array.isArray(slice.stats) ? slice.stats : [];
 
   return (
     <section
-      data-slice-type={slice.slice_type}
-      data-slice-variation={slice.variation}
+      data-slice-type={slice._type}
       className="relative overflow-hidden py-24 md:py-32"
     >
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
@@ -37,31 +31,25 @@ export default function Hero({ slice }) {
           </p>
         ) : null}
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:w-fit">
-          <PrismicNextLink
-            field={primary.primary_cta_link}
-            href={linkHref(primary.primary_cta_link, "#services")}
-          >
+          <Link field={slice.primaryCta} href={resolveLinkHref(slice.primaryCta, "#services")}>
             <Button as="span" variant="accent">
-              {getPrismicText(primary.primary_cta_label, "Explore Services")}
+              {getLinkLabel(slice.primaryCta, "Explore Services")}
             </Button>
-          </PrismicNextLink>
-          <PrismicNextLink
-            field={primary.secondary_cta_link}
-            href={linkHref(primary.secondary_cta_link, "#about")}
-          >
+          </Link>
+          <Link field={slice.secondaryCta} href={resolveLinkHref(slice.secondaryCta, "#about")}>
             <Button as="span" variant="secondary">
-              {getPrismicText(primary.secondary_cta_label, "About Us")}
+              {getLinkLabel(slice.secondaryCta, "About Us")}
             </Button>
-          </PrismicNextLink>
+          </Link>
         </div>
-        {items?.length > 0 ? (
+        {stats.length > 0 ? (
           <dl className="mt-16 grid grid-cols-2 gap-8 border-t border-border pt-10 md:grid-cols-4">
-            {items.map((item, index) => {
-              const label = getPrismicText(item.label);
+            {stats.map((item, index) => {
+              const label = getCmsText(item.label);
               return (
                 <StatCard
                   key={`${label}-${index}`}
-                  value={getPrismicText(item.value)}
+                  value={getCmsText(item.value)}
                   label={label}
                 />
               );

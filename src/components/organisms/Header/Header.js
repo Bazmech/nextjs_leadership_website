@@ -3,7 +3,7 @@ import MobileNav from "@/components/molecules/MobileNav/MobileNav";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
 import Container from "@/components/atoms/Container/Container";
 import Logo from "@/components/molecules/Logo/Logo";
-import { getHeaderMenuLinks } from "@/lib/prismic-header-menu";
+import { getHeaderMenuLinks } from "@/lib/header-menu";
 import { getCurrentAppUser } from "@/lib/users";
 
 export default async function Header() {

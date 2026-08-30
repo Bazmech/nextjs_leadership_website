@@ -1,16 +1,14 @@
-import { getPrismicText } from "@/lib/prismic-field";
+import { getCmsText } from "@/lib/cms-field";
 import TextImageBlock from "@/components/organisms/TextImageBlock/TextImageBlock";
 
 export default function TextImage({ slice }) {
-  const { primary } = slice;
-
   return (
-    <div data-slice-type={slice.slice_type} data-slice-variation={slice.variation}>
+    <div data-slice-type={slice._type}>
       <TextImageBlock
-        image={primary.image}
-        videoUrl={getPrismicText(primary.video_url) || undefined}
-        text={primary.text}
-        reversed={primary.reversed}
+        image={slice.image}
+        videoUrl={getCmsText(slice.videoUrl) || undefined}
+        text={slice.text}
+        reversed={Boolean(slice.reversed)}
       />
     </div>
   );

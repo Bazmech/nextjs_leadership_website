@@ -2,8 +2,8 @@ import RichTextBlock from "@/components/organisms/RichTextBlock/RichTextBlock";
 
 export default function RichText({ slice }) {
   return (
-    <div data-slice-type={slice.slice_type} data-slice-variation={slice.variation}>
-      <RichTextBlock text={slice.primary.text} />
+    <div data-slice-type={slice._type}>
+      <RichTextBlock text={slice.text} />
     </div>
   );
 }

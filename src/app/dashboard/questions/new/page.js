@@ -1,6 +1,6 @@
 import Link from "@/components/atoms/Link/Link";
 import CreateAssessmentForm from "@/components/organisms/CreateAssessmentForm/CreateAssessmentForm";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 
 export async function generateMetadata() {
   return buildSimplePageMetadata(

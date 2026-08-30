@@ -1,6 +1,6 @@
 import Link from "@/components/atoms/Link/Link";
 import RichText from "@/components/molecules/RichText/RichText";
-import { getLinkLabel } from "@/lib/link-utils";
+import { getLinkLabel, isFilledLink } from "@/lib/link-utils";
 
 export default function SectionIntro({
   title,
@@ -27,7 +27,7 @@ export default function SectionIntro({
         </p>
       ) : null}
       {text ? <div className="mt-4"><RichText field={text} /></div> : null}
-      {linkHref || linkField ? (
+      {linkHref || isFilledLink(linkField) ? (
         <div className="mt-8">
           <Link
             href={linkHref}

@@ -1,7 +1,7 @@
 import Container from "@/components/atoms/Container/Container";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
-import { getHeaderMenuLinks } from "@/lib/prismic-header-menu";
-import { getSiteSettings } from "@/lib/prismic-settings";
+import { getHeaderMenuLinks } from "@/lib/header-menu";
+import { getSiteSettings } from "@/lib/site-settings";
 
 function flattenMenuItems(items = []) {
   return items.flatMap((item) => [

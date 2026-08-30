@@ -1,7 +1,7 @@
 import Link from "@/components/atoms/Link/Link";
 import WaitlistManager from "@/components/organisms/WaitlistManager/WaitlistManager";
 import WaitlistSearchForm from "@/components/organisms/WaitlistSearchForm/WaitlistSearchForm";
-import { buildSimplePageMetadata } from "@/lib/prismic-seo";
+import { buildSimplePageMetadata } from "@/lib/site-seo";
 import { listWaitlistEntries } from "@/lib/users";
 
 export async function generateMetadata() {
