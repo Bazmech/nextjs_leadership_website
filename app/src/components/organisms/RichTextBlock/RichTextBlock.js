@@ -6,7 +6,7 @@ export default function RichTextBlock({ id, text, className = "py-24" }) {
 
   return (
     <Section id={id} className={className}>
-      <div className="col-span-12 md:col-span-8">
+      <div className="col-span-12">
         <RichText field={text} />
       </div>
     </Section>
