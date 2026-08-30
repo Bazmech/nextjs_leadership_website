@@ -1,6 +1,6 @@
 ---
 description: Atomic component folders and reuse-before-create mandate
-globs: src/components/**
+globs: app/src/components/**
 alwaysApply: false
 ---
 

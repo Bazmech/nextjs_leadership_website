@@ -1,0 +1,169 @@
+import { cache } from "react";
+import { getCmsText } from "@/lib/cms-field";
+import { getImageUrl } from "@/sanity/lib/image";
+import { siteDefaults } from "@/lib/site-defaults";
+import {
+  buildTitleTemplate,
+  formatTitleWithPostfix,
+  getSiteSettings,
+} from "@/lib/site-settings";
+
+function getText(field, fallback = "") {
+  return getCmsText(field, fallback);
+}
+
+function buildAbsoluteUrl(path, siteUrl) {
+  if (!path) return siteUrl || undefined;
+  if (path.startsWith("http")) return path;
+  if (!siteUrl) return path;
+
+  const base = siteUrl.replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalizedPath}`;
+}
+
+function buildSocialImage(url, alt) {
+  if (!url) return undefined;
+
+  const isSiteLogo = url === siteDefaults.defaultMetaImageUrl;
+
+  return [
+    {
+      url,
+      width: isSiteLogo ? 810 : 1200,
+      height: isSiteLogo ? 748 : 630,
+      alt,
+    },
+  ];
+}
+
+function buildSocialMetadata(settings) {
+  const metadata = {};
+
+  if (settings.twitterHandle) {
+    metadata.twitter = {
+      site: settings.twitterHandle,
+      creator: settings.twitterHandle,
+    };
+  }
+
+  if (settings.googleSiteVerification) {
+    metadata.verification = {
+      google: settings.googleSiteVerification,
+    };
+  }
+
+  return metadata;
+}
+
+export function buildPageMetadata(document, { path, settings } = {}) {
+  const siteSettings = settings ?? siteDefaults;
+  const seo = document?.seo ?? {};
+  const pageTitle = getText(document?.title);
+  const explicitMetaTitle = getText(seo.metaTitle);
+  const title = explicitMetaTitle
+    ? { absolute: explicitMetaTitle }
+    : pageTitle || undefined;
+  const metaDescription =
+    getText(seo.metaDescription) ||
+    siteSettings.defaultMetaDescription ||
+    undefined;
+  const resolvedTitle =
+    explicitMetaTitle ||
+    (pageTitle
+      ? formatTitleWithPostfix(pageTitle, siteSettings)
+      : siteSettings.defaultMetaTitle);
+  const ogTitle =
+    getText(seo.ogTitle) || siteSettings.defaultOgTitle || resolvedTitle;
+  const ogDescription =
+    getText(seo.ogDescription) ||
+    siteSettings.defaultOgDescription ||
+    metaDescription;
+  const ogImageUrl =
+    getImageUrl(seo.metaImage) || siteSettings.defaultMetaImageUrl;
+  const canonicalUrl =
+    getText(seo.canonicalUrl) ||
+    buildAbsoluteUrl(path, siteSettings.siteUrl) ||
+    undefined;
+
+  return {
+    title,
+    description: metaDescription,
+    alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
+    robots: seo.noIndex
+      ? { index: false, follow: false, googleBot: { index: false, follow: false } }
+      : undefined,
+    openGraph: {
+      title: ogTitle,
+      description: ogDescription || undefined,
+      type: "website",
+      siteName: siteSettings.siteName,
+      url: canonicalUrl || path || undefined,
+      images: buildSocialImage(ogImageUrl, ogTitle),
+    },
+    twitter: {
+      card: ogImageUrl ? "summary_large_image" : "summary",
+      title: ogTitle,
+      description: ogDescription || undefined,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
+      ...(siteSettings.twitterHandle
+        ? { site: siteSettings.twitterHandle, creator: siteSettings.twitterHandle }
+        : {}),
+    },
+    ...(siteSettings.googleSiteVerification
+      ? { verification: { google: siteSettings.googleSiteVerification } }
+      : {}),
+  };
+}
+
+export async function buildRootMetadata() {
+  const settings = await getSiteSettings();
+
+  return {
+    title: {
+      default: settings.defaultMetaTitle,
+      template: buildTitleTemplate(settings),
+    },
+    description: settings.defaultMetaDescription,
+    metadataBase: settings.siteUrl ? new URL(settings.siteUrl) : undefined,
+    openGraph: {
+      title: settings.defaultOgTitle || settings.defaultMetaTitle,
+      description:
+        settings.defaultOgDescription || settings.defaultMetaDescription,
+      type: "website",
+      siteName: settings.siteName,
+      images: buildSocialImage(
+        settings.defaultMetaImageUrl,
+        settings.defaultMetaTitle,
+      ),
+    },
+    twitter: {
+      card: settings.defaultMetaImageUrl ? "summary_large_image" : "summary",
+      title: settings.defaultOgTitle || settings.defaultMetaTitle,
+      description:
+        settings.defaultOgDescription || settings.defaultMetaDescription,
+      images: settings.defaultMetaImageUrl
+        ? [settings.defaultMetaImageUrl]
+        : undefined,
+      ...(settings.twitterHandle
+        ? { site: settings.twitterHandle, creator: settings.twitterHandle }
+        : {}),
+    },
+    ...buildSocialMetadata(settings),
+  };
+}
+
+export async function buildSimplePageMetadata(title, description) {
+  const settings = await getSiteSettings();
+
+  return {
+    title,
+    description: description || settings.defaultMetaDescription,
+    ...buildSocialMetadata(settings),
+  };
+}
+
+export const defaultSiteMetadata = {
+  title: { absolute: siteDefaults.defaultMetaTitle },
+  description: siteDefaults.defaultMetaDescription,
+};

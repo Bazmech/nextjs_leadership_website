@@ -1,6 +1,6 @@
 ---
 description: Light/dark mode via Tailwind v4 semantic tokens
-globs: src/**/*.{js,css}
+globs: app/src/**/*.{js,css}
 alwaysApply: false
 ---
 
