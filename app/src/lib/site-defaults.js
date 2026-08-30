@@ -7,7 +7,7 @@ export const siteDefaults = {
   defaultMetaTitle: "Productiv eLeadership | Executive Coaching & Leadership Development",
   defaultMetaDescription:
     "Partner with experienced coaches to build high-performing teams, sharpen your leadership skills, and drive lasting organizational impact.",
-  defaultMetaImageUrl: null,
+  defaultMetaImageUrl: "/logo.png",
   defaultOgTitle: null,
   defaultOgDescription: null,
   siteUrl: null,

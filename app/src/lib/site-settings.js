@@ -54,7 +54,8 @@ function mapSettingsData(data = {}) {
     logoAccent: getText(data.logoAccent, siteDefaults.logoAccent),
     defaultMetaTitle,
     defaultMetaDescription,
-    defaultMetaImageUrl: getImageUrl(data.defaultMetaImage),
+    defaultMetaImageUrl:
+      getImageUrl(data.defaultMetaImage) || siteDefaults.defaultMetaImageUrl,
     defaultOgTitle: getText(data.defaultOgTitle) || null,
     defaultOgDescription: getText(data.defaultOgDescription) || null,
     siteUrl: getText(data.siteUrl) || null,

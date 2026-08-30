@@ -22,6 +22,21 @@ function buildAbsoluteUrl(path, siteUrl) {
   return `${base}${normalizedPath}`;
 }
 
+function buildSocialImage(url, alt) {
+  if (!url) return undefined;
+
+  const isSiteLogo = url === siteDefaults.defaultMetaImageUrl;
+
+  return [
+    {
+      url,
+      width: isSiteLogo ? 810 : 1200,
+      height: isSiteLogo ? 748 : 630,
+      alt,
+    },
+  ];
+}
+
 function buildSocialMetadata(settings) {
   const metadata = {};
 
@@ -84,9 +99,7 @@ export function buildPageMetadata(document, { path, settings } = {}) {
       type: "website",
       siteName: siteSettings.siteName,
       url: canonicalUrl || path || undefined,
-      images: ogImageUrl
-        ? [{ url: ogImageUrl, width: 1200, height: 630, alt: ogTitle }]
-        : undefined,
+      images: buildSocialImage(ogImageUrl, ogTitle),
     },
     twitter: {
       card: ogImageUrl ? "summary_large_image" : "summary",
@@ -119,16 +132,10 @@ export async function buildRootMetadata() {
         settings.defaultOgDescription || settings.defaultMetaDescription,
       type: "website",
       siteName: settings.siteName,
-      images: settings.defaultMetaImageUrl
-        ? [
-            {
-              url: settings.defaultMetaImageUrl,
-              width: 1200,
-              height: 630,
-              alt: settings.defaultMetaTitle,
-            },
-          ]
-        : undefined,
+      images: buildSocialImage(
+        settings.defaultMetaImageUrl,
+        settings.defaultMetaTitle,
+      ),
     },
     twitter: {
       card: settings.defaultMetaImageUrl ? "summary_large_image" : "summary",
