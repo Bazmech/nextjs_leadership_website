@@ -1,6 +1,6 @@
 # ProductiveLeadership
 
-Executive coaching and leadership development website built with Next.js 16 (App Router), JavaScript, and Tailwind CSS v4.
+Executive coaching and leadership development website built with Next.js 16 (App Router), JavaScript, and Tailwind CSS v4. Marketing pages are CMS-driven. Signed-in users take leadership assessments stored in Neon Postgres.
 
 ## Tech stack
 
@@ -13,6 +13,10 @@ Executive coaching and leadership development website built with Next.js 16 (App
 | CMS | [Sanity](https://www.sanity.io) (`next-sanity`, embedded Studio at `/studio`) |
 | Database | [Neon](https://neon.tech) Postgres via `@neondatabase/serverless` |
 | ORM / migrations | [Drizzle ORM](https://orm.drizzle.team) + `drizzle-kit` |
+| Charts | [Recharts](https://recharts.org) (leadership profile radar, domain averages) |
+| PDF export | [`@react-pdf/renderer`](https://react-pdf.org) |
+| Drag and drop | [`@dnd-kit`](https://dndkit.com) (assessment structure builder) |
+| Analytics | `@vercel/analytics` + `@vercel/speed-insights` |
 | Deployment | [Vercel](https://vercel.com) with Neon Storage integration |
 
 ## Getting started
@@ -23,6 +27,7 @@ Executive coaching and leadership development website built with Next.js 16 (App
 - Yarn 1.x
 - Clerk account ([dashboard.clerk.com](https://dashboard.clerk.com))
 - Neon database (via Vercel Storage or [console.neon.tech](https://console.neon.tech))
+- Sanity project ([sanity.io/manage](https://www.sanity.io/manage))
 
 ### 1. Install dependencies
 
@@ -40,6 +45,8 @@ cp .env.example .env.local   # skip if .env.local already exists
 
 See [Environment variables](#environment-variables) below for what each variable does.
 
+`DATABASE_URL` should be the **pooled** Neon URL (`…-pooler…`). `DATABASE_URL_UNPOOLED` should be the **direct** host (same hostname with `-pooler` removed). Migrations use the unpooled URL when it is set.
+
 ### 3. Run database migrations (local)
 
 After `DATABASE_URL` is set in `.env.local`:
@@ -54,29 +61,46 @@ yarn db:migrate
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Restart the dev server after changing `.env.local`. The Studio is at [http://localhost:3000/studio](http://localhost:3000/studio).
 
 ## Project structure
 
 ```
 src/
   app/                    # App Router pages and layouts
-    dashboard/            # Protected route (requires sign-in)
+    dashboard/            # Signed-in app (assessments, account, staff tools)
+      assessments/        # Take, past submissions, overall averages
+      questions/          # super_admin assessment template builder
+      users/              # Staff user management + Clerk wait list
     sign-in/              # Clerk sign-in
     sign-up/              # Clerk sign-up
+    studio/               # Embedded Sanity Studio
+    api/                  # Webhooks and export routes (not form mutations)
   actions/                # Server Actions (mutations, data writes)
   components/
-    atoms/                # Primitives (Button, Input, Textarea, Eyebrow)
-    molecules/            # Compositions (NavLink, Logo, StatCard, AuthNav, ...)
-    organisms/            # Page sections (Header, Hero, Services, About, ...)
+    atoms/                # Primitives (Button, Input, Checkbox, ScoreRadioGroup, …)
+    molecules/            # Compositions (NavLink, AuthNav, Dialog, …)
+    organisms/            # Page sections and feature UIs (Header, TakeAssessmentForm, …)
   db/
     schema.js             # Drizzle table definitions
     migrations/           # SQL migrations (committed to git)
   lib/
     db.js                 # Drizzle + Neon client
     db-context.js         # Resolves active Neon branch at runtime
+    users.js              # Clerk session → app user, roles, wait list
+    assessments.js        # Assessment templates, submissions, averages
     clerk-appearance.js   # Clerk UI theming
+    site-settings.js      # Sanity settings adapter
+    site-seo.js           # Sanity SEO adapter
+    header-menu.js        # Role-gated nav from Sanity
+  sanity/
+    env.js                # Project ID, dataset, API version
+    lib/                  # Client, GROQ queries, image URL builder
+    schemaTypes/          # Documents and page-builder slices
+    structure.js          # Studio desk structure
+  slices/                 # Page-builder slice components
   proxy.js                # Clerk auth middleware (Next.js 16 proxy)
+sanity.config.js          # Embedded Studio config
 scripts/
   migrate.mjs             # Runs migrations on build / manually
   neon-branch.mjs         # Local per-git-branch Neon workflow helper
@@ -108,6 +132,11 @@ Project conventions for Cursor and contributors live in `.cursor/rules/`:
 | `server-actions.mdc` | All form submissions and mutations via `src/actions/` + `useActionState` |
 | `user-data-authorization.mdc` | Scope user-owned DB queries by Clerk ID / role; staff cross-user only on admin pages |
 | `dark-mode-ui.mdc` | All new UI must support light and dark mode via semantic tokens in `globals.css` |
+| `delete-confirmations.mdc` | Deletes go through a Radix Alert Dialog, not a single click |
+| `page-layouts.mdc` | Shared `Container` / `Section` / `RichText` patterns |
+| `grid-first-layout.mdc` | Prefer CSS grid unless flex is required |
+| `env-example.mdc` | Keep `.env.example` in sync when adding or renaming env vars |
+| `sanity-cms.mdc` | Sanity Studio, schemas, GROQ, and revalidation |
 
 **Additional actions:**
 
@@ -129,8 +158,12 @@ Clerk handles sign-in, sign-up, and session management.
 | Auth middleware | `src/proxy.js` (Next.js 16 uses `proxy.js`, not `middleware.ts`) |
 | Sign-in / sign-up pages | `src/app/sign-in/`, `src/app/sign-up/` |
 | Header auth controls | `src/components/molecules/AuthNav/AuthNav.js` |
-| Protected route example | `src/app/dashboard/page.js` |
-| Sync Clerk user → Neon | `src/lib/users.js` + `src/app/dashboard/layout.js` |
+| Protected app | `src/app/dashboard/` (layout calls `requireEnabledAppUser`) |
+| Sync Clerk user → Neon | `src/lib/users.js` (`ensureAppUser` / `getCurrentAppUser`) |
+| Roles | `default`, `admin`, `super_admin` in `user_roles` |
+| Staff user management | `/dashboard/users` (`requireStaffAppUser`) |
+| Clerk wait list | `/dashboard/users/waitlist` (accept / deny) |
+| Assessment builder | `/dashboard/questions` (`requireSuperAdminAppUser`) |
 | Purge user data on Clerk delete | `src/app/api/webhooks/clerk/` + `deleteAppUserDataByClerkId` |
 | Branded Clerk UI | `src/lib/clerk-appearance.js` |
 
@@ -138,10 +171,14 @@ Clerk handles sign-in, sign-up, and session management.
 
 | Route | Access |
 |-------|--------|
-| `/`, `/sign-in`, `/sign-up`, `/[uid]`, `/slice-simulator` | Public |
-| `/dashboard` | Protected (redirects to sign-in if unauthenticated) |
+| `/`, `/sign-in`, `/sign-up`, `/[uid]`, `/studio` | Public (`/studio` still requires a Sanity login) |
+| `/dashboard`, `/dashboard/assessments/*` | Signed-in and enabled (`users.enabled`) |
+| `/dashboard/users`, `/dashboard/users/waitlist` | `admin` or `super_admin` |
+| `/dashboard/questions` | `super_admin` only |
 
-After sign-in / sign-up, Clerk redirects to `/dashboard`. The dashboard layout calls `ensureAppUser`, which inserts the Clerk user into `users` (with the `default` role) if they are not already present.
+Disabled accounts are sent to the CMS Account disabled page. After sign-in / sign-up, Clerk redirects to `/dashboard`. The dashboard layout ensures a `users` row (with the `default` role) if the Clerk user is not already present.
+
+`admin` can manage `default` and `admin` users, but cannot edit or assign `super_admin`. Header menu visibility is cascading (`Public` → `default` → `admin` → `super_admin`).
 
 **Additional actions (required before auth works)**
 
@@ -156,13 +193,36 @@ After sign-in / sign-up, Clerk redirects to `/dashboard`. The dashboard layout c
 3. In the Clerk Dashboard, configure allowed redirect URLs for your environments:
    - Local: `http://localhost:3000`
    - Production: your Vercel domain
-4. Optional: customize sign-in methods, social providers, and branding in the Clerk Dashboard.
+4. Optional: customize sign-in methods, social providers, branding, and the wait list in the Clerk Dashboard.
 5. Optional but recommended for account deletion: **Webhooks → Add Endpoint**
    - URL: `https://your-domain.com/api/webhooks/clerk`
    - Subscribe to: `user.deleted`
    - Copy the Signing Secret into `CLERK_WEBHOOK_SIGNING_SECRET` (`.env.local` / Vercel)
 
 **Note:** Clerk v7 uses `useAuth`, `SignInButton`, and `UserButton` — not the deprecated `SignedIn` / `SignedOut` components.
+
+---
+
+### Assessments
+
+Leadership assessments live in Neon, not Sanity. Super-admins build templates; signed-in users take them and can opt completed submissions into an overall average.
+
+**What is implemented**
+
+| Item | Location |
+|------|----------|
+| Schema | `assessments`, `assessment_domains`, `assessment_attributes`, `assessment_statements`, `assessment_submissions`, `assessment_overall_averages` |
+| Queries / scoring | `src/lib/assessments.js`, `src/lib/assessment-scores.js` |
+| Mutations | `src/actions/assessments.js` |
+| Take / continue | `/dashboard` cards → `/dashboard/assessments` |
+| Past submissions | `/dashboard/assessments/past` |
+| Completed results | `/dashboard/assessments/submissions/[id]` (radar chart, PDF, CSV) |
+| Overall average | `/dashboard/assessments/average` (opted-in submissions only) |
+| Template builder | `/dashboard/questions` (drag-and-drop domains / attributes / statements) |
+
+Templates have status `draft`, `available`, or `archived`, plus a frequency (`daily` / `weekly` / `monthly` / `yearly`). Users start or continue one in-progress submission per available template. Answers are scores 1–5. Completing a submission stores domain and attribute averages; opting in refreshes the cached overall average for that template.
+
+Submissions are scoped to the signed-in Clerk user unless the caller is staff on an admin surface.
 
 ---
 
@@ -174,11 +234,11 @@ Postgres is provided by Neon. The app uses **one isolated Neon database branch p
 
 | Item | Location |
 |------|----------|
-| Schema | `src/db/schema.js` — `user_roles`, `users` tables |
+| Schema | `src/db/schema.js` — roles, users, assessment templates, submissions, overall averages |
 | Migrations | `src/db/migrations/` |
 | DB client | `src/lib/db.js` |
 | Branch context | `src/lib/db-context.js` — reads active Neon branch name at runtime |
-| Dashboard DB info | `src/app/dashboard/page.js` shows Neon branch, git branch, and environment |
+| Dashboard DB info | Super-admin Danger Zone on `/dashboard` shows Neon branch, git branch, and environment |
 | Auto-migrate on build | `yarn build` runs `scripts/migrate.mjs` first |
 
 **How per-branch works**
@@ -215,7 +275,9 @@ On each Vercel preview deploy, Neon receives a webhook, creates a copy-on-write 
 
    This prints the suggested Neon branch name for your current git branch.
 
-3. Create that branch in the [Neon Console](https://console.neon.tech) or via the Neon CLI, then copy its connection string into `.env.local` as `DATABASE_URL`.
+3. Create that branch in the [Neon Console](https://console.neon.tech) or via the Neon CLI, then copy its connection strings into `.env.local`:
+   - `DATABASE_URL` — pooled host (`ep-…-pooler.…`)
+   - `DATABASE_URL_UNPOOLED` — direct host (omit `-pooler`)
 4. Run migrations:
 
    ```bash
@@ -245,7 +307,7 @@ yarn db:studio
 
 ### Sanity CMS
 
-Content is managed in [Sanity](https://www.sanity.io). The homepage and additional pages are built from reusable page-builder slices. The Studio is embedded in this app at `/studio`.
+Content is managed in [Sanity](https://www.sanity.io). The homepage and additional pages are built from reusable page-builder slices. The Studio is embedded in this app at `/studio`. Assessment data is not stored in Sanity.
 
 **What is implemented**
 
@@ -256,12 +318,12 @@ Content is managed in [Sanity](https://www.sanity.io). The homepage and addition
 | Schemas | `src/sanity/schemaTypes/` — homepage, page, settings, header menu, slices |
 | SEO helper | `src/lib/site-seo.js` |
 | Site settings helper | `src/lib/site-settings.js` |
+| Header menu | `src/lib/header-menu.js` (role-gated links) |
 | Slices | `src/slices/` — rendered by `SliceZone` |
 | Homepage (CMS-driven) | `src/app/page.js` — falls back to static components if Sanity is unavailable |
 | Dynamic pages | `src/app/[uid]/page.js` |
 | Studio | `src/app/studio/` |
 | Revalidation webhook | `src/app/api/revalidate/` |
-| Clerk account-deleted webhook | `src/app/api/webhooks/clerk/` |
 
 **Document types**
 
@@ -270,7 +332,7 @@ Content is managed in [Sanity](https://www.sanity.io). The homepage and addition
 | Homepage | No (singleton `homepage`) | `/` |
 | Page | Yes (`slug`) | `/:uid` |
 | Settings | No (singleton `settings`) | — (not routed) |
-| Header menu | No (singleton `headerMenu`) | — (not routed) |
+| Header menu | No (singleton `headerMenu`) | — (nav links + required role) |
 
 **Settings** stores site-wide fallbacks used when page-level SEO fields are empty:
 
@@ -309,9 +371,9 @@ Content is managed in [Sanity](https://www.sanity.io). The homepage and addition
 5. Configure a revalidation webhook in Sanity (**API → Webhooks**):
    - URL: `https://your-domain.com/api/revalidate`
    - Trigger on create / update / delete
-   - Set `SANITY_WEBHOOK_SECRET` in Vercel and send the same value as `?secret=` or header `x-sanity-webhook-secret`
+   - Set `SANITY_WEBHOOK_SECRET` in Vercel and send the same value as `?secret=`, in the JSON body, or header `x-sanity-webhook-secret`
 
-**Note:** Until Sanity is configured and content is published, the site uses static fallback components automatically.
+**Note:** Until Sanity is configured and content is published, the site uses static fallback components automatically. `NEXT_PUBLIC_SANITY_PROJECT_ID` must match `/^[a-z0-9-]+$/` or the client is not created.
 
 ---
 
@@ -333,8 +395,8 @@ Copy `.env.example` to `.env.local` and configure:
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | Recommended | Legacy Clerk redirect (keep in sync with FORCE URL) |
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_OUT_URL` | Recommended | Redirect after sign-out (default: `/`) |
 | `CLERK_WEBHOOK_SIGNING_SECRET` | Optional | Clerk webhook signing secret for `/api/webhooks/clerk` (`user.deleted` purge) |
-| `DATABASE_URL` | Yes (for DB features) | Pooled Neon connection string |
-| `DATABASE_URL_UNPOOLED` | Recommended | Direct connection (used for migrations) |
+| `DATABASE_URL` | Yes (for DB features) | Pooled Neon connection string (`…-pooler…`) |
+| `DATABASE_URL_UNPOOLED` | Recommended | Direct connection (no `-pooler`; used for migrations) |
 | `NEON_PROJECT_ID` | Optional | Neon project ID for CLI branch workflow |
 | `NEON_API_KEY` | Optional | Neon API key for CLI branch workflow |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | Yes (for CMS) | Sanity project ID |
@@ -353,7 +415,7 @@ On Vercel, Clerk keys must be added manually in **Project Settings → Environme
 
 | Script | Description |
 |--------|-------------|
-| `yarn dev` | Start development server |
+| `yarn dev` | Start development server (includes `/studio`) |
 | `yarn build` | Run migrations, then production build |
 | `yarn start` | Start production server |
 | `yarn lint` | Run ESLint |
@@ -370,11 +432,13 @@ Before going live, confirm:
 
 - [ ] Clerk application created and keys set in Vercel env vars
 - [ ] Clerk redirect URLs include your production domain
+- [ ] Clerk `user.deleted` webhook pointed at `/api/webhooks/clerk` with `CLERK_WEBHOOK_SIGNING_SECRET`
 - [ ] Neon Postgres connected via Vercel Storage
 - [ ] Preview branching enabled for isolated preview databases
 - [ ] `DATABASE_URL` available in Production (via Neon integration)
 - [ ] First deploy completes successfully (`yarn build` runs migrations)
-- [ ] Sign-in, sign-up, and dashboard tested on preview and production
+- [ ] Sign-in, sign-up, dashboard, and an assessment flow tested on preview and production
+- [ ] Staff can open `/dashboard/users`; super_admin can open `/dashboard/questions`
 - [ ] Sanity project created and `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` set in Vercel
 - [ ] CORS origins added for local and production
 - [ ] Homepage, Settings, and Header menu published in Studio (`/studio`)
