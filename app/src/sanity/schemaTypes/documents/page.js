@@ -5,25 +5,38 @@ export const page = defineType({
   name: "page",
   title: "Page",
   type: "document",
+  groups: [
+    { name: "content", title: "Page content", default: true },
+    { name: "seo", title: "SEO" },
+  ],
   fields: [
     defineField({
       name: "title",
       title: "Title",
       type: "string",
+      group: "content",
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "slug",
       title: "Slug",
       type: "slug",
+      group: "content",
       options: { source: "title", maxLength: 96 },
-      validation: (rule) => rule.required(),
+      validation: (rule) =>
+        rule.required().custom((value) => {
+          if (value?.current === "articles") {
+            return "This path is reserved for the article listing";
+          }
+          return true;
+        }),
     }),
-    pageBuilderField,
+    defineField({ ...pageBuilderField, group: "content" }),
     defineField({
       name: "seo",
       title: "SEO & metadata",
       type: "seo",
+      group: "seo",
     }),
   ],
   preview: {

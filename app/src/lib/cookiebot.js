@@ -1,6 +1,9 @@
 /** Public Cookiebot domain group ID (safe to expose in the client). */
 export const COOKIEBOT_CBID = "9a3991c5-8aa9-4797-9dfd-dcc3b179b502";
 
+/** Cookie listing / declaration script. Place only on the cookie policy page. */
+export const COOKIEBOT_DECLARATION_SRC = `https://consent.cookiebot.com/${COOKIEBOT_CBID}/cd.js`;
+
 const PRODUCTION_HOSTS = new Set([
   "www.productiveleadership.org",
   "productiveleadership.org",

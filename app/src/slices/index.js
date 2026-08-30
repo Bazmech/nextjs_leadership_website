@@ -1,4 +1,5 @@
 import About from "./About";
+import CookiebotCookieListing from "./CookiebotCookieListing";
 import Hero from "./Hero";
 import Listing from "./Listing";
 import Media from "./Media";
@@ -8,6 +9,7 @@ import TextImage from "./TextImage";
 
 export const components = {
   about: About,
+  cookiebotCookieListing: CookiebotCookieListing,
   hero: Hero,
   listing: Listing,
   media: Media,

@@ -12,5 +12,6 @@ export const pageBuilderField = defineField({
     defineArrayMember({ type: "listing" }),
     defineArrayMember({ type: "sectionIntro" }),
     defineArrayMember({ type: "richText" }),
+    defineArrayMember({ type: "cookiebotCookieListing" }),
   ],
 });

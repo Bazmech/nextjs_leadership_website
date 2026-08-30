@@ -24,7 +24,7 @@ Gate staff-only routes with `requireStaffAppUser()`. Gate `super_admin`-only rou
 
 ## Cascading visibility (CMS / nav)
 
-For Header Menu and similar role-gated UI, access is **cascading** (higher roles see everything below them):
+For Header Menu, Footer Menu, and similar role-gated UI, access is **cascading** (higher roles see everything below them):
 
 | Viewer | Can see items requiring |
 |--------|-------------------------|

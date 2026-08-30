@@ -109,28 +109,33 @@ function mapFallbackLinks() {
   }));
 }
 
-export const getHeaderMenuDocument = cache(async () => {
-  return sanityFetch(headerMenuQuery);
-});
-
 /**
- * Header/footer nav tree for the current session, filtered by cascading role visibility.
+ * Role-gated nav tree for the current session.
  * Disabled accounts only see Public links (no user-page nav).
  */
-export const getHeaderMenuLinks = cache(async () => {
+export async function resolveCmsMenuLinks(rows, { fallback = [] } = {}) {
   const appUser = await getCurrentAppUser();
   const accountDisabled = Boolean(appUser && !appUser.enabled);
   const viewerRole = accountDisabled
     ? PUBLIC_ROLE_NAME
     : getViewerVisibilityRole(appUser?.roleName);
 
-  const document = await getHeaderMenuDocument();
-  const rows = document?.menuItems;
   const tree =
     Array.isArray(rows) && rows.length > 0
       ? buildMenuTree(rows)
-      : mapFallbackLinks();
+      : fallback;
 
   const filtered = stripRemovedNavItems(filterMenuTree(tree, viewerRole));
   return accountDisabled ? stripUserPageLinks(filtered) : filtered;
+}
+
+export const getHeaderMenuDocument = cache(async () => {
+  return sanityFetch(headerMenuQuery);
+});
+
+export const getHeaderMenuLinks = cache(async () => {
+  const document = await getHeaderMenuDocument();
+  return resolveCmsMenuLinks(document?.menuItems, {
+    fallback: mapFallbackLinks(),
+  });
 });
