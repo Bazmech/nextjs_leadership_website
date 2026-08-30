@@ -23,15 +23,16 @@ Marketing content lives in Sanity. Assessments, users, and dashboard data stay i
 
 Use `sanityFetch()` from `app/src/sanity/lib/client.js`. Tag requests with `sanity` so `/api/revalidate` can purge them. If `NEXT_PUBLIC_SANITY_PROJECT_ID` is missing, fetches return `null` and the site uses static fallbacks.
 
-Do not query Sanity from Client Components. Keep reads in Server Components and the existing adapters (`getSiteSettings`, `getHeaderMenuLinks`, `buildPageMetadata`).
+Do not query Sanity from Client Components. Keep reads in Server Components and the existing adapters (`getSiteSettings`, `getHeaderMenuLinks`, `getFooterMenuLinks`, `buildPageMetadata`).
 
 ## Modeling
 
-- Singletons (`homepage`, `settings`, `headerMenu`) use fixed document IDs
-- Repeatable pages use `slug`
+- Singletons (`homepage`, `settings`, `headerMenu`, `footerMenu`, `articleListing`) use fixed document IDs
+- Repeatable pages use `slug`; articles live at `/articles/[slug]`
 - Page builder slices are objects in a `slices` array (`hero`, `about`, `media`, `textImage`, `listing`, `sectionIntro`, `richText`)
-- Links are `appLink` (path/URL + optional page reference)
+- Links are `appLink` (path/URL + optional page or article reference)
 - Rich text is Portable Text (`portableText`), rendered only through the `RichText` molecule
+- Articles may be **protected**; unsigned visitors see a padlock in the listing and cannot read the body
 
 ## Avoid
 

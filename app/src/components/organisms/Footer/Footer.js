@@ -3,25 +3,17 @@ import Container from "@/components/atoms/Container/Container";
 import Link from "@/components/atoms/Link/Link";
 import LogoMark from "@/components/atoms/LogoMark/LogoMark";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
-import { getHeaderMenuLinks } from "@/lib/header-menu";
+import { getFooterMenuLinks } from "@/lib/footer-menu";
 import { getSiteSettings } from "@/lib/site-settings";
 
 const HORIZONS_URL = "https://www.horizonsnhs.com";
 const footerLogoClassName = "h-12 w-auto";
 
-function flattenMenuItems(items = []) {
-  return items.flatMap((item) => [
-    { ...item, children: [] },
-    ...flattenMenuItems(item.children),
-  ]);
-}
-
 export default async function Footer() {
   const [settings, menuItems] = await Promise.all([
     getSiteSettings(),
-    getHeaderMenuLinks(),
+    getFooterMenuLinks(),
   ]);
-  const footerLinks = flattenMenuItems(menuItems);
   const year = new Date().getFullYear();
 
   return (
@@ -86,14 +78,16 @@ export default async function Footer() {
               ))}
             </ul>
           ) : null}
-          <nav aria-label="Footer">
-            <NavMenuList
-              items={footerLinks}
-              className="grid grid-flow-col gap-6"
-              variant="inline"
-              tone="inverse"
-            />
-          </nav>
+          {menuItems.length > 0 ? (
+            <nav aria-label="Footer">
+              <NavMenuList
+                items={menuItems}
+                className="grid grid-flow-col gap-6"
+                variant="inline"
+                tone="inverse"
+              />
+            </nav>
+          ) : null}
         </div>
       </Container>
     </footer>

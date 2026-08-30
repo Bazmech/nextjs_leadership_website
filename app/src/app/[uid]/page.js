@@ -30,7 +30,9 @@ export async function generateStaticParams() {
   try {
     const pages = await sanityFetch(pageSlugsQuery);
     if (!Array.isArray(pages)) return [];
-    return pages.filter((page) => page?.uid).map((page) => ({ uid: page.uid }));
+    return pages
+      .filter((page) => page?.uid && page.uid !== "articles")
+      .map((page) => ({ uid: page.uid }));
   } catch {
     return [];
   }

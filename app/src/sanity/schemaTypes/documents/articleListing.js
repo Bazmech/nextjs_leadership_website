@@ -1,9 +1,9 @@
 import { defineField, defineType } from "sanity";
 import { pageBuilderField } from "../objects/pageBuilder";
 
-export const page = defineType({
-  name: "page",
-  title: "Page",
+export const articleListing = defineType({
+  name: "articleListing",
+  title: "Article listing",
   type: "document",
   groups: [
     { name: "content", title: "Page content", default: true },
@@ -18,18 +18,20 @@ export const page = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "slug",
-      title: "Slug",
-      type: "slug",
+      name: "description",
+      title: "Description",
+      type: "text",
+      rows: 3,
       group: "content",
-      options: { source: "title", maxLength: 96 },
-      validation: (rule) =>
-        rule.required().custom((value) => {
-          if (value?.current === "articles") {
-            return "This path is reserved for the article listing";
-          }
-          return true;
-        }),
+      description: "Shown under the title when this page has no page-builder slices.",
+    }),
+    defineField({
+      name: "relatedHeading",
+      title: "Related articles heading",
+      type: "string",
+      group: "content",
+      description: "Heading for the related articles section on each article page.",
+      initialValue: "Related articles",
     }),
     defineField({ ...pageBuilderField, group: "content" }),
     defineField({
@@ -40,9 +42,9 @@ export const page = defineType({
     }),
   ],
   preview: {
-    select: { title: "title", slug: "slug.current" },
-    prepare({ title, slug }) {
-      return { title: title || "Page", subtitle: slug ? `/${slug}` : "" };
+    select: { title: "title" },
+    prepare({ title }) {
+      return { title: title || "Article listing", subtitle: "/articles" };
     },
   },
 });

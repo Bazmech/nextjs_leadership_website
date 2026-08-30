@@ -20,7 +20,7 @@ export const appLink = defineType({
       name: "internalPage",
       title: "Internal page",
       type: "reference",
-      to: [{ type: "page" }],
+      to: [{ type: "page" }, { type: "article" }],
       description: "Overrides URL or path when set",
     }),
     defineField({
@@ -35,11 +35,17 @@ export const appLink = defineType({
       title: "label",
       href: "href",
       slug: "internalPage.slug.current",
+      type: "internalPage._type",
     },
-    prepare({ title, href, slug }) {
+    prepare({ title, href, slug, type }) {
+      const path = slug
+        ? type === "article"
+          ? `/articles/${slug}`
+          : `/${slug}`
+        : href;
       return {
         title: title || slug || href || "Link",
-        subtitle: slug ? `/${slug}` : href,
+        subtitle: path,
       };
     },
   },
