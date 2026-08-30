@@ -1,6 +1,6 @@
 ---
 description: Prefer CSS Grid for layout; use Flexbox only when necessary
-globs: src/**/*.{js,css}
+globs: app/src/**/*.{js,css}
 alwaysApply: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 description: Page layout components, container width, and rich text patterns
-globs: src/components/**/*
+globs: app/src/components/**/*
 alwaysApply: false
 ---
 
