@@ -53,8 +53,9 @@ export default async function SubmissionPage({ params }) {
             </p>
             {readOnly ? (
               <p className="mt-2 text-sm text-muted">
-                Completed assessment — attribute averages appear in the profile
-                chart; statement scores are grouped by domain below.
+                Completed assessment — domain averages appear above; attribute
+                averages and the profile chart are available on larger screens.
+                Statement scores are grouped by domain below.
               </p>
             ) : (
               <p className="mt-2 text-sm text-muted">

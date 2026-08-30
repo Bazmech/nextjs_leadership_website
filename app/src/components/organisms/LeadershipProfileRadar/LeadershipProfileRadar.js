@@ -278,7 +278,7 @@ function AttributeAveragesTable({
 
   return (
     <section
-      className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm"
+      className="mt-6 hidden rounded-2xl border border-border bg-surface p-6 shadow-sm md:block"
       aria-labelledby="attribute-averages-heading"
     >
       <h2
@@ -367,7 +367,7 @@ export default function LeadershipProfileRadar({
     <div className="mb-10">
       {averages.length > 0 ? (
       <section
-        className="rounded-2xl border border-border bg-surface p-6 shadow-sm"
+        className="hidden rounded-2xl border border-border bg-surface p-6 shadow-sm md:block"
         aria-labelledby="leadership-profile-heading"
       >
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
