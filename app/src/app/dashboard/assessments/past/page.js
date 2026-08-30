@@ -64,12 +64,14 @@ export default async function PastAssessmentsPage({ searchParams }) {
               <DomainAveragesLineChart groups={domainSeries} />
             ) : null}
             {attributeSeries.length > 0 ? (
-              <DomainAveragesLineChart
-                groups={attributeSeries}
-                heading="Attribute averages"
-                description="Each line is an attribute. Each point is a completed assessment (scale 0–5)."
-                idPrefix="attribute-trend"
-              />
+              <div className="hidden md:block">
+                <DomainAveragesLineChart
+                  groups={attributeSeries}
+                  heading="Attribute averages"
+                  description="Each line is an attribute. Each point is a completed assessment (scale 0–5)."
+                  idPrefix="attribute-trend"
+                />
+              </div>
             ) : null}
           </div>
         ) : null}
