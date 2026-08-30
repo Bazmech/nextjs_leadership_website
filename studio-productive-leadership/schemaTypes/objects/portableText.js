@@ -34,7 +34,7 @@ export const portableText = defineType({
                 name: "internalPage",
                 title: "Internal page",
                 type: "reference",
-                to: [{ type: "page" }],
+                to: [{ type: "page" }, { type: "article" }],
               }),
               defineField({
                 name: "openInNewTab",

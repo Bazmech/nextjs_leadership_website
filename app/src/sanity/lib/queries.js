@@ -1,8 +1,22 @@
+const INTERNAL_SLUG_PROJECTION = `"internalSlug": select(
+  internalPage->_type == "article" => "articles/" + internalPage->slug.current,
+  internalPage->slug.current
+)`;
+
 const LINK_PROJECTION = `{
   label,
   href,
   openInNewTab,
-  "internalSlug": internalPage->slug.current
+  ${INTERNAL_SLUG_PROJECTION}
+}`;
+
+const ARTICLE_CARD_PROJECTION = `{
+  title,
+  excerpt,
+  protected,
+  publishedAt,
+  featuredImage,
+  "uid": slug.current
 }`;
 
 const PORTABLE_TEXT_PROJECTION = `[]{
@@ -11,7 +25,7 @@ const PORTABLE_TEXT_PROJECTION = `[]{
     ...,
     _type == "link" => {
       ...,
-      "internalSlug": internalPage->slug.current
+      ${INTERNAL_SLUG_PROJECTION}
     }
   }
 }`;
@@ -81,11 +95,45 @@ export const settingsQuery = `*[_type == "settings" && _id == "settings"][0]{
   introductionText ${PORTABLE_TEXT_PROJECTION}
 }`;
 
-export const headerMenuQuery = `*[_type == "headerMenu" && _id == "headerMenu"][0]{
+const MENU_ITEMS_PROJECTION = `{
   menuItems[]{
     label,
     requiredRole,
     parentLabel,
     link ${LINK_PROJECTION}
   }
+}`;
+
+export const headerMenuQuery = `*[_type == "headerMenu" && _id == "headerMenu"][0] ${MENU_ITEMS_PROJECTION}`;
+
+export const footerMenuQuery = `*[_type == "footerMenu" && _id == "footerMenu"][0] ${MENU_ITEMS_PROJECTION}`;
+
+export const articleListingQuery = `*[_type == "articleListing" && _id == "articleListing"][0]{
+  title,
+  description,
+  relatedHeading,
+  slices[] ${SLICE_PROJECTION},
+  seo ${SEO_PROJECTION}
+}`;
+
+export const articlesListQuery = `*[_type == "article" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc) ${ARTICLE_CARD_PROJECTION}`;
+
+export const articleBySlugQuery = `*[_type == "article" && slug.current == $slug][0]{
+  _id,
+  title,
+  "uid": slug.current,
+  excerpt,
+  protected,
+  publishedAt,
+  featuredImage,
+  slices[] ${SLICE_PROJECTION},
+  seo ${SEO_PROJECTION},
+  "relatedArticles": select(
+    count(relatedArticles) > 0 => relatedArticles[]->[defined(slug.current)]${ARTICLE_CARD_PROJECTION},
+    *[_type == "article" && defined(slug.current) && _id != ^._id] | order(coalesce(publishedAt, _createdAt) desc) [0...3] ${ARTICLE_CARD_PROJECTION}
+  )
+}`;
+
+export const articleSlugsQuery = `*[_type == "article" && defined(slug.current)]{
+  "slug": slug.current
 }`;

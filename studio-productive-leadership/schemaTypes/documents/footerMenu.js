@@ -1,14 +1,14 @@
 import { defineType } from "sanity";
 import { navMenuItemsField } from "../objects/navMenuItems";
 
-export const headerMenu = defineType({
-  name: "headerMenu",
-  title: "Header menu",
+export const footerMenu = defineType({
+  name: "footerMenu",
+  title: "Footer menu",
   type: "document",
   fields: [navMenuItemsField],
   preview: {
     prepare() {
-      return { title: "Header menu" };
+      return { title: "Footer menu" };
     },
   },
 });
