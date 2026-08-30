@@ -373,6 +373,7 @@ Content is managed in [Sanity](https://www.sanity.io). The homepage and addition
 | `listing` | 3-column responsive card listing |
 | `sectionIntro` | Centered title, subtitle, text, link |
 | `richText` | Full-width rich text |
+| `cookiebotCookieListing` | Cookiebot cookie declaration (cookie / privacy policy page; live production only) |
 
 **Additional actions (required for CMS)**
 

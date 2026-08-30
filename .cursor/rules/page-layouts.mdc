@@ -27,7 +27,7 @@ Use the shared layout system for all page sections. Max content width is **lg** 
 | Molecule | `TextImage` | 50/50 via `col-span-12 md:col-span-6` on the page grid; image always above text on mobile |
 | Molecule | `ListingCard` | Card with image, title, CMS/URL link |
 | Organism | `Section` | Full-width section + `Container` |
-| Organism | `MediaBlock`, `TextImageBlock`, `ListingBlock`, `SectionIntroBlock`, `RichTextBlock` | Composed page sections |
+| Organism | `MediaBlock`, `TextImageBlock`, `ListingBlock`, `SectionIntroBlock`, `RichTextBlock`, `CookiebotCookieListingBlock` | Composed page sections |
 
 ## Rich text
 

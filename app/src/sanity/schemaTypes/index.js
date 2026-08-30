@@ -1,5 +1,6 @@
 import { about } from "./objects/about";
 import { appLink } from "./objects/appLink";
+import { cookiebotCookieListing } from "./objects/cookiebotCookieListing";
 import { hero } from "./objects/hero";
 import { listing } from "./objects/listing";
 import { media } from "./objects/media";
@@ -27,6 +28,7 @@ export const schemaTypes = [
   listing,
   sectionIntro,
   richText,
+  cookiebotCookieListing,
   homepage,
   page,
   article,
