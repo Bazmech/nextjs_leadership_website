@@ -6,11 +6,13 @@ export default function ListingBlock({ id, items = [], className = "py-24" }) {
 
   return (
     <Section id={id} className={className}>
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item, index) => (
-          <ListingCard key={`${item.title}-${index}`} {...item} />
-        ))}
-      </div>
+      {items.map((item, index) => (
+        <ListingCard
+          key={`${item.title}-${index}`}
+          className="col-span-12 sm:col-span-6 lg:col-span-4"
+          {...item}
+        />
+      ))}
     </Section>
   );
 }

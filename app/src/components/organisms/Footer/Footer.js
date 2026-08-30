@@ -26,9 +26,9 @@ export default async function Footer() {
 
   return (
     <footer className="bg-primary py-12 text-white">
-      <Container className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-        <div className="grid gap-4">
-          <div className="grid w-fit grid-cols-1 items-start gap-4 sm:grid-cols-[auto_auto] sm:items-center">
+      <Container className="items-center">
+        <div className="col-span-12 grid gap-4 md:col-span-8">
+          <div className="flex flex-wrap items-center gap-4">
             <Link href="/" className="inline-grid">
               <LogoMark alt={settings.siteName} className="size-14" />
             </Link>
@@ -69,7 +69,7 @@ export default async function Footer() {
             </p>
           ) : null}
         </div>
-        <div className="grid gap-4 justify-self-center md:justify-self-end">
+        <div className="col-span-12 grid gap-4 md:col-span-4 md:justify-self-end">
           {settings.socialLinks.length > 0 ? (
             <ul className="grid grid-flow-col gap-4">
               {settings.socialLinks.map((link) => (

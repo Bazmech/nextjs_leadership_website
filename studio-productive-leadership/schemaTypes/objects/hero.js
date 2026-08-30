@@ -14,6 +14,20 @@ export const hero = defineType({
       rows: 3,
     }),
     defineField({
+      name: "image",
+      title: "Image",
+      type: "image",
+      description: "Optional. Shown beside the text on desktop.",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          type: "string",
+          title: "Alternative text",
+        }),
+      ],
+    }),
+    defineField({
       name: "primaryCta",
       title: "Primary CTA",
       type: "appLink",
@@ -42,9 +56,9 @@ export const hero = defineType({
     }),
   ],
   preview: {
-    select: { title: "title", subtitle: "eyebrow" },
-    prepare({ title, subtitle }) {
-      return { title: title || "Hero", subtitle };
+    select: { title: "title", subtitle: "eyebrow", media: "image" },
+    prepare({ title, subtitle, media }) {
+      return { title: title || "Hero", subtitle, media };
     },
   },
 });

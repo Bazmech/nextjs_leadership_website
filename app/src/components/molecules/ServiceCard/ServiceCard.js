@@ -1,6 +1,8 @@
-export default function ServiceCard({ icon, title, description }) {
+export default function ServiceCard({ icon, title, description, className = "" }) {
   return (
-    <article className="group rounded-2xl border border-border bg-background p-8 transition-shadow hover:shadow-lg">
+    <article
+      className={`group rounded-2xl border border-border bg-background p-8 transition-shadow hover:shadow-lg ${className}`.trim()}
+    >
       <span className="text-2xl text-accent" aria-hidden="true">
         {icon}
       </span>

@@ -11,12 +11,14 @@ export default function MediaBlock({
 }) {
   return (
     <Section id={id} className={className}>
-      <AspectMedia
-        image={image}
-        imageSrc={imageSrc}
-        imageAlt={imageAlt}
-        videoUrl={videoUrl}
-      />
+      <div className="col-span-12">
+        <AspectMedia
+          image={image}
+          imageSrc={imageSrc}
+          imageAlt={imageAlt}
+          videoUrl={videoUrl}
+        />
+      </div>
     </Section>
   );
 }

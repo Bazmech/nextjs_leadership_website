@@ -12,7 +12,7 @@ export default async function Logo({ className = "text-primary" }) {
   return (
     <Link
       href="/"
-      className={`grid grid-cols-[auto_auto] items-center gap-3 ${className}`.trim()}
+      className={`flex items-center gap-3 ${className}`.trim()}
     >
       <LogoMark priority />
       <span className="text-xl font-semibold tracking-tight">

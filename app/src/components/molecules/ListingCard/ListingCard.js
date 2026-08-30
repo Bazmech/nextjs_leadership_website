@@ -11,6 +11,7 @@ export default function ListingCard({
   linkField,
   linkLabel,
   linkTarget,
+  className = "",
 }) {
   const label = linkLabel || getLinkLabel(linkField, title);
   const target = getLinkTarget(linkField, linkTarget);
@@ -35,14 +36,16 @@ export default function ListingCard({
     </article>
   );
 
-  if (!hasLink) return card;
+  if (!hasLink) {
+    return <div className={className}>{card}</div>;
+  }
 
   return (
     <Link
       href={linkHref}
       field={linkField}
       target={target}
-      className="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className={`block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${className}`.trim()}
     >
       {card}
     </Link>

@@ -14,7 +14,7 @@ export async function generateMetadata() {
 
 export default function SignUpPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16">
+    <main className="grid min-h-full place-items-center bg-background px-6 py-16">
       <SignUp
         appearance={{
           ...clerkAppearance,

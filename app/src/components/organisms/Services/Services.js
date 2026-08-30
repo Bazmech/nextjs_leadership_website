@@ -33,16 +33,18 @@ export default function Services() {
   return (
     <Section id="services" className="bg-surface py-24">
       <SectionHeader
-        className="max-w-2xl"
+        className="col-span-12 md:col-span-8"
         eyebrow="What We Offer"
         title="Programs designed for lasting impact"
         description="Tailored solutions that meet leaders where they are and accelerate where they want to go."
       />
-      <div className="mt-14 grid gap-8 sm:grid-cols-2">
-        {services.map((service) => (
-          <ServiceCard key={service.title} {...service} />
-        ))}
-      </div>
+      {services.map((service) => (
+        <ServiceCard
+          key={service.title}
+          className="col-span-12 sm:col-span-6"
+          {...service}
+        />
+      ))}
     </Section>
   );
 }

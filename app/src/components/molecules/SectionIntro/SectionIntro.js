@@ -17,7 +17,7 @@ export default function SectionIntro({
   const label = linkLabel || getLinkLabel(linkField);
 
   return (
-    <div className={`mx-auto max-w-2xl text-center ${className}`.trim()}>
+    <div className={`col-span-12 text-center md:col-span-8 md:col-start-3 ${className}`.trim()}>
       <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
         {title}
       </h2>

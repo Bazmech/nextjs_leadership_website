@@ -14,7 +14,7 @@ function StaticHome() {
   return (
     <>
       <Header />
-      <main className="flex-1">
+      <main>
         <Hero />
         <Services />
         <About />
@@ -52,7 +52,7 @@ export default async function Home() {
     return (
       <>
         <Header />
-        <main className="flex-1">
+        <main>
           <SliceZone slices={homepage.slices} components={components} />
         </main>
         <Footer />

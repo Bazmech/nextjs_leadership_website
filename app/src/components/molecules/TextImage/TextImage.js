@@ -10,11 +10,16 @@ export default function TextImage({
   reversed = false,
   className = "",
 }) {
+  const imageClass = reversed
+    ? "col-span-12 md:col-span-6 md:col-start-7"
+    : "col-span-12 md:col-span-6";
+  const textClass = reversed
+    ? "col-span-12 md:col-span-6 md:col-start-1 md:row-start-1"
+    : "col-span-12 md:col-span-6";
+
   return (
-    <div
-      className={`grid grid-cols-1 items-center gap-12 md:grid-cols-2 ${className}`.trim()}
-    >
-      <div className={reversed ? "order-1 md:order-2" : "order-1"}>
+    <>
+      <div className={`${imageClass} ${className}`.trim()}>
         <AspectMedia
           image={image}
           imageSrc={imageSrc}
@@ -22,9 +27,9 @@ export default function TextImage({
           videoUrl={videoUrl}
         />
       </div>
-      <div className={reversed ? "order-2 md:order-1" : "order-2"}>
+      <div className={textClass}>
         <RichText field={text} />
       </div>
-    </div>
+    </>
   );
 }

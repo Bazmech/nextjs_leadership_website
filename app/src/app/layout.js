@@ -30,7 +30,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="h-full">
         {loadCookiebot ? (
           <Script
             id="Cookiebot"
@@ -50,7 +50,9 @@ export default function RootLayout({ children }) {
           signUpFallbackRedirectUrl="/dashboard"
           afterSignOutUrl="/"
         >
-          <div className="flex min-h-full flex-1 flex-col">{children}</div>
+          <div className="grid h-full min-h-full grid-rows-[auto_1fr_auto]">
+            {children}
+          </div>
         </ClerkProvider>
         <Analytics />
         <SpeedInsights />

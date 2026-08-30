@@ -12,35 +12,33 @@ export default function About({ slice }) {
 
   return (
     <Section id="about" className="py-24" data-slice-type={slice._type}>
-      <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-        <div className="relative aspect-square max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-light">
-          <div className="grid h-full place-items-center">
-            <span className="text-8xl font-bold text-white/20" aria-hidden="true">
-              {getCmsText(slice.monogram, "PL")}
-            </span>
-          </div>
+      <div className="relative col-span-12 aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-light md:col-span-6">
+        <div className="grid h-full place-items-center">
+          <span className="text-8xl font-bold text-white/20" aria-hidden="true">
+            {getCmsText(slice.monogram, "PL")}
+          </span>
         </div>
-        <div>
-          <SectionHeader
-            eyebrow={eyebrow || undefined}
-            title={heading || undefined}
-          />
-          {body1 ? (
-            <p className="mt-6 leading-relaxed text-muted">{body1}</p>
-          ) : null}
-          {body2 ? (
-            <p className="mt-4 leading-relaxed text-muted">{body2}</p>
-          ) : null}
-          {highlights.length > 0 ? (
-            <ul className="mt-8 grid gap-3">
-              {highlights.map((highlight, index) => (
-                <CheckListItem key={`${highlight}-${index}`}>
-                  {highlight}
-                </CheckListItem>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+      </div>
+      <div className="col-span-12 md:col-span-6">
+        <SectionHeader
+          eyebrow={eyebrow || undefined}
+          title={heading || undefined}
+        />
+        {body1 ? (
+          <p className="mt-6 leading-relaxed text-muted">{body1}</p>
+        ) : null}
+        {body2 ? (
+          <p className="mt-4 leading-relaxed text-muted">{body2}</p>
+        ) : null}
+        {highlights.length > 0 ? (
+          <ul className="mt-8 grid gap-3">
+            {highlights.map((highlight, index) => (
+              <CheckListItem key={`${highlight}-${index}`}>
+                {highlight}
+              </CheckListItem>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </Section>
   );

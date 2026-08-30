@@ -8,7 +8,7 @@ export default async function DashboardLayout({ children }) {
   return (
     <>
       <Header />
-      <main className="flex-1">{children}</main>
+      <main>{children}</main>
       <Footer />
     </>
   );

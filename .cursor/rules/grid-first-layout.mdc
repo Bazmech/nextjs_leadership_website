@@ -1,64 +1,61 @@
 ---
-description: Prefer CSS Grid for layout; use Flexbox only when necessary
+description: 12-column CSS Grid for page structure; Flexbox only in small components
 globs: app/src/**/*.{js,css}
 alwaysApply: false
 ---
 
-# Grid-First Layout
+# 12-Column Grid Layout
 
-Use **CSS Grid** for page and section structure. Use **Flexbox** only when Grid is a poor fit.
+Page and section structure uses a **12-column CSS Grid**. Flexbox is only for small inner positioning.
 
-This project uses **Tailwind v4** — prefer `grid`, `grid-cols-*`, `gap-*`, and `place-*` utilities.
+`Container` (and `Section`) is the grid: `grid-cols-12`. Direct children **span columns** — they do not start a second layout model.
 
-## Default to Grid
+## Spans
 
-Use Grid for:
-
-- Page sections and multi-column layouts
-- Card grids, stat rows, and feature lists
-- Header/footer structure with distinct columns
-- Any 2D layout (rows **and** columns)
+| Role | Classes |
+|------|---------|
+| Full width | `col-span-12` |
+| Half | `col-span-12 md:col-span-6` |
+| Third | `col-span-12 md:col-span-4` |
+| Two thirds | `col-span-12 md:col-span-8` |
+| Quarter (stats) | `col-span-6 md:col-span-3` |
 
 ```js
-// ❌ BAD — flex for a structural multi-column section
-<div className="flex flex-wrap gap-8 sm:flex-row">...</div>
+// ❌ BAD — nested 2-col grid instead of spanning the page grid
+<Section>
+  <div className="grid md:grid-cols-2">...</div>
+</Section>
 
-// ✅ GOOD — grid for structural layout
-<div className="grid gap-8 sm:grid-cols-2">...</div>
+// ✅ GOOD — children participate in the 12-column Container
+<Section>
+  <div className="col-span-12 md:col-span-6">...</div>
+  <div className="col-span-12 md:col-span-6">...</div>
+</Section>
 ```
 
-```js
-// ✅ GOOD — page-level structure
-<div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">...</div>
-```
+## Flex only in small components
 
-## Flex only when required
-
-Use Flex sparingly for:
-
-- Single-axis alignment inside one grid cell (e.g. center an icon in a box)
-- Inline groups that must not wrap into a grid (button groups, nav item clusters)
-- `flex-1` / `grow` behavior inside a parent that is already Grid-based
-- Third-party components that require flex (e.g. Clerk `UserButton` wrappers)
+Use Flex for positioning **inside** a grid cell: icon + label, button groups, Clerk controls, checkbox rows.
 
 ```js
-// ✅ OK — flex inside a grid cell for inline controls
-<div className="flex items-center gap-3">
-  <Button>Sign in</Button>
-  <Button>Sign up</Button>
+// ✅ OK — flex for alignment inside one cell
+<div className="col-span-12 md:col-span-6">
+  <div className="flex flex-wrap gap-4">
+    <Button>Explore</Button>
+    <Button>Start</Button>
+  </div>
 </div>
 ```
 
 ## Avoid
 
-- `flex` on outer section wrappers that define columns or rows
-- `flex-wrap` as a substitute for responsive grids
-- Nested flex containers where one `grid` parent would suffice
-- Mixing competing layout models at the same structural level without reason
+- `flex` / `flex-wrap` / `sm:flex-row` for section or page columns
+- `grid-cols-2` / `grid-cols-3` on section wrappers (use `col-span-*` on the 12-col parent)
+- Overriding `Container` with another `grid-cols-*`
+- `flex-1` for page chrome — use `grid-rows-[auto_1fr_auto]` on the app shell
 
-## Checklist for new layout work
+## Checklist
 
-- [ ] Section/column structure uses `grid` first
-- [ ] Responsive breakpoints use `grid-cols-*`, not flex direction swaps
-- [ ] Flex is limited to inner alignment or unavoidable one-dimensional cases
-- [ ] Gaps use `gap-*` on the grid parent, not margin hacks between flex children
+- [ ] Section content is direct `col-span-*` children of `Section` / `Container`
+- [ ] Halves / thirds / quarters use the span table above
+- [ ] Flex appears only in molecules/atoms for alignment

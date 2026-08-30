@@ -16,9 +16,12 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-white">
-      <Container className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
-        <Logo className="text-white" />
-        <nav className="hidden justify-self-center md:block" aria-label="Main">
+      <Container className="items-center py-4">
+        <Logo className="col-span-8 text-white md:col-span-4" />
+        <nav
+          className="col-span-5 hidden justify-self-center md:grid"
+          aria-label="Main"
+        >
           <NavMenuList
             items={menuItems}
             className="grid grid-flow-col gap-8"
@@ -26,7 +29,7 @@ export default async function Header() {
             tone="inverse"
           />
         </nav>
-        <div className="grid grid-flow-col items-center justify-end gap-3">
+        <div className="col-span-4 grid grid-flow-col items-center justify-end gap-3 md:col-span-3">
           <div className="hidden md:block">
             <AuthNav inverse showUserLinks={showUserLinks} />
           </div>

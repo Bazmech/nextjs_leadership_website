@@ -152,7 +152,7 @@ Project conventions for Cursor and contributors live in `.cursor/rules/`:
 | `dark-mode-ui.mdc` | All new UI must support light and dark mode via semantic tokens in `globals.css` |
 | `delete-confirmations.mdc` | Deletes go through a Radix Alert Dialog, not a single click |
 | `page-layouts.mdc` | Shared `Container` / `Section` / `RichText` patterns |
-| `grid-first-layout.mdc` | Prefer CSS grid unless flex is required |
+| `grid-first-layout.mdc` | 12-column CSS Grid for page structure; flex only in small components |
 | `env-example.mdc` | Keep `.env.example` in sync when adding or renaming env vars |
 | `sanity-cms.mdc` | Sanity Studio, schemas, GROQ, and revalidation |
 
