@@ -1,7 +1,12 @@
+import Image from "next/image";
 import Container from "@/components/atoms/Container/Container";
+import Link from "@/components/atoms/Link/Link";
 import NavMenuList from "@/components/molecules/NavMenuList/NavMenuList";
 import { getHeaderMenuLinks } from "@/lib/header-menu";
 import { getSiteSettings } from "@/lib/site-settings";
+
+const HORIZONS_URL = "https://www.horizonsnhs.com";
+const footerLogoClassName = "h-12 w-auto";
 
 function flattenMenuItems(items = []) {
   return items.flatMap((item) => [
@@ -18,21 +23,38 @@ export default async function Footer() {
   const footerLinks = flattenMenuItems(menuItems);
   const year = new Date().getFullYear();
 
-
   return (
     <footer className="bg-primary py-12 text-white">
       <Container className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-        <div className="grid gap-3">
+        <div className="grid gap-4">
+          <div className="grid w-fit grid-cols-1 items-start gap-4 sm:grid-cols-[auto_auto] sm:items-center">
+            <Link href="/" className="inline-grid">
+              <Image
+                src="/logo.png"
+                alt={settings.siteName}
+                width={810}
+                height={748}
+                className={`${footerLogoClassName} shrink-0`}
+              />
+            </Link>
+            <Link href={HORIZONS_URL} className="inline-grid">
+              <Image
+                src="/horizons-logo.png"
+                alt="NHS Horizons"
+                width={720}
+                height={142}
+                className={footerLogoClassName}
+              />
+            </Link>
+          </div>
           <p className="text-sm text-white/90">
             &copy; {year} Productive Leadership produced in partnership with{" "}
-            <a
-              href="https://www.horizonsnhs.com"
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href={HORIZONS_URL}
               className="underline-offset-2 transition-colors hover:text-white underline"
             >
               NHS Horizons
-            </a>
+            </Link>
           </p>
           {settings.contactEmail || settings.contactPhone ? (
             <p className="text-sm text-white/90">
