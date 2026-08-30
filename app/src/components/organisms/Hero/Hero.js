@@ -55,7 +55,7 @@ export default function Hero({
   const solidCta = getCta(primaryCta);
   const copySpan = resolvedImageSrc
     ? "col-span-12 md:col-span-6"
-    : "col-span-12 md:col-span-8";
+    : "col-span-12";
 
   return (
     <Section
