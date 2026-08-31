@@ -61,7 +61,7 @@ export default async function Footer() {
             </p>
           ) : null}
         </div>
-        <div className="col-span-12 grid gap-4 md:col-span-4 md:justify-self-end">
+        <div className="col-span-12 grid justify-self-end justify-items-end gap-4 md:col-span-4">
           {settings.socialLinks.length > 0 ? (
             <ul className="grid grid-flow-col gap-4">
               {settings.socialLinks.map((link) => (
