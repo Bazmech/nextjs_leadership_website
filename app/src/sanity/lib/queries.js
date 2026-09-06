@@ -137,3 +137,24 @@ export const articleBySlugQuery = `*[_type == "article" && slug.current == $slug
 export const articleSlugsQuery = `*[_type == "article" && defined(slug.current)]{
   "slug": slug.current
 }`;
+
+export const sitemapHomepageQuery = `*[_type == "homepage" && _id == "homepage"][0]{
+  _updatedAt,
+  "noIndex": seo.noIndex == true
+}`;
+
+export const sitemapArticleListingQuery = `*[_type == "articleListing" && _id == "articleListing"][0]{
+  _updatedAt,
+  "noIndex": seo.noIndex == true
+}`;
+
+export const sitemapPagesQuery = `*[_type == "page" && defined(slug.current) && slug.current != "articles" && seo.noIndex != true]{
+  "uid": slug.current,
+  _updatedAt
+}`;
+
+export const sitemapArticlesQuery = `*[_type == "article" && defined(slug.current) && protected != true && seo.noIndex != true]{
+  "slug": slug.current,
+  _updatedAt,
+  publishedAt
+}`;
