@@ -6,6 +6,8 @@ import { sanityFetch } from "@/sanity/lib/client";
 import { getImageUrl } from "@/sanity/lib/image";
 import { settingsQuery } from "@/sanity/lib/queries";
 
+const FALLBACK_SITE_URL = "https://www.productiveleadership.org";
+
 function getText(field, fallback = "") {
   return getCmsText(field, fallback);
 }
@@ -91,6 +93,27 @@ export const getSiteSettings = cache(async () => {
   if (!settings) return siteDefaults;
   return mapSettingsData(settings);
 });
+
+/**
+ * Absolute origin for canonical URLs, sitemap, and robots.
+ * Prefers CMS Settings → Site URL, then the Vercel production host.
+ */
+export function resolveCanonicalSiteUrl(siteUrl) {
+  const fromSettings = typeof siteUrl === "string" ? siteUrl.trim() : "";
+  if (fromSettings) {
+    return fromSettings.replace(/\/$/, "");
+  }
+
+  const vercelHost = (process.env.VERCEL_PROJECT_PRODUCTION_URL || "")
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+
+  if (vercelHost) {
+    return `https://${vercelHost}`;
+  }
+
+  return FALLBACK_SITE_URL;
+}
 
 export function formatTitleWithPostfix(title, settings = siteDefaults) {
   const value = getText(title);
